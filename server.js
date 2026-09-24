@@ -6,14 +6,17 @@ const { WebSocketServer } = require('ws');
 const app = express();
 app.use(express.static(path.join(__dirname)));
 
+// ⭐ Redirect root "/" to the presentation
+app.get('/', (req, res) => {
+  res.redirect('/presentation.html');
+});
+
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-// 🧠 All data lives here in RAM — gone when the server restarts
 let responses = [];
 
 wss.on('connection', (ws) => {
-  // Send current state to every new client
   ws.send(JSON.stringify({ type: 'init', responses }));
 
   ws.on('message', (raw) => {
