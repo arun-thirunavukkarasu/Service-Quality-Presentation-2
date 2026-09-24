@@ -4,11 +4,34 @@ const path = require('path');
 const { WebSocketServer } = require('ws');
 
 const app = express();
+app.use(express.json({ limit: '1mb' }));
 app.use(express.static(path.join(__dirname)));
 
-// ⭐ Redirect root "/" to the presentation
+// ⭐ Redirect root to the presentation
 app.get('/', (req, res) => {
   res.redirect('/presentation.html');
+});
+
+// ⭐ Groq proxy — keeps the API key on the server, never in the browser
+app.post('/groq', async (req, res) => {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: 'GROQ_API_KEY not set on server.' });
+  }
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(req.body)
+    });
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    res.status(500).json({ error: 'Groq request failed: ' + err.message });
+  }
 });
 
 const server = http.createServer(app);
