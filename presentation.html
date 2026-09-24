@@ -571,4 +571,492 @@
       <!-- ⭐ NEW: AI Insights + Word Cloud row -->
       <div class="insights-row">
         <div class="ai-insights">
-          <h4><span class="sparkle">✨</span> AI Insights <span style="font-size:0.7rem;font-weight:500;color:var(--text-muted);
+          <h4><span class="sparkle">✨</span> AI Insights <span style="font-size:0.7rem;font-weight:500;color:var(--text-muted);margin-left:auto;">powered by Groq</span></h4>
+          <div class="ai-status" id="aiStatus">Gathering comments…</div>
+          <ul id="aiInsightsList"></ul>
+        </div>
+        <div class="wordcloud" id="wordcloud">
+          <h4>TOP THEMES</h4>
+          <span class="empty">Awaiting comments…</span>
+        </div>
+      </div>
+
+      <div style="margin-top:.7rem;font-size:.84rem;color:var(--text-secondary);">
+        <span id="liveCounter">0 responses received</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 11 -->
+    <div class="slide">
+      <h1>Why Promoters Matter?</h1>
+      <img class="slide-img img-small" src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1200&h=200&fit=crop" alt="">
+      <div class="grid-2">
+        <div class="card">
+          <h3>⭐ Promoters of Karur Vysya Bank:</h3>
+          <ul class="bullets">
+            <li>Stay longer with the bank</li>
+            <li>Trust more deeply</li>
+            <li>Recommend to family & friends</li>
+            <li>Complain less</li>
+            <li>Strengthen the brand image</li>
+          </ul>
+        </div>
+        <div class="card tinted-yellow">
+          <h3>💬 Discussion Question</h3>
+          <ul class="bullets">
+            <li>"Which is more powerful: A Karur Vysya Bank advertisement or a genuine customer recommendation?"</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12 -->
+    <div class="slide">
+      <h1>Role of Every Employee</h1>
+      <img class="slide-img img-small" src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&h=200&fit=crop" alt="">
+      <p>Every Karur Vysya Bank employee influences <strong>CSAT, CES and NPS</strong> through:</p>
+      <ul class="bullets">
+        <li>Responsiveness</li>
+        <li>Accuracy</li>
+        <li>Communication</li>
+        <li>Ownership</li>
+        <li>Professional behaviour</li>
+      </ul>
+      <div class="metric-badge">
+        <p><strong>Key Message:</strong> Every interaction can create either a promoter or a detractor.</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 13 -->
+    <div class="slide">
+      <h1>Final Takeaway</h1>
+      <img class="slide-img img-small" src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=1200&h=200&fit=crop" alt="">
+      <div class="grid-2">
+        <div class="card">
+          <h3>📌 Remember</h3>
+          <ul class="bullets">
+            <li><strong>CSAT</strong> measures Satisfaction</li>
+            <li><strong>CES</strong> measures Effort</li>
+            <li><strong>NPS</strong> measures Loyalty</li>
+            <li><strong>Mismatch</strong> creates dissatisfaction</li>
+            <li><strong>Parity</strong> creates satisfaction</li>
+            <li><strong>Exceed</strong> creates delight</li>
+          </ul>
+        </div>
+        <div class="card tinted-green" style="display:flex;flex-direction:column;justify-content:center;">
+          <p style="font-style:italic;font-size:1.02rem;color:var(--text-primary);line-height:1.55;">"Customers may forget what we said at Karur Vysya Bank, but they rarely forget how easy, satisfying, and trustworthy we made their experience."</p>
+        </div>
+      </div>
+      <p style="margin-top:1rem;font-weight:600;color:var(--kvb-green-deep);">Thank you.</p>
+    </div>
+
+  </div>
+
+  <div class="nav-controls">
+    <button class="nav-btn" id="prevBtn" disabled>← Previous</button>
+    <div style="text-align:center;">
+      <span class="slide-counter" id="slideCounter">1 / 13</span>
+      <div class="shortcut-hint">
+        <kbd>←</kbd> <kbd>→</kbd> navigate · <kbd>F</kbd> fullscreen · <kbd>Esc</kbd> exit
+      </div>
+    </div>
+    <button class="nav-btn" id="nextBtn">Next →</button>
+  </div>
+</div>
+
+<script>
+  // ═══════════ SLIDE NAVIGATION ═══════════
+  const slides = document.querySelectorAll('.slide');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const counter = document.getElementById('slideCounter');
+  let currentSlide = 0;
+  const totalSlides = slides.length;
+
+  function showSlide(i) {
+    if (i < 0) i = 0;
+    if (i >= totalSlides) i = totalSlides - 1;
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === i));
+    currentSlide = i;
+    counter.textContent = `${i + 1} / ${totalSlides}`;
+    prevBtn.disabled = i === 0;
+    nextBtn.disabled = i === totalSlides - 1;
+  }
+  prevBtn.onclick = () => showSlide(currentSlide - 1);
+  nextBtn.onclick = () => showSlide(currentSlide + 1);
+
+  window.addEventListener('keydown', (e) => {
+    const tag = document.activeElement.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); showSlide(currentSlide + 1);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); showSlide(currentSlide - 1);
+    } else if (e.key === 'f' || e.key === 'F') {
+      e.preventDefault(); toggleFullscreen();
+    }
+  });
+
+  function toggleFullscreen() {
+    const el = document.documentElement;
+    if (!document.fullscreenElement) {
+      if (el.requestFullscreen) el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+    }
+  }
+
+  showSlide(0);
+
+  // ═══════════ SOUND CHIME ═══════════
+  // A short, pleasant two-note chime using Web Audio API (no file needed)
+  let audioCtx = null;
+  function playChime() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const now = audioCtx.currentTime;
+      [880, 1320].forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, now + i * 0.08);
+        gain.gain.linearRampToValueAtTime(0.08, now + i * 0.08 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.08 + 0.35);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + i * 0.08);
+        osc.stop(now + i * 0.08 + 0.4);
+      });
+    } catch (e) { /* silent fail — some browsers block without user gesture */ }
+  }
+
+  // Browsers require a user gesture before AudioContext can play.
+  // Attach a one-time click listener to unlock audio on first interaction.
+  let audioUnlocked = false;
+  function unlockAudio() {
+    if (audioUnlocked) return;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      audioUnlocked = true;
+    } catch (e) {}
+  }
+  document.addEventListener('click', unlockAudio, { once: false });
+  document.addEventListener('keydown', unlockAudio, { once: false });
+
+  // ═══════════ DASHBOARD ═══════════
+  let npsChart, csatChart, cesChart;
+  const state = {
+    nps: { promoters: 0, passives: 0, detractors: 0 },
+    csat: [0, 0, 0, 0, 0],
+    ces:  [0, 0, 0, 0, 0],
+    comments: []
+  };
+
+  const CHART_GREEN  = '#4CAF50';
+  const CHART_YELLOW = '#E0C418';
+  const CHART_RED    = '#C15C5C';
+  const CHART_ORANGE = '#D4813F';
+
+  function initCharts() {
+    const commonOpts = { responsive: true, maintainAspectRatio: false };
+
+    npsChart = new Chart(document.getElementById('npsChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Promoters', 'Passives', 'Detractors'],
+        datasets: [{
+          data: [0, 0, 0],
+          backgroundColor: [CHART_GREEN, CHART_YELLOW, CHART_RED],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        ...commonOpts,
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+        cutout: '60%'
+      }
+    });
+
+    csatChart = new Chart(document.getElementById('csatChart'), {
+      type: 'bar',
+      data: {
+        labels: ['1★', '2★', '3★', '4★', '5★'],
+        datasets: [{
+          data: [0, 0, 0, 0, 0],
+          backgroundColor: [CHART_RED, CHART_ORANGE, CHART_YELLOW, CHART_GREEN, '#2E7D32'],
+          borderRadius: 6
+        }]
+      },
+      options: {
+        ...commonOpts,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, grid: { color: '#EDEDE5' }, ticks: { stepSize: 1, precision: 0 } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+
+    cesChart = new Chart(document.getElementById('cesChart'), {
+      type: 'bar',
+      data: {
+        labels: ['😫', '😟', '😐', '🙂', '😎'],
+        datasets: [{
+          data: [0, 0, 0, 0, 0],
+          backgroundColor: [CHART_RED, CHART_ORANGE, CHART_YELLOW, CHART_GREEN, '#2E7D32'],
+          borderRadius: 6
+        }]
+      },
+      options: {
+        ...commonOpts,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, grid: { color: '#EDEDE5' }, ticks: { stepSize: 1, precision: 0 } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  function refreshCharts() {
+    npsChart.data.datasets[0].data = [
+      state.nps.promoters, state.nps.passives, state.nps.detractors
+    ];
+    npsChart.update();
+    csatChart.data.datasets[0].data = state.csat;
+    csatChart.update();
+    cesChart.data.datasets[0].data = state.ces;
+    cesChart.update();
+  }
+
+  function addResponse(entry) {
+    if (entry.nps >= 9) state.nps.promoters++;
+    else if (entry.nps >= 7) state.nps.passives++;
+    else state.nps.detractors++;
+
+    const csatIdx = Math.max(0, Math.min(4, entry.csat - 1));
+    state.csat[csatIdx]++;
+
+    const cesIdx = Math.max(0, Math.min(4, entry.ces - 1));
+    state.ces[cesIdx]++;
+
+    if (entry.comment || entry.user) {
+      state.comments.unshift({
+        user: entry.user || 'Anonymous',
+        text: entry.comment || '(no comment)',
+        rating: `NPS ${entry.nps} · CSAT ${entry.csat} · CES ${entry.ces}`
+      });
+      if (state.comments.length > 20) state.comments.pop();
+    }
+
+    refreshCharts();
+    renderComments();
+    updateCounter();
+    updateWordCloud();
+
+    // Trigger a new AI insight refresh every 5 responses
+    if (state.comments.length > 0 && state.comments.length % 5 === 0) {
+      fetchAIInsights();
+    }
+  }
+
+  function renderComments() {
+    const list = document.getElementById('commentsList');
+    if (!state.comments.length) {
+      list.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;">Waiting for responses…</p>';
+      return;
+    }
+    list.innerHTML = state.comments.slice(0, 5).map(c => `
+      <div class="comment-item">
+        <span class="comment-user">${escapeHtml(c.user)}</span>
+        <span class="comment-text">${escapeHtml(c.text)}</span>
+        <span class="comment-rating">${c.rating}</span>
+      </div>
+    `).join('');
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, m => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[m]));
+  }
+
+  function updateCounter() {
+    const total = state.nps.promoters + state.nps.passives + state.nps.detractors;
+    document.getElementById('liveCounter').textContent = `${total} responses received`;
+  }
+
+  // ═══════════ WORD CLOUD ═══════════
+  const STOP_WORDS = new Set([
+    'the','a','an','and','or','but','of','to','in','on','at','is','it','i','we','you','they',
+    'was','were','are','be','been','have','has','had','do','does','did','for','with','as',
+    'this','that','these','those','my','our','your','their','very','so','too','much','many',
+    'good','bad','nice','ok','okay','fine','not','no','yes','if','then','than','also',
+    'can','could','will','would','should','may','might','must','about','from','by','up','down',
+    'out','off','over','under','again','only','just','really','quite','more','most','less'
+  ]);
+
+  function extractWords() {
+    const counts = {};
+    state.comments.forEach(c => {
+      const words = (c.text || '').toLowerCase()
+        .replace(/[^a-z\s]/g, ' ')
+        .split(/\s+/)
+        .filter(w => w.length >= 3 && !STOP_WORDS.has(w));
+      words.forEach(w => { counts[w] = (counts[w] || 0) + 1; });
+    });
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 18);
+  }
+
+  function updateWordCloud() {
+    const container = document.getElementById('wordcloud');
+    const words = extractWords();
+    if (!words.length) {
+      container.innerHTML = '<h4>TOP THEMES</h4><span class="empty">Awaiting comments…</span>';
+      return;
+    }
+    const max = words[0][1];
+    const min = words[words.length - 1][1];
+    const palette = ['#007A3D', '#005F2E', '#C9A600', '#4C7A12', '#A88300'];
+    container.innerHTML = '<h4>TOP THEMES</h4>' + words.map(([word, count], i) => {
+      const t = max === min ? 1 : (count - min) / (max - min);
+      const size = 0.78 + t * 1.05; // 0.78rem .. 1.83rem
+      const weight = count >= max * 0.7 ? 800 : count >= max * 0.4 ? 700 : 600;
+      const color = palette[i % palette.length];
+      return `<span class="wc-word" style="font-size:${size}rem;font-weight:${weight};color:${color};" title="${count} mention${count > 1 ? 's' : ''}">${escapeHtml(word)}</span>`;
+    }).join('');
+  }
+
+  // ═══════════ AI INSIGHTS (Groq) ═══════════
+  let aiInFlight = false;
+  let lastAICommentCount = 0;
+
+  async function fetchAIInsights() {
+    if (aiInFlight) return;
+    const comments = state.comments.map(c => c.text).filter(t => t && t !== '(no comment)');
+    if (comments.length < 3) return;
+    if (comments.length === lastAICommentCount) return;
+
+    aiInFlight = true;
+    const status = document.getElementById('aiStatus');
+    const list = document.getElementById('aiInsightsList');
+    status.textContent = 'Analyzing…';
+
+    try {
+      const res = await fetch('/groq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'llama-3.1-8b-instant',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a customer experience analyst. Given a list of customer comments, produce exactly 3 short, specific insights (max 12 words each). Output ONLY a JSON array of 3 strings, no other text. Focus on recurring themes, sentiment, and actionable takeaways.'
+            },
+            {
+              role: 'user',
+              content: 'Comments:\n' + comments.slice(0, 25).map((c, i) => `${i + 1}. ${c}`).join('\n')
+            }
+          ],
+          temperature: 0.4,
+          max_tokens: 220,
+          response_format: { type: 'json_object' }
+        })
+      });
+
+      const data = await res.json();
+      const raw = data?.choices?.[0]?.message?.content || '';
+      let insights = [];
+      try {
+        const parsed = JSON.parse(raw);
+        insights = Array.isArray(parsed) ? parsed : (parsed.insights || parsed.points || []);
+      } catch {
+        // fallback: split lines
+        insights = raw.split('\n').map(s => s.replace(/^[\d\.\-\•\s]+/, '').trim()).filter(Boolean).slice(0, 3);
+      }
+
+      if (insights.length) {
+        list.innerHTML = insights.slice(0, 3).map(t => `<li>${escapeHtml(t)}</li>`).join('');
+        status.textContent = `Based on ${comments.length} comment${comments.length > 1 ? 's' : ''}`;
+        lastAICommentCount = comments.length;
+      } else {
+        status.textContent = 'No insights yet.';
+      }
+    } catch (err) {
+      console.warn('AI insight fetch failed:', err);
+      status.textContent = 'AI analysis unavailable.';
+    } finally {
+      aiInFlight = false;
+    }
+  }
+
+  function clearDashboard() {
+    state.nps = { promoters: 0, passives: 0, detractors: 0 };
+    state.csat = [0, 0, 0, 0, 0];
+    state.ces  = [0, 0, 0, 0, 0];
+    state.comments = [];
+    refreshCharts();
+    renderComments();
+    updateCounter();
+    updateWordCloud();
+    document.getElementById('aiInsightsList').innerHTML = '';
+    document.getElementById('aiStatus').textContent = 'Gathering comments…';
+    lastAICommentCount = 0;
+  }
+
+  function rebuildFromScratch(entries) {
+    clearDashboard();
+    entries.forEach(e => addResponse(e));
+  }
+
+  // ═══════════ WEBSOCKET ═══════════
+  const WS_URL = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
+  let ws;
+
+  function connectWS() {
+    ws = new WebSocket(WS_URL);
+    ws.onopen = () => console.log('✅ Connected to relay');
+    ws.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      if (msg.type === 'init') rebuildFromScratch(msg.responses);
+      else if (msg.type === 'new') {
+        addResponse(msg.entry);
+        playChime(); // 🔊 chime on every new submission
+      }
+      else if (msg.type === 'reset') clearDashboard();
+    };
+    ws.onclose = () => {
+      console.warn('⚠️ Disconnected. Retrying in 2s…');
+      setTimeout(connectWS, 2000);
+    };
+    ws.onerror = (err) => console.error('WS error', err);
+  }
+
+  document.getElementById('resetDashboardBtn').addEventListener('click', () => {
+    if (confirm('Clear all responses for everyone?')) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'reset' }));
+      }
+    }
+  });
+
+  // ═══════════ BOOT ═══════════
+  window.addEventListener('load', () => {
+    initCharts();
+    renderComments();
+    updateCounter();
+    updateWordCloud();
+    connectWS();
+
+    // Periodic AI refresh every 30s, if there are fresh comments
+    setInterval(() => { fetchAIInsights(); }, 30000);
+  });
+</script>
+</body>
+</html>
