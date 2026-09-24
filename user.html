@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Karur Vysya Bank · Share Your Experience</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --kvb-yellow:       #F5D000;
+    --kvb-yellow-soft:  #FFF8CC;
+    --kvb-yellow-deep:  #C9A600;
+    --kvb-green:        #007A3D;
+    --kvb-green-deep:   #005F2E;
+    --kvb-green-soft:   #E6F4EA;
+    --base-bg:          #FBFBF6;
+    --surface:          #FFFFFF;
+    --surface-soft:     #F7F7F0;
+    --border:           #EDEDE0;
+    --border-strong:    #E0E0D0;
+    --text-primary:     #1A1A1A;
+    --text-secondary:   #5A5A50;
+    --text-muted:       #8E8E82;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(245, 208, 0, 0.06), transparent 55%),
+      radial-gradient(circle at 80% 100%, rgba(0, 122, 61, 0.05), transparent 55%),
+      var(--base-bg);
+    min-height: 100vh;
+    padding: 16px 14px 110px;
+    color: var(--text-primary);
+  }
+  .container { max-width: 480px; margin: 0 auto; }
+
+  /* ── Header — LOGO + NAME LOCKED TIGHTLY ── */
+  .header {
+    text-align: center;
+    margin-bottom: 14px;
+    padding: 0 18px 16px;
+    background: #fff;
+    border-radius: 22px;
+    box-shadow: 0 4px 18px rgba(26, 26, 26, 0.05);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  /* Brand gradient strip at top */
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--kvb-yellow) 0%, var(--kvb-yellow) 40%, var(--kvb-green) 100%);
+  }
+
+  /* Logo wrapper */
+  .logo-wrap {
+    padding: 12px 0 0;
+    margin-bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Logo — default: safe gap. Only tight when logo actually loads. */
+  .header .kvb-logo {
+    width: 220px;
+    max-width: 78%;
+    height: auto;
+    display: block;
+    margin: 0 auto 8px;
+    transition: margin 0.15s ease;
+  }
+  .header.logo-loaded .kvb-logo {
+    margin: 0 auto -22px;   /* tight pull only when logo is present */
+  }
+
+  /* Bank name — default: safe margin. Only tightened when logo loaded. */
+  .header .bank-name {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--kvb-green-deep);
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    margin: 4px 0 4px;
+    position: relative;
+    z-index: 2;
+    transition: margin 0.15s ease;
+  }
+  .header.logo-loaded .bank-name {
+    margin: -6px 0 4px;     /* extra pull only when logo is present */
+  }
+
+  .header .tagline {
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-top: 2px;
+  }
+
+  .header .live-pill {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 4px 12px;
+    background: var(--kvb-yellow-soft);
+    border: 1px solid #F0E08A;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #7A6D00;
+  }
+  .header .live-pill::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--kvb-green);
+    margin-right: 6px;
+    animation: pulse 1.4s infinite;
+    vertical-align: middle;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.35; }
+  }
+
+  /* ── Name card ── */
+  .name-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    box-shadow: 0 3px 12px rgba(26, 26, 26, 0.04);
+    border: 1px solid var(--border);
+  }
+  .name-card label {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: 8px;
+  }
+  .name-card input {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 1rem;
+    font-family: inherit;
+    outline: none;
+    transition: border 0.2s, background 0.2s, box-shadow 0.2s;
+    background: var(--surface-soft);
+    color: var(--text-primary);
+  }
+  .name-card input:focus {
+    border-color: var(--kvb-green);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(0, 122, 61, 0.08);
+  }
+
+  /* ── Question card ── */
+  .q-card {
+    background: #fff;
+    border-radius: 22px;
+    padding: 18px 16px 16px 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 3px 14px rgba(26, 26, 26, 0.045);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .q-card::before {
+    content: '';
+    position: absolute;
+    top: 14px; bottom: 14px; left: 0;
+    width: 5px;
+    background: linear-gradient(180deg, var(--kvb-yellow) 0%, var(--kvb-green) 100%);
+    border-radius: 0 4px 4px 0;
+  }
+  .q-card h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+  .q-card .q-sub {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+
+  /* ── Smiley row ── */
+  .smiley-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .smiley {
+    flex: 1;
+    height: 52px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.18s,
+                border-color 0.18s;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .smiley svg { width: 62%; height: 62%; display: block; }
+  .smiley:active { transform: scale(0.9); }
+  .smiley.selected {
+    transform: scale(1.16);
+    border-color: #fff;
+    box-shadow: 0 0 0 3px currentColor, 0 5px 14px rgba(0,0,0,0.12);
+    z-index: 2;
+  }
+  .smiley-row.tight .smiley { height: 40px; }
+  .smiley-row.tight .smiley svg { width: 72%; height: 72%; }
+
+  .c-red    { background: #FFD1D1; color: #B71C1C; }
+  .c-orange { background: #FFD9B5; color: #C65400; }
+  .c-amber  { background: #FFEEA8; color: #A88300; }
+  .c-lime   { background: #DDF0B8; color: #4C7A12; }
+  .c-green  { background: #B8E6C2; color: var(--kvb-green-deep); }
+
+  .scale-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    padding: 0 2px;
+    font-weight: 500;
+  }
+
+  /* ── Comment box ── */
+  .comment-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+    box-shadow: 0 3px 12px rgba(26, 26, 26, 0.04);
+    border: 1px solid var(--border);
+  }
+  .comment-card label {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: 8px;
+  }
+  .comment-card textarea {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    resize: none;
+    outline: none;
+    min-height: 80px;
+    background: var(--surface-soft);
+    transition: border 0.2s, background 0.2s, box-shadow 0.2s;
+    color: var(--text-primary);
+  }
+  .comment-card textarea:focus {
+    border-color: var(--kvb-green);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(0, 122, 61, 0.08);
+  }
+
+  /* ── Submit ── */
+  .submit-btn {
+    position: fixed;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 36px);
+    max-width: 448px;
+    background: var(--kvb-green);
+    color: #fff;
+    border: none;
+    border-radius: 18px;
+    padding: 17px;
+    font-size: 1.02rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 6px 22px rgba(0, 122, 61, 0.28);
+    transition: all 0.2s;
+    z-index: 100;
+    letter-spacing: 0.01em;
+  }
+  .submit-btn:disabled {
+    background: #DCDCD0;
+    color: #9E9E90;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+  .submit-btn:not(:disabled):active {
+    transform: translateX(-50%) scale(0.98);
+    box-shadow: 0 3px 12px rgba(0, 122, 61, 0.22);
+  }
+
+  /* ── Thank-you screen ── */
+  .thanks {
+    display: none;
+    text-align: center;
+    padding: 60px 24px;
+  }
+  .thanks.show { display: block; }
+  .thanks .big-check {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    background: var(--kvb-green);
+    color: #fff;
+    font-size: 2.8rem;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 22px;
+    animation: pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 10px 30px rgba(0, 122, 61, 0.28);
+  }
+  @keyframes pop {
+    0%   { transform: scale(0); opacity: 0; }
+    60%  { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+  .thanks h2 { font-size: 1.5rem; color: var(--kvb-green-deep); margin-bottom: 10px; font-weight: 800; }
+  .thanks p  { color: var(--text-secondary); font-size: 0.98rem; line-height: 1.55; margin-bottom: 6px; }
+  .thanks .live-tag {
+    display: inline-block;
+    background: var(--kvb-yellow-soft);
+    color: #7A6D00;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-top: 16px;
+    border: 1px solid #F0E08A;
+  }
+  .thanks .live-tag::before {
+    content: '';
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--kvb-green);
+    margin-right: 6px;
+    animation: pulse 1.2s infinite;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<div class="container" id="formView">
+  <div class="header" id="pageHeader">
+    <div class="logo-wrap" id="logoWrap">
+      <img class="kvb-logo" id="kvbLogo" src="kvb-logo.png" alt="Karur Vysya Bank">
+    </div>
+    <div class="bank-name">Karur Vysya Bank</div>
+    <div class="tagline">Your feedback appears live on the big screen</div>
+    <div class="live-pill">LIVE DASHBOARD</div>
+  </div>
+
+  <div class="name-card">
+    <label>Your Name (optional)</label>
+    <input type="text" id="userName" placeholder="e.g. Priya" maxlength="40" autocomplete="off">
+  </div>
+
+  <div class="q-card">
+    <h2>How likely are you to recommend Karur Vysya Bank?</h2>
+    <div class="q-sub">0 = Not at all · 10 = Absolutely</div>
+    <div class="smiley-row tight" id="npsRow"></div>
+    <div class="scale-labels"><span>Not likely</span><span>Very likely</span></div>
+  </div>
+
+  <div class="q-card">
+    <h2>How satisfied were you with Karur Vysya Bank today?</h2>
+    <div class="q-sub">Tap the face that matches your feeling</div>
+    <div class="smiley-row" id="csatRow"></div>
+    <div class="scale-labels"><span>Very unhappy</span><span>Very happy</span></div>
+  </div>
+
+  <div class="q-card">
+    <h2>How easy was it to get your work done at Karur Vysya Bank?</h2>
+    <div class="q-sub">Tap the face that matches your effort</div>
+    <div class="smiley-row" id="cesRow"></div>
+    <div class="scale-labels"><span>Very difficult</span><span>Very easy</span></div>
+  </div>
+
+  <div class="comment-card">
+    <label>Any comments about Karur Vysya Bank? (optional)</label>
+    <textarea id="comment" placeholder="Tell us more..." maxlength="200"></textarea>
+  </div>
+</div>
+
+<div class="thanks" id="thanksView">
+  <div class="big-check">✓</div>
+  <h2>Thank you!</h2>
+  <p>Your feedback for Karur Vysya Bank has been received.</p>
+  <p>Look at the big screen — you're part of the live picture now.</p>
+  <div class="live-tag">Live on dashboard</div>
+</div>
+
+<button class="submit-btn" id="submitBtn" disabled>Submit Feedback</button>
+
+<script>
+  // ═══════════ Logo loader — gracefully handles missing logo ═══════════
+  (function() {
+    const logo = document.getElementById('kvbLogo');
+    const header = document.getElementById('pageHeader');
+
+    if (!logo || !header) return;
+
+    logo.addEventListener('load', () => {
+      header.classList.add('logo-loaded');
+    });
+
+    logo.addEventListener('error', () => {
+      header.classList.remove('logo-loaded');
+      const wrap = document.getElementById('logoWrap');
+      if (wrap) wrap.style.display = 'none';
+      console.log('ℹ️ Logo not found — showing bank name only.');
+    });
+
+    // If already loaded from cache
+    if (logo.complete && logo.naturalWidth > 0) {
+      header.classList.add('logo-loaded');
+    }
+  })();
+
+  // ═══════════ STEP 1 — Build UI first ═══════════
+
+  function smileySVG(mood) {
+    const mouthPaths = [
+      'M 10 30 Q 20 18 30 30',
+      'M 10 29 Q 20 21 30 29',
+      'M 10 27 L 30 27',
+      'M 10 25 Q 20 33 30 25',
+      'M 8 23 Q 20 36 32 23'
+    ];
+    const eyeY = mood <= 1 ? 16 : 15;
+    const eyeR = mood >= 3 ? 2.4 : 2;
+    return `
+      <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="20" cy="20" r="17" fill="currentColor" opacity="0.15"/>
+        <circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.55"/>
+        <circle cx="14" cy="${eyeY}" r="${eyeR}" fill="currentColor"/>
+        <circle cx="26" cy="${eyeY}" r="${eyeR}" fill="currentColor"/>
+        <path d="${mouthPaths[mood]}" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" fill="none"/>
+      </svg>
+    `;
+  }
+
+  const npsColorMap = [
+    'c-red','c-red','c-red','c-orange','c-orange',
+    'c-amber','c-amber','c-lime','c-lime','c-green','c-green'
+  ];
+  const npsMoodMap = [0,0,0,0,1,1,2,2,3,4,4];
+  const scaleColors = ['c-red','c-orange','c-amber','c-lime','c-green'];
+  const scaleMoods  = [0,1,2,3,4];
+  const state = { nps: null, csat: null, ces: null };
+
+  function buildNPSRow() {
+    const row = document.getElementById('npsRow');
+    row.innerHTML = '';
+    for (let i = 0; i <= 10; i++) {
+      const el = document.createElement('div');
+      el.className = 'smiley ' + npsColorMap[i];
+      el.innerHTML = smileySVG(npsMoodMap[i]);
+      el.dataset.value = i;
+      el.addEventListener('click', () => select('nps', i, el));
+      row.appendChild(el);
+    }
+  }
+
+  function buildScaleRow(containerId, metric) {
+    const row = document.getElementById(containerId);
+    row.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
+      const el = document.createElement('div');
+      el.className = 'smiley ' + scaleColors[i];
+      el.innerHTML = smileySVG(scaleMoods[i]);
+      el.dataset.value = i + 1;
+      el.addEventListener('click', () => select(metric, i + 1, el));
+      row.appendChild(el);
+    }
+  }
+
+  function select(metric, value, el) {
+    state[metric] = value;
+    document.querySelectorAll('#' + metric + 'Row .smiley')
+      .forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+    if (navigator.vibrate) navigator.vibrate(15);
+    checkReady();
+  }
+
+  function checkReady() {
+    document.getElementById('submitBtn').disabled =
+      state.nps === null || state.csat === null || state.ces === null;
+  }
+
+  window.addEventListener('load', () => {
+    buildNPSRow();
+    buildScaleRow('csatRow', 'csat');
+    buildScaleRow('cesRow',  'ces');
+  });
+
+  // ═══════════ STEP 2 — WebSocket ═══════════
+  const WS_URL = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
+  let ws = null;
+
+  try {
+    ws = new WebSocket(WS_URL);
+    ws.onopen  = () => console.log('✅ WebSocket connected');
+    ws.onerror = (e) => console.warn('⚠️ WebSocket error', e);
+    ws.onclose = () => console.warn('⚠️ WebSocket closed');
+  } catch (err) {
+    console.error('❌ Could not create WebSocket:', err);
+  }
+
+  // ═══════════ STEP 3 — Submit ═══════════
+  document.getElementById('submitBtn').addEventListener('click', () => {
+    const payload = {
+      type: 'submit',
+      data: {
+        user:    document.getElementById('userName').value.trim() || 'Anonymous',
+        nps:     state.nps,
+        csat:    state.csat,
+        ces:     state.ces,
+        comment: document.getElementById('comment').value.trim()
+      }
+    };
+
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(payload));
+      showThanks();
+    } else {
+      alert('Could not reach the server. Please check your internet connection and reload the page.');
+    }
+  });
+
+  function showThanks() {
+    document.getElementById('formView').style.display = 'none';
+    document.getElementById('submitBtn').style.display = 'none';
+    document.getElementById('thanksView').classList.add('show');
+    window.scrollTo(0, 0);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Karur Vysya Bank · Customer Experience & Loyalty Training</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --kvb-yellow:      #F5D000;
+    --kvb-yellow-soft: #FFF8CC;
+    --kvb-yellow-deep: #C9A600;
+    --kvb-green:       #007A3D;
+    --kvb-green-deep:  #005F2E;
+    --kvb-green-soft:  #E6F4EA;
+    --kvb-green-tint:  #F1F8F3;
+    --matte-base:      #FBFBF6;
+    --matte-surface:   #F5F5F0;
+    --matte-border:    #EDEDE0;
+    --text-primary:    #1A1A1A;
+    --text-secondary:  #5A5A50;
+    --text-muted:      #8E8E82;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(245, 208, 0, 0.06), transparent 55%),
+      radial-gradient(circle at 80% 100%, rgba(0, 122, 61, 0.05), transparent 55%),
+      var(--matte-surface);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 20px;
+  }
+
+  .presentation-container {
+    width: 1280px; max-width: 96vw;
+    background: var(--matte-base);
+    border-radius: 26px;
+    box-shadow: 0 8px 32px rgba(26, 26, 26, 0.08),
+                0 2px 8px rgba(26, 26, 26, 0.04);
+    border: 1px solid var(--matte-border);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .slides-wrapper { position: relative; width: 100%; height: 0; padding-bottom: 56.25%; }
+
+  .slide {
+    position: absolute; inset: 0;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+    padding: 2.2rem 2.8rem 2rem;
+    background: var(--matte-base);
+  }
+  .slide.active { opacity: 1; visibility: visible; z-index: 10; }
+
+  /* Brand gradient bar at top of every slide */
+  .slide::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--kvb-yellow) 0%, var(--kvb-yellow) 40%, var(--kvb-green) 100%);
+  }
+
+  /* Logo overlay top-left on every slide */
+  .slide::after {
+    content: '';
+    position: absolute;
+    top: 1rem; left: 2.8rem;
+    width: 150px;
+    height: 45px;
+    background-image: url('kvb-logo.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: left center;
+    z-index: 5;
+  }
+
+  h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--kvb-green-deep);
+    letter-spacing: -0.025em;
+    margin: 1.5rem 0 0.8rem;
+    line-height: 1.15;
+  }
+  h1 .sub {
+    display: block;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-top: 0.35rem;
+    letter-spacing: 0;
+  }
+  h2 { font-size: 1.65rem; font-weight: 700; color: var(--kvb-green-deep); margin-bottom: 0.85rem; letter-spacing: -0.015em; }
+  h3 { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.6rem; }
+  p, li { font-size: 1.02rem; line-height: 1.6; color: var(--text-primary); }
+
+  /* ── Bullet lists — KVB yellow bullets with green ring ── */
+  ul.bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0.4rem 0;
+  }
+  ul.bullets li {
+    position: relative;
+    padding: 0.42rem 0 0.42rem 1.85rem;
+    font-size: 1.02rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+  }
+  ul.bullets li::before {
+    content: '';
+    position: absolute;
+    left: 0.35rem; top: 50%;
+    transform: translateY(-50%);
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--kvb-yellow);
+    border: 1.5px solid var(--kvb-green);
+  }
+
+  .highlight { color: var(--kvb-green); font-weight: 700; }
+
+  .metric-badge {
+    background: var(--kvb-green-tint);
+    border-left: 4px solid var(--kvb-green);
+    padding: 0.9rem 1.3rem;
+    border-radius: 12px;
+    margin: 1rem 0;
+  }
+  .metric-badge p { font-size: 0.98rem; margin: 0; color: var(--text-primary); }
+
+  .metric-badge.yellow {
+    background: #FFFCF0;
+    border-left-color: var(--kvb-yellow);
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; margin-top: 1rem; }
+
+  .card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 1.3rem 1.4rem;
+    box-shadow: 0 3px 12px rgba(26, 26, 26, 0.035);
+    border: 1px solid var(--matte-border);
+  }
+
+  .card.tinted-green  { background: var(--kvb-green-tint);  border-color: #DCEEDF; }
+  .card.tinted-yellow { background: #FFFCF0;                 border-color: #F5EFB8; }
+  .card.tinted-red    { background: #FDF0F0;                 border-color: #F5D9D9; }
+
+  .slide-img {
+    width: 100%; height: 165px; object-fit: cover;
+    border-radius: 16px;
+    margin: 0.6rem 0 1rem;
+    filter: saturate(0.92);
+    border: 1px solid var(--matte-border);
+  }
+  .img-small { height: 115px; }
+
+  /* ── Dashboard ── */
+  .dashboard-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-right: 150px;
+    margin-bottom: 0.4rem;
+  }
+  .reset-btn {
+    background: #fff;
+    border: 1.5px solid #C15C1E;
+    color: #C15C1E;
+    padding: 0.5rem 1.3rem;
+    border-radius: 40px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .reset-btn:hover { background: #C15C1E; color: #fff; }
+
+  .charts-row { display: flex; gap: 1.1rem; margin: 1.1rem 0; flex-wrap: wrap; }
+  .chart-box {
+    flex: 1; min-width: 200px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 0.85rem;
+    border: 1px solid var(--matte-border);
+    box-shadow: 0 2px 8px rgba(26, 26, 26, 0.03);
+  }
+  .chart-box h4 {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--kvb-green-deep);
+    margin-bottom: 0.55rem;
+    text-align: center;
+  }
+  .chart-container { position: relative; height: 165px; width: 100%; }
+
+  .comments-section {
+    background: #fff;
+    border-radius: 16px;
+    padding: 0.95rem 1.25rem;
+    border: 1px solid var(--matte-border);
+    max-height: 195px;
+    overflow-y: auto;
+    box-shadow: 0 2px 8px rgba(26, 26, 26, 0.03);
+  }
+  .comments-section h4 { font-size: 0.92rem; color: var(--kvb-green-deep); margin-bottom: 0.45rem; }
+  .comment-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--matte-border);
+    font-size: 0.88rem;
+    display: flex; justify-content: space-between; align-items: center;
+    animation: slideIn 0.4s ease;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .comment-item:last-child { border-bottom: none; }
+  .comment-user { font-weight: 700; color: var(--kvb-green-deep); min-width: 80px; }
+  .comment-text { color: var(--text-secondary); flex: 1; margin: 0 1rem; }
+  .comment-rating {
+    background: var(--kvb-yellow-soft);
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.76rem;
+    color: #7A6D00;
+    border: 1px solid #F0E48A;
+  }
+
+  .qr-block {
+    position: absolute; top: 1.1rem; right: 1.1rem;
+    text-align: center;
+    background: #fff;
+    padding: 10px;
+    border-radius: 14px;
+    box-shadow: 0 3px 14px rgba(26, 26, 26, 0.08);
+    border: 2px solid var(--kvb-yellow);
+    z-index: 20;
+  }
+  .qr-block img { width: 105px; height: 105px; display: block; border-radius: 8px; }
+  .qr-block p {
+    font-size: 0.66rem;
+    color: var(--kvb-green-deep);
+    margin-top: 5px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Navigation ── */
+  .nav-controls {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.85rem 1.7rem;
+    background: var(--text-primary);
+    color: #fff;
+    border-top: 4px solid transparent;
+    border-image: linear-gradient(90deg, var(--kvb-yellow), var(--kvb-green)) 1;
+  }
+  .nav-btn {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 0.55rem 1.5rem;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .nav-btn:not(:disabled):hover { background: rgba(245, 208, 0, 0.2); border-color: var(--kvb-yellow); }
+
+  .slide-counter { font-weight: 700; color: var(--kvb-yellow); font-size: 0.92rem; letter-spacing: 0.05em; }
+  .shortcut-hint { font-size: 0.72rem; color: rgba(255,255,255,0.6); margin-top: 0.15rem; }
+  .shortcut-hint kbd {
+    background: rgba(255,255,255,0.15);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: inherit;
+    font-size: 0.72rem;
+    margin: 0 2px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  @media (max-width: 800px) {
+    .slide { padding: 1.2rem 1.4rem; }
+    .slide::after { left: 1.4rem; width: 110px; height: 35px; }
+    h1 { font-size: 1.45rem; }
+    h2 { font-size: 1.2rem; }
+    p, li, ul.bullets li { font-size: 0.9rem; }
+    .grid-2 { grid-template-columns: 1fr; gap: 1rem; }
+    .charts-row { flex-direction: column; }
+    .qr-block { transform: scale(0.75); transform-origin: top right; }
+    .dashboard-header { padding-right: 100px; }
+  }
+</style>
+</head>
+<body>
+<div class="presentation-container">
+  <div class="slides-wrapper">
+
+    <!-- SLIDE 1 -->
+    <div class="slide active">
+      <h1>How Do We Know Customers Are Happy?
+        <span class="sub">Karur Vysya Bank · Customer Experience & Loyalty Training</span>
+      </h1>
+      <img class="slide-img" src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&h=300&fit=crop" alt="">
+      <ul class="bullets">
+        <li>If we provide good service today, how do we know customers are satisfied?</li>
+        <li>How do we measure their experience?</li>
+        <li>How do we know they will stay with Karur Vysya Bank?</li>
+      </ul>
+      <div class="metric-badge">
+        <p><strong>Answer:</strong> Organizations use customer metrics to measure sentiment and loyalty.</p>
+      </div>
+      <ul class="bullets">
+        <li>📊 <strong>CSAT</strong> — Satisfaction with today's interaction</li>
+        <li>⚡ <strong>CES</strong> — Effort required to get work done</li>
+        <li>❤️ <strong>NPS</strong> — Loyalty & willingness to recommend</li>
+      </ul>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide">
+      <h1>Why Measure Customer Experience?</h1>
+      <img class="slide-img" src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200&h=300&fit=crop" alt="">
+      <p style="font-size:1.3rem;font-weight:700;color:var(--kvb-green);">"What gets measured gets improved."</p>
+      <div class="grid-2">
+        <div class="card">
+          <h3>📌 Customer measurements help us:</h3>
+          <ul class="bullets">
+            <li>Understand customer expectations</li>
+            <li>Identify pain points</li>
+            <li>Improve service delivery</li>
+            <li>Increase loyalty</li>
+            <li>Strengthen Karur Vysya Bank's reputation</li>
+          </ul>
+        </div>
+        <div class="card tinted-yellow">
+          <h3>💡 Key Message</h3>
+          <ul class="bullets">
+            <li>Assumptions cannot improve service.</li>
+            <li><span class="highlight">Customer feedback can.</span></li>
+            <li>Metrics act as a health check-up for customer experience.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide">
+      <h1>CSAT <span class="sub">Customer Satisfaction Score</span></h1>
+      <img class="slide-img img-small" src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1200&h=200&fit=crop" alt="">
+      <div class="grid-2">
+        <div class="card">
+          <h3>📖 Definition</h3>
+          <ul class="bullets">
+            <li>Measures how satisfied a customer is with a specific interaction at Karur Vysya Bank.</li>
+            <li>Question: <em>"How satisfied were you today?"</em></li>
+            <li>Rating: 1 to 5 or 1 to 10</li>
+            <li>Measures immediate satisfaction.</li>
+          </ul>
+        </div>
+        <div class="card tinted-yellow">
+          <h3>🤔 Audience Poll</h3>
+          <ul class="bullets">
+            <li>"Can a customer be satisfied today but leave Karur Vysya Bank tomorrow?"</li>
+            <li><strong style="color:var(--kvb-green);">Answer: Yes</strong></li>
+            <li>Satisfaction alone does not guarantee loyalty.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide">
+      <h1>CES <span class="sub">Customer Effort Score</span></h1>
+      <img class="slide-img img-small" src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1200&h=200&fit=crop" alt="">
+      <div class="grid-2">
+        <div class="card">
+          <h3>📖 Definition & Question</h3>
+          <ul class="bullets">
+            <li>Measures how easy or difficult it was to get work done at Karur Vysya Bank.</li>
+            <li>Question: <em>"How easy was it to complete your request?"</em></li>
+            <li>Customers prefer easy experiences.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>⚖️ Effort Comparison</h3>
+          <ul class="bullets">
+            <li><strong style="color:var(--kvb-green);">Low Effort:</strong> Single visit · Quick info · No follow-ups</li>
+            <li><strong style="color:#C15C1E;">High Effort:</strong> Multiple visits · Repeated documents · Repeated follow-ups</li>
+          </ul>
+        </div>
+      </div>
+      <div class="metric-badge">
+        <p><strong>Key Message:</strong> Customers remember the effort <em>they</em> invested more than the effort Karur Vysya Bank invested.</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 5 -->
+    <div class="slide">
+      <h1>NPS <span class="sub">Net Promoter Score</span></h1>
+      <img class="slide-img img-small" src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&h=200&fit=crop" alt="">
+      <div class="grid-2">
+        <div class="card">
+          <h3>📖 Definition</h3>
+          <ul class="bullets">
+            <li>Measures customer loyalty toward Karur Vysya Bank.</li>
+            <li>Question: <em>"How likely are you to recommend Karur Vysya Bank to friends or family?"</em></li>
+            <li>Scale: 0 to 10</li>
+          </ul>
+        </div>
+        <div class="card tinted-green">
+          <h3>💡 Why Important?</h3>
+          <ul class="bullets">
+            <li>Recommendation reflects trust.</li>
+            <li>Satisfaction measures today's experience.</li>
+            <li>NPS measures future loyalty.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6 -->
+    <div class="slide">
+      <h1>Promoters, Passives & Detractors</h1>
+      <img class="slide-img img-small" src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&h=200&fit=crop" alt="">
+      <div class="grid-2">
+        <div class="card tinted-green">
+          <h3>😍 Promoters (9–10)</h3>
+          <ul class="bullets">
+            <li>Loyal to Karur Vysya Bank</li>
+            <li>Actively recommend</li>
+            <li>Positive word-of-mouth</li>
+          </ul>
+        </div>
+        <div class="card tinted-yellow">
+          <h3>😐 Passives (7–8)</h3>
+          <ul class="bullets">
+            <li>Satisfied but not loyal</li>
+            <li>Not emotionally connected</li>
+            <li>May switch to a competitor</li>
+          </ul>
+        </div>
+        <div class="card tinted-red" style="grid-column:span 2;">
+          <h3>😠 Detractors (0–6)</h3>
+          <ul class="bullets">
+            <li>Unhappy with Karur Vysya Bank</li>
+            <li>May complain publicly</li>
+            <li>May discourage others</li>
+            <li><strong>Objective:</strong> Convert passives → promoters, reduce detractors</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7 -->
+    <div class="slide">
+      <h1>Understanding NPS Calculation</h1>
+      <img class="slide-img img-small" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=200&fit=crop" alt="">
+      <div class="grid-2">
+        <div class="card">
+          <h3>🧮 Formula</h3>
+          <ul class="bullets">
+            <li style="font-weight:700;color:var(--kvb-green);font-size:1.1rem;">NPS = % Promoters − % Detractors</li>
+            <li>Example: 60% Promoters · 25% Passives · 15% Detractors</li>
+          </ul>
+        </div>
+        <div class="card tinted-green">
+          <h3>📈 Result & Interpretation</h3>
+          <ul class="bullets">
+            <li style="font-size:1.5rem;font-weight:800;color:var(--kvb-green);">NPS = +45</li>
+            <li>Higher score = stronger customer loyalty</li>
+            <li>Karur Vysya Bank's goal is to keep raising this number</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8 -->
+    <div class="slide">
+      <h1>Three Customer Experience Outcomes</h1>
+      <p>After every interaction at Karur Vysya Bank, one of three outcomes occurs:</p>
+      <div class="grid-2" style="margin-top:1rem;">
+        <div class="card tinted-red">
+          <h3>1. Mismatch Effect</h3>
+          <ul class="bullets">
+            <li>Service delivered <strong>&lt;</strong> Customer expectation</li>
+            <li>Result: Dissatisfaction, complaints</li>
+          </ul>
+        </div>
+        <div class="card tinted-yellow">
+          <h3>2. Parity Effect</h3>
+          <ul class="bullets">
+            <li>Service delivered <strong>=</strong> Customer expectation</li>
+            <li>Result: Satisfaction — but not impressed</li>
+          </ul>
+        </div>
+        <div class="card tinted-green" style="grid-column:span 2;">
+          <h3>3. Exceed Effect</h3>
+          <ul class="bullets">
+            <li>Service delivered <strong>&gt;</strong> Customer expectation</li>
+            <li>Result: Delight, appreciation, strong loyalty</li>
+            <li>Creates promoters for Karur Vysya Bank</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9 -->
+    <div class="slide">
+      <h1>Customer Journey Through Outcomes</h1>
+      <img class="slide-img img-small" src="https://images.unsplash.com/photo-1552581234-26160f608093?w=1200&h=200&fit=crop" alt="">
+      <ul class="bullets">
+        <li><strong>Mismatch</strong> → Complaint</li>
+        <li><strong>Parity</strong> → Satisfaction</li>
+        <li><strong>Exceed</strong> → Loyalty → Advocacy</li>
+      </ul>
+      <div class="metric-badge yellow">
+        <p><strong>Key Message:</strong> The goal is not merely to satisfy customers. The goal is to create promoters of Karur Vysya Bank.</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 10 — LIVE DASHBOARD -->
+    <div class="slide" id="dashboardSlide">
+      <div class="qr-block">
+        <img src="qr.png" alt="Scan to rate Karur Vysya Bank"
+             onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(location.origin+'/user.html')">
+        <p>📱 SCAN TO RATE KVB</p>
+      </div>
+
+      <div class="dashboard-header">
+        <h1 style="margin:1.5rem 0 0.3rem;font-size:1.85rem;">📊 Live Experience Dashboard</h1>
+        <button class="reset-btn" id="resetDashboardBtn">🔄 Reset</button>
+      </div>
+      <p style="color:var(--text-secondary);">Real-time feedback from Karur Vysya Bank participants — NPS · CSAT · CES</p>
+
+      <div class="charts-row">
+        <div class="chart-box">
+          <h4>NPS Breakdown</h4>
+          <div class="chart-container"><canvas id="npsChart"></canvas></div>
+        </div>
+        <div class="chart-box">
+          <h4>CSAT Ratings</h4>
+          <div class="chart-container"><canvas id="csatChart"></canvas></div>
+        </div>
+        <div class="chart-box">
+          <h4>CES Ease</h4>
+          <div class="chart-container"><canvas id="cesChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="comments-section" id="commentsSection">
+        <h4>💬 Recent Comments</h4>
+        <div id="commentsList">
+          <p style="color:var(--text-muted);font-size:.88rem;">Waiting for responses…</p>
+        </div>
+      </div>
+
+      <div style="margin-top:.7rem;font-size:.84rem;color:var(--text-secondary);">
+        <span id="liveCounter">0 responses received</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 11 -->
+    <div class="slide">
+      <h1>Why Promoters Matter?</h1>
+      <img class="slide-img img-small" src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1200&h=200&fit=crop" alt="">
+      <div class="grid-2">
+        <div class="card">
+          <h3>⭐ Promoters of Karur Vysya Bank:</h3>
+          <ul class="bullets">
+            <li>Stay longer with the bank</li>
+            <li>Trust more deeply</li>
+            <li>Recommend to family & friends</li>
+            <li>Complain less</li>
+            <li>Strengthen the brand image</li>
+          </ul>
+        </div>
+        <div class="card tinted-yellow">
+          <h3>💬 Discussion Question</h3>
+          <ul class="bullets">
+            <li>"Which is more powerful: A Karur Vysya Bank advertisement or a genuine customer recommendation?"</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12 -->
+    <div class="slide">
+      <h1>Role of Every Employee</h1>
+      <img class="slide-img img-small" src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&h=200&fit=crop" alt="">
+      <p>Every Karur Vysya Bank employee influences <strong>CSAT, CES and NPS</strong> through:</p>
+      <ul class="bullets">
+        <li>Responsiveness</li>
+        <li>Accuracy</li>
+        <li>Communication</li>
+        <li>Ownership</li>
+        <li>Professional behaviour</li>
+      </ul>
+      <div class="metric-badge">
+        <p><strong>Key Message:</strong> Every interaction can create either a promoter or a detractor.</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 13 -->
+    <div class="slide">
+      <h1>Final Takeaway</h1>
+      <img class="slide-img img-small" src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=1200&h=200&fit=crop" alt="">
+      <div class="grid-2">
+        <div class="card">
+          <h3>📌 Remember</h3>
+          <ul class="bullets">
+            <li><strong>CSAT</strong> measures Satisfaction</li>
+            <li><strong>CES</strong> measures Effort</li>
+            <li><strong>NPS</strong> measures Loyalty</li>
+            <li><strong>Mismatch</strong> creates dissatisfaction</li>
+            <li><strong>Parity</strong> creates satisfaction</li>
+            <li><strong>Exceed</strong> creates delight</li>
+          </ul>
+        </div>
+        <div class="card tinted-green" style="display:flex;flex-direction:column;justify-content:center;">
+          <p style="font-style:italic;font-size:1.02rem;color:var(--text-primary);line-height:1.55;">"Customers may forget what we said at Karur Vysya Bank, but they rarely forget how easy, satisfying, and trustworthy we made their experience."</p>
+        </div>
+      </div>
+      <p style="margin-top:1rem;font-weight:600;color:var(--kvb-green-deep);">Thank you.</p>
+    </div>
+
+  </div>
+
+  <div class="nav-controls">
+    <button class="nav-btn" id="prevBtn" disabled>← Previous</button>
+    <div style="text-align:center;">
+      <span class="slide-counter" id="slideCounter">1 / 13</span>
+      <div class="shortcut-hint">
+        <kbd>←</kbd> <kbd>→</kbd> navigate · <kbd>F</kbd> fullscreen · <kbd>Esc</kbd> exit
+      </div>
+    </div>
+    <button class="nav-btn" id="nextBtn">Next →</button>
+  </div>
+</div>
+
+<script>
+  // ═══════════ SLIDE NAVIGATION ═══════════
+  const slides = document.querySelectorAll('.slide');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const counter = document.getElementById('slideCounter');
+  let currentSlide = 0;
+  const totalSlides = slides.length;
+
+  function showSlide(i) {
+    if (i < 0) i = 0;
+    if (i >= totalSlides) i = totalSlides - 1;
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === i));
+    currentSlide = i;
+    counter.textContent = `${i + 1} / ${totalSlides}`;
+    prevBtn.disabled = i === 0;
+    nextBtn.disabled = i === totalSlides - 1;
+  }
+  prevBtn.onclick = () => showSlide(currentSlide - 1);
+  nextBtn.onclick = () => showSlide(currentSlide + 1);
+
+  // ═══════════ KEYBOARD SHORTCUTS ═══════════
+  window.addEventListener('keydown', (e) => {
+    const tag = document.activeElement.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault();
+      showSlide(currentSlide + 1);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      showSlide(currentSlide - 1);
+    } else if (e.key === 'f' || e.key === 'F') {
+      e.preventDefault();
+      toggleFullscreen();
+    }
+  });
+
+  function toggleFullscreen() {
+    const el = document.documentElement;
+    if (!document.fullscreenElement) {
+      if (el.requestFullscreen) el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else if (el.msRequestFullscreen) el.msRequestFullscreen();
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+    }
+  }
+
+  showSlide(0);
+
+  // ═══════════ DASHBOARD ═══════════
+  let npsChart, csatChart, cesChart;
+  const state = {
+    nps: { promoters: 0, passives: 0, detractors: 0 },
+    csat: [0, 0, 0, 0, 0],
+    ces:  [0, 0, 0, 0, 0],
+    comments: []
+  };
+
+  const CHART_GREEN  = '#4CAF50';
+  const CHART_YELLOW = '#E0C418';
+  const CHART_RED    = '#C15C5C';
+  const CHART_ORANGE = '#D4813F';
+
+  function initCharts() {
+    const commonOpts = { responsive: true, maintainAspectRatio: false };
+
+    npsChart = new Chart(document.getElementById('npsChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Promoters', 'Passives', 'Detractors'],
+        datasets: [{
+          data: [0, 0, 0],
+          backgroundColor: [CHART_GREEN, CHART_YELLOW, CHART_RED],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        ...commonOpts,
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+        cutout: '60%'
+      }
+    });
+
+    csatChart = new Chart(document.getElementById('csatChart'), {
+      type: 'bar',
+      data: {
+        labels: ['1★', '2★', '3★', '4★', '5★'],
+        datasets: [{
+          data: [0, 0, 0, 0, 0],
+          backgroundColor: [CHART_RED, CHART_ORANGE, CHART_YELLOW, CHART_GREEN, '#2E7D32'],
+          borderRadius: 6
+        }]
+      },
+      options: {
+        ...commonOpts,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, grid: { color: '#EDEDE5' }, ticks: { stepSize: 1, precision: 0 } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+
+    cesChart = new Chart(document.getElementById('cesChart'), {
+      type: 'bar',
+      data: {
+        labels: ['😫', '😟', '😐', '🙂', '😎'],
+        datasets: [{
+          data: [0, 0, 0, 0, 0],
+          backgroundColor: [CHART_RED, CHART_ORANGE, CHART_YELLOW, CHART_GREEN, '#2E7D32'],
+          borderRadius: 6
+        }]
+      },
+      options: {
+        ...commonOpts,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, grid: { color: '#EDEDE5' }, ticks: { stepSize: 1, precision: 0 } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  function refreshCharts() {
+    npsChart.data.datasets[0].data = [
+      state.nps.promoters, state.nps.passives, state.nps.detractors
+    ];
+    npsChart.update();
+    csatChart.data.datasets[0].data = state.csat;
+    csatChart.update();
+    cesChart.data.datasets[0].data = state.ces;
+    cesChart.update();
+  }
+
+  function addResponse(entry) {
+    if (entry.nps >= 9) state.nps.promoters++;
+    else if (entry.nps >= 7) state.nps.passives++;
+    else state.nps.detractors++;
+
+    const csatIdx = Math.max(0, Math.min(4, entry.csat - 1));
+    state.csat[csatIdx]++;
+
+    const cesIdx = Math.max(0, Math.min(4, entry.ces - 1));
+    state.ces[cesIdx]++;
+
+    if (entry.comment || entry.user) {
+      state.comments.unshift({
+        user: entry.user || 'Anonymous',
+        text: entry.comment || '(no comment)',
+        rating: `NPS ${entry.nps} · CSAT ${entry.csat} · CES ${entry.ces}`
+      });
+      if (state.comments.length > 20) state.comments.pop();
+    }
+
+    refreshCharts();
+    renderComments();
+    updateCounter();
+  }
+
+  function renderComments() {
+    const list = document.getElementById('commentsList');
+    if (!state.comments.length) {
+      list.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;">Waiting for responses…</p>';
+      return;
+    }
+    list.innerHTML = state.comments.slice(0, 8).map(c => `
+      <div class="comment-item">
+        <span class="comment-user">${escapeHtml(c.user)}</span>
+        <span class="comment-text">${escapeHtml(c.text)}</span>
+        <span class="comment-rating">${c.rating}</span>
+      </div>
+    `).join('');
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, m => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[m]));
+  }
+
+  function updateCounter() {
+    const total = state.nps.promoters + state.nps.passives + state.nps.detractors;
+    document.getElementById('liveCounter').textContent = `${total} responses received`;
+  }
+
+  function clearDashboard() {
+    state.nps = { promoters: 0, passives: 0, detractors: 0 };
+    state.csat = [0, 0, 0, 0, 0];
+    state.ces  = [0, 0, 0, 0, 0];
+    state.comments = [];
+    refreshCharts();
+    renderComments();
+    updateCounter();
+  }
+
+  function rebuildFromScratch(entries) {
+    clearDashboard();
+    entries.forEach(e => addResponse(e));
+  }
+
+  // ═══════════ WEBSOCKET ═══════════
+  const WS_URL = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
+  let ws;
+
+  function connectWS() {
+    ws = new WebSocket(WS_URL);
+    ws.onopen = () => console.log('✅ Connected to relay');
+    ws.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      if (msg.type === 'init') rebuildFromScratch(msg.responses);
+      else if (msg.type === 'new') addResponse(msg.entry);
+      else if (msg.type === 'reset') clearDashboard();
+    };
+    ws.onclose = () => {
+      console.warn('⚠️ Disconnected. Retrying in 2s…');
+      setTimeout(connectWS, 2000);
+    };
+    ws.onerror = (err) => console.error('WS error', err);
+  }
+
+  document.getElementById('resetDashboardBtn').addEventListener('click', () => {
+    if (confirm('Clear all responses for everyone?')) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'reset' }));
+      }
+    }
+  });
+
+  // ═══════════ BOOT ═══════════
+  window.addEventListener('load', () => {
+    initCharts();
+    renderComments();
+    updateCounter();
+    connectWS();
+  });
+</script>
+</body>
+</html>
