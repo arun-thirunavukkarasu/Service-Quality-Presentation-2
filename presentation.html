@@ -290,7 +290,7 @@
     margin: 0 2px; border: 1px solid rgba(255,255,255,0.1);
   }
 
-  /* ═══════════ FLOATING EMOJI BURST ═══════════ */
+  /* ═══════════ FLOATING EMOJI BURST — 3.5s, scattered, fade-off ═══════════ */
   #emojiBurstLayer {
     position: fixed;
     inset: 0;
@@ -303,33 +303,49 @@
     font-size: 3rem;
     line-height: 1;
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.4);
-    animation: emojiFloat 2.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    transform: translate(-50%, -50%) scale(0.3);
+    animation: emojiFloat 3.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     will-change: transform, opacity;
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.15));
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.14));
     user-select: none;
   }
+  /* 4-phase animation: appear → float up → hold → fade-off */
   @keyframes emojiFloat {
     0% {
       opacity: 0;
       transform: translate(-50%, -50%) scale(0.3) rotate(0deg);
     }
-    15% {
+    10% {
       opacity: 1;
-      transform: translate(-50%, -50%) scale(1.15) rotate(var(--rot, 0deg));
+      transform:
+        translate(-50%, -50%)
+        scale(1.1)
+        rotate(var(--rot, 0deg));
     }
-    60% {
+    40% {
       opacity: 1;
-      transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, -80px))) scale(1) rotate(var(--rot, 0deg));
+      transform:
+        translate(calc(-50% + var(--dx1, 0px)), calc(-50% + var(--dy1, -60px)))
+        scale(1)
+        rotate(var(--rot, 0deg));
+    }
+    70% {
+      opacity: 0.85;
+      transform:
+        translate(calc(-50% + var(--dx2, 0px)), calc(-50% + var(--dy2, -140px)))
+        scale(1.02)
+        rotate(var(--rot, 0deg));
     }
     100% {
       opacity: 0;
-      transform: translate(calc(-50% + var(--dx-end, 0px)), calc(-50% + var(--dy-end, -220px))) scale(0.6) rotate(var(--rot, 0deg));
+      transform:
+        translate(calc(-50% + var(--dx3, 0px)), calc(-50% + var(--dy3, -220px)))
+        scale(0.55)
+        rotate(var(--rot, 0deg));
     }
   }
-  /* Small size variant for variety */
-  .float-emoji.small { font-size: 2rem; animation-duration: 2.2s; }
-  .float-emoji.large { font-size: 4.2rem; animation-duration: 3s; }
+  .float-emoji.small { font-size: 2rem;  animation-duration: 3.2s; }
+  .float-emoji.large { font-size: 4.2rem; animation-duration: 3.8s; }
 
   @media (max-width: 800px) {
     .slide { padding: 1.2rem 1.4rem; }
@@ -753,7 +769,7 @@
   showSlide(0);
 
   // ═══════════════════════════════════════════════
-  // 🔊 LOUDER, RICHER CHIME
+  // 🔊 MOOD-BASED CHIMES
   // ═══════════════════════════════════════════════
   let audioCtx = null;
 
@@ -772,59 +788,94 @@
   }
 
   /**
-   * Plays a richer, louder 3-note ascending bell chime.
-   * Uses a triangle wave + slight detune + a longer decay tail
-   * to make it clearly audible in a training room.
+   * Plays a 3-note arpeggio based on mood.
+   *
+   * @param {'promoter'|'passive'|'detractor'} mood
+   *
+   * Promoter  → bright major triad ascending (C6-E6-G6)  — feels celebratory
+   * Passive   → neutral perfect fifth (E5-B5)             — calm, unremarkable
+   * Detractor → soft descending minor (A5-F5-D5)          — lower, gentle, concerned
    */
-  function playChime() {
+  function playMoodChime(mood) {
     const ctx = ensureAudioCtx();
     if (!ctx) return;
 
     const now = ctx.currentTime;
+
+    // Master volume — noticeably loud but not jarring
     const masterGain = ctx.createGain();
-    masterGain.gain.value = 0.32;   // overall volume (loud, but not deafening)
+    masterGain.gain.value = 0.38;
     masterGain.connect(ctx.destination);
 
-    // Three ascending notes for a pleasant bell-like feel
-    // C6 → E6 → G6 (a clean major triad)
-    const notes = [1046.5, 1318.5, 1568.0];
+    let notes, stagger, baseDuration, oscType;
+
+    if (mood === 'promoter') {
+      // Happy ascending major triad
+      notes = [1046.5, 1318.5, 1568.0];     // C6, E6, G6
+      stagger = 0.10;
+      baseDuration = 1.15;
+      oscType = 'triangle';
+
+    } else if (mood === 'passive') {
+      // Neutral perfect fifth, no strong emotional color
+      notes = [659.3, 987.8, 784.0];        // E5, B5, G5
+      stagger = 0.13;
+      baseDuration = 1.0;
+      oscType = 'sine';
+
+    } else {
+      // Detractor: soft descending minor triad
+      notes = [880.0, 698.5, 587.3];        // A5, F5, D5 (descending)
+      stagger = 0.16;
+      baseDuration = 1.1;
+      oscType = 'sine';
+    }
+
     notes.forEach((freq, i) => {
-      const startTime = now + i * 0.11; // stagger
-      const duration = 1.1 + i * 0.15;
+      const startTime = now + i * stagger;
+      const duration = baseDuration + i * 0.12;
 
-      // Oscillator 1 — main tone (triangle = bright but pleasant)
-      const osc1 = ctx.createOscillator();
-      osc1.type = 'triangle';
-      osc1.frequency.value = freq;
+      // Main oscillator
+      const osc = ctx.createOscillator();
+      osc.type = oscType;
+      osc.frequency.value = freq;
 
-      // Oscillator 2 — subtle detuned layer for richness
-      const osc2 = ctx.createOscillator();
-      osc2.type = 'sine';
-      osc2.frequency.value = freq * 2.01; // octave + tiny detune
+      // A soft harmonic layer for richness (quieter for detractor)
+      const harmonic = ctx.createOscillator();
+      harmonic.type = 'sine';
+      harmonic.frequency.value = freq * 2.01;
 
-      // Envelope
-      const gain = ctx.createGain();
-      gain.gain.setValueAtTime(0, startTime);
-      gain.gain.linearRampToValueAtTime(0.9, startTime + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+      const mainGain = ctx.createGain();
+      mainGain.gain.setValueAtTime(0, startTime);
+      mainGain.gain.linearRampToValueAtTime(0.9, startTime + 0.015);
+      mainGain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
 
-      // Secondary gain for the harmonic layer (quieter)
-      const gain2 = ctx.createGain();
-      gain2.gain.setValueAtTime(0, startTime);
-      gain2.gain.linearRampToValueAtTime(0.25, startTime + 0.02);
-      gain2.gain.exponentialRampToValueAtTime(0.0001, startTime + duration * 0.7);
+      const harmGain = ctx.createGain();
+      const harmLevel = mood === 'detractor' ? 0.15 : 0.28;
+      harmGain.gain.setValueAtTime(0, startTime);
+      harmGain.gain.linearRampToValueAtTime(harmLevel, startTime + 0.02);
+      harmGain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration * 0.7);
 
-      osc1.connect(gain);
-      gain.connect(masterGain);
+      osc.connect(mainGain);
+      mainGain.connect(masterGain);
 
-      osc2.connect(gain2);
-      gain2.connect(masterGain);
+      harmonic.connect(harmGain);
+      harmGain.connect(masterGain);
 
-      osc1.start(startTime);
-      osc1.stop(startTime + duration + 0.05);
-      osc2.start(startTime);
-      osc2.stop(startTime + duration + 0.05);
+      osc.start(startTime);
+      osc.stop(startTime + duration + 0.05);
+      harmonic.start(startTime);
+      harmonic.stop(startTime + duration + 0.05);
     });
+  }
+
+  /**
+   * Maps an entry's NPS score to a mood bucket.
+   */
+  function moodForEntry(entry) {
+    if (entry.nps >= 9) return 'promoter';
+    if (entry.nps >= 7) return 'passive';
+    return 'detractor';
   }
 
   // Browsers require a user gesture before AudioContext can play.
@@ -834,7 +885,6 @@
     const ctx = ensureAudioCtx();
     if (ctx) {
       audioUnlocked = true;
-      // Small silent ping to fully unlock on some browsers
       try {
         const g = ctx.createGain();
         g.gain.value = 0.0001;
@@ -851,33 +901,29 @@
   document.addEventListener('touchstart', unlockAudio, { once: false });
 
   // ═══════════════════════════════════════════════
-  // 🎉 FLOATING EMOJI BURST
+  // 🎉 SCATTERED FLOATING EMOJI BURST — 3.5s fade-off
   // ═══════════════════════════════════════════════
   const CHEER_EMOJIS  = ['🎉', '👏', '🌟', '💚', '🔥', '✨', '🙌', '💯', '🥳', '😍', '💫', '🏆'];
   const FROWN_EMOJIS  = ['😟', '😕', '😞', '💔', '😢', '😠', '👎', '😔'];
   const NEUTRAL_EMOJIS = ['👀', '💭', '🤔', '📊'];
 
   /**
-   * Spawns a burst of emojis around the center of the viewport
-   * based on the sentiment of the submission.
-   *
-   * Sentiment is inferred from NPS + CSAT + CES combined:
-   *   - Strong positive → cheer emojis
-   *   - Strong negative → frown emojis
-   *   - Mixed → mixture
+   * Spawns emojis scattered ACROSS the entire screen
+   * (not just from one origin), each with its own drift path,
+   * all fading off over ~3.5 seconds.
    */
   function spawnEmojiBurst(entry) {
     const layer = document.getElementById('emojiBurstLayer');
     if (!layer) return;
 
-    // Determine sentiment score: 0 (worst) to 1 (best)
-    const npsScore  = Math.max(0, Math.min(10, entry.nps || 0)) / 10;    // 0..1
-    const csatScore = Math.max(1, Math.min(5,  entry.csat || 3)) / 5;    // 0.2..1
-    const cesScore  = Math.max(1, Math.min(5,  entry.ces  || 3)) / 5;    // 0.2..1
-    const score = (npsScore * 0.4) + (csatScore * 0.3) + (cesScore * 0.3); // 0..1
+    // Combined sentiment score: 0 (worst) to 1 (best)
+    const npsScore  = Math.max(0, Math.min(10, entry.nps || 0)) / 10;
+    const csatScore = Math.max(1, Math.min(5,  entry.csat || 3)) / 5;
+    const cesScore  = Math.max(1, Math.min(5,  entry.ces  || 3)) / 5;
+    const score = (npsScore * 0.4) + (csatScore * 0.3) + (cesScore * 0.3);
 
-    // Number of emojis scales a bit with score (but caps low)
-    const count = 8 + Math.floor(Math.random() * 4); // 8-11 emojis per burst
+    // Emoji count — good for a full-screen scatter
+    const count = 14 + Math.floor(Math.random() * 5); // 14-18
 
     // Pick emoji pool based on sentiment
     let pool;
@@ -886,53 +932,82 @@
     else if (score >= 0.3) pool = [...NEUTRAL_EMOJIS, ...FROWN_EMOJIS];
     else pool = FROWN_EMOJIS;
 
-    // Viewport size
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
-    // Emojis generally burst from lower-center and float up-and-out
-    const originX = vw * (0.35 + Math.random() * 0.30); // 35%-65% of width
-    const originY = vh * (0.60 + Math.random() * 0.15); // 60%-75% of height
+    // Divide the screen into a loose 6-column × 3-row grid so emojis
+    // scatter evenly without piling up in the middle.
+    const cols = 6;
+    const rows = 3;
+    const cellsTotal = cols * rows; // 18 cells for 14-18 emojis
+
+    // Shuffle cell indices for random distribution
+    const cellIdx = Array.from({ length: cellsTotal }, (_, i) => i);
+    for (let i = cellIdx.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [cellIdx[i], cellIdx[j]] = [cellIdx[j], cellIdx[i]];
+    }
 
     for (let i = 0; i < count; i++) {
       const el = document.createElement('span');
       el.className = 'float-emoji';
-      // Random size class for variety
       const r = Math.random();
-      if (r < 0.25) el.classList.add('large');
-      else if (r < 0.65) el.classList.add('small');
+      if (r < 0.28) el.classList.add('large');
+      else if (r < 0.68) el.classList.add('small');
 
       el.textContent = pool[Math.floor(Math.random() * pool.length)];
 
-      // Position at burst origin with small jitter
-      const startX = originX + (Math.random() - 0.5) * 60;
-      const startY = originY + (Math.random() - 0.5) * 40;
+      // Snap to a grid cell, then jitter inside it
+      const cell = cellIdx[i % cellsTotal];
+      const col = cell % cols;
+      const row = Math.floor(cell / cols);
+
+      const cellW = vw / cols;
+      const cellH = (vh * 0.85) / rows; // don't use bottom 15% (nav/console)
+
+      // Position with jitter INSIDE the cell — this spreads them nicely
+      const baseX = col * cellW + cellW * 0.5;
+      const baseY = row * cellH + cellH * 0.5 + vh * 0.10;
+
+      const jitterX = (Math.random() - 0.5) * cellW * 0.6;
+      const jitterY = (Math.random() - 0.5) * cellH * 0.5;
+
+      const startX = baseX + jitterX;
+      const startY = baseY + jitterY;
+
       el.style.left = startX + 'px';
       el.style.top  = startY + 'px';
 
-      // Random drift
-      const dx = (Math.random() - 0.5) * 220;             // horizontal drift ±110px
-      const dy = -120 - Math.random() * 180;              // upward drift 120-300px
-      const dxEnd = dx + (Math.random() - 0.5) * 120;
-      const dyEnd = dy - 80 - Math.random() * 120;
-      const rot = (Math.random() - 0.5) * 30;             // rotation ±15deg
+      // Each emoji drifts UP + slightly out — small random wander
+      const driftX  = (Math.random() - 0.5) * 60;
+      const driftX2 = driftX + (Math.random() - 0.5) * 70;
+      const driftX3 = driftX2 + (Math.random() - 0.5) * 80;
 
-      el.style.setProperty('--dx', dx + 'px');
-      el.style.setProperty('--dy', dy + 'px');
-      el.style.setProperty('--dx-end', dxEnd + 'px');
-      el.style.setProperty('--dy-end', dyEnd + 'px');
+      const dy1 = -30 - Math.random() * 30;   // early
+      const dy2 = -80 - Math.random() * 60;   // mid
+      const dy3 = -160 - Math.random() * 120; // end (higher)
+
+      const rot = (Math.random() - 0.5) * 40;
+
+      el.style.setProperty('--dx1', driftX  + 'px');
+      el.style.setProperty('--dy1', dy1 + 'px');
+      el.style.setProperty('--dx2', driftX2 + 'px');
+      el.style.setProperty('--dy2', dy2 + 'px');
+      el.style.setProperty('--dx3', driftX3 + 'px');
+      el.style.setProperty('--dy3', dy3 + 'px');
       el.style.setProperty('--rot', rot + 'deg');
 
-      // Slight delay so they cascade
-      el.style.animationDelay = (i * 45 + Math.random() * 60) + 'ms';
+      // Staggered start — 60ms apart creates a natural cascade
+      // (fine for 14-18 emojis over ~1s + 3.5s animation = under 4.5s total)
+      el.style.animationDelay = (i * 60 + Math.random() * 40) + 'ms';
 
       layer.appendChild(el);
 
-      // Auto-remove from DOM when animation ends
+      // Auto-remove after animation ends
       const totalDelay = parseFloat(el.style.animationDelay) || 0;
       setTimeout(() => {
         if (el.parentNode) el.parentNode.removeChild(el);
-      }, 3500 + totalDelay);
+      }, 4200 + totalDelay);
     }
   }
 
@@ -1079,7 +1154,6 @@
     updateCounter();
     updateWordCloud();
 
-    // Fire emoji burst only for LIVE submissions, not for the initial rebuild
     if (!opts.silent) {
       spawnEmojiBurst(entry);
     }
@@ -1236,7 +1310,6 @@
 
   function rebuildFromScratch(entries) {
     clearDashboard();
-    // Rebuild silently — no chime, no emoji burst for past submissions
     entries.forEach(e => addResponse(e, { silent: true }));
   }
 
@@ -1252,7 +1325,8 @@
       if (msg.type === 'init') rebuildFromScratch(msg.responses);
       else if (msg.type === 'new') {
         addResponse(msg.entry);
-        playChime();
+        // 🔊 Play chime according to mood (promoter / passive / detractor)
+        playMoodChime(moodForEntry(msg.entry));
       }
       else if (msg.type === 'reset') clearDashboard();
     };
