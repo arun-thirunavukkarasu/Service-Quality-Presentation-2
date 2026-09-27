@@ -192,197 +192,95 @@
   }
 
   /* ═══════════════════════════════════════════════
-     CONCEPT 3 — NPS BIG NUMBER REVEAL
+     SIMPLE NPS NUMBER GRID
      ═══════════════════════════════════════════════ */
-  .reveal-wrap {
-    padding: 6px 4px 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  .nps-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
   }
 
-  /* Card behind the number */
-  .reveal-card {
-    position: relative;
-    width: 100%;
-    max-width: 340px;
-    padding: 22px 16px 18px;
-    border-radius: 24px;
-    background: linear-gradient(180deg, #FFFFFF 0%, #F9FBF6 100%);
-    border: 1.5px solid #EDEDE0;
-    box-shadow:
-      0 8px 28px rgba(20, 60, 120, 0.06),
-      0 2px 6px rgba(0, 0, 0, 0.03);
-    overflow: hidden;
-    transition: border-color 0.4s, box-shadow 0.4s;
-  }
-  .reveal-card::before {
-    /* mood color top strip */
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 6px;
-    background: var(--mood-color, #C9A600);
-    transition: background 0.4s;
-    border-radius: 22px 22px 0 0;
-  }
-
-  /* Big number with flip animation */
-  .big-number-stage {
-    position: relative;
-    height: 140px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    perspective: 800px;
-    margin-bottom: 4px;
-  }
-
-  .big-number {
-    font-size: 8rem;
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: -0.06em;
-    color: var(--mood-color, #C9A600);
-    transition: color 0.4s;
-    font-variant-numeric: tabular-nums;
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backface-visibility: hidden;
-    transform-origin: center;
-    will-change: transform, opacity;
-  }
-
-  /* Two animation variants: incoming and outgoing */
-  .big-number.flip-in {
-    animation: flipIn 0.42s cubic-bezier(0.34, 1.2, 0.5, 1) both;
-  }
-  .big-number.flip-out {
-    animation: flipOut 0.42s cubic-bezier(0.34, 1.2, 0.5, 1) both;
-  }
-
-  @keyframes flipIn {
-    0%   { opacity: 0; transform: rotateX(-90deg) translateY(-10px) scale(0.7); }
-    100% { opacity: 1; transform: rotateX(0deg) translateY(0) scale(1); }
-  }
-  @keyframes flipOut {
-    0%   { opacity: 1; transform: rotateX(0deg) translateY(0) scale(1); }
-    100% { opacity: 0; transform: rotateX(90deg) translateY(10px) scale(0.7); }
-  }
-
-  /* Mood label under the number */
-  .mood-label {
-    text-align: center;
-    font-size: 0.78rem;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--mood-color, #C9A600);
-    transition: color 0.4s;
-    margin-bottom: 18px;
-    min-height: 1.2em;
-  }
-
-  /* Dot strip 0..10 */
-  .dot-strip {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 6px 4px;
-    background: #F7F7F0;
-    border-radius: 18px;
-    border: 1px solid #EDEDE0;
-  }
-
-  .dot-btn {
-    flex: 1;
+  .nps-btn {
+    /* 6 columns on top row, 5 on second row (11 buttons total) */
     aspect-ratio: 1;
-    max-width: 26px;
-    min-width: 18px;
-    border-radius: 50%;
+    border-radius: 14px;
     border: 2px solid transparent;
-    background: #FFFFFF;
+    background: #F5F5EE;
+    color: #1A1A1A;
+    font-family: inherit;
+    font-size: 1.05rem;
+    font-weight: 700;
     cursor: pointer;
     transition:
-      transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
-      background 0.3s,
-      border-color 0.3s,
-      box-shadow 0.3s;
-    position: relative;
-    padding: 0;
+      transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+      background 0.2s,
+      color 0.2s,
+      box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
     -webkit-appearance: none;
     appearance: none;
     outline: none;
-  }
-  .dot-btn::after {
-    /* inner fill dot */
-    content: '';
-    position: absolute;
-    inset: 4px;
-    border-radius: 50%;
-    background: #E5E5DC;
-    transition: background 0.3s, transform 0.3s;
+    padding: 0;
   }
 
-  .dot-btn:active { transform: scale(0.9); }
-
-  .dot-btn.filled::after {
-    background: var(--mood-color, #C9A600);
+  .nps-btn:active {
+    transform: scale(0.92);
   }
 
-  .dot-btn.selected {
-    transform: scale(1.4);
-    border-color: var(--mood-color, #C9A600);
-    background: #fff;
+  /* Filled (values ≤ selection) — colored by mood */
+  .nps-btn.filled {
+    background: var(--nps-mood, #C9A600);
+    color: #fff;
+    border-color: transparent;
+  }
+
+  /* Selected — glowing ring + slight scale */
+  .nps-btn.selected {
+    transform: scale(1.12);
+    border-color: #fff;
     box-shadow:
-      0 0 0 3px rgba(255,255,255,1),
-      0 0 0 6px var(--mood-color, #C9A600),
-      0 4px 12px rgba(0,0,0,0.12);
+      0 0 0 3px var(--nps-mood, #C9A600),
+      0 6px 16px rgba(0, 0, 0, 0.18);
     z-index: 2;
   }
-  .dot-btn.selected::after {
-    transform: scale(1.15);
-  }
 
-  /* NPS band hints below the dots */
-  .dot-bands {
+  /* Mood hint strip */
+  .nps-bands {
     display: flex;
     justify-content: space-between;
-    margin-top: 10px;
-    font-size: 0.62rem;
+    margin-top: 12px;
+    font-size: 0.64rem;
     color: var(--text-muted);
     font-weight: 600;
-    letter-spacing: 0.04em;
-    padding: 0 4px;
+    letter-spacing: 0.03em;
+    padding: 0 2px;
   }
-  .dot-bands span {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .dot-bands .band-dot {
+  .nps-bands span { display: flex; align-items: center; gap: 4px; }
+  .nps-bands .band-dot {
     display: inline-block;
-    width: 6px;
-    height: 6px;
+    width: 6px; height: 6px;
     border-radius: 50%;
   }
+  .nps-bands .band-detractor .band-dot { background: #C15C5C; }
+  .nps-bands .band-passive .band-dot { background: #E0C418; }
+  .nps-bands .band-promoter .band-dot { background: #2E7D32; }
 
-  .dot-bands .band-detractor .band-dot { background: #C15C5C; }
-  .dot-bands .band-passive .band-dot { background: #E0C418; }
-  .dot-bands .band-promoter .band-dot { background: #2E7D32; }
-
-  /* Subtle "tap a dot" hint */
-  .reveal-hint {
+  /* Live readout below grid */
+  .nps-readout {
+    margin-top: 14px;
     text-align: center;
-    margin-top: 12px;
-    font-size: 0.68rem;
-    color: var(--text-muted);
+    font-size: 0.86rem;
+    color: var(--text-secondary);
     font-weight: 500;
+    min-height: 1.4em;
+  }
+  .nps-readout strong {
+    color: var(--nps-mood, #C9A600);
+    font-weight: 800;
+    font-size: 1rem;
   }
 
   /* ── CSAT bouncing emojis ── */
@@ -690,28 +588,21 @@
     <input type="text" id="userName" placeholder="e.g. Priya" maxlength="40" autocomplete="off">
   </div>
 
-  <!-- ═══════════ Q1 — NPS BIG NUMBER REVEAL ═══════════ -->
+  <!-- ═══════════ Q1 — NPS NUMBER GRID ═══════════ -->
   <div class="q-card">
     <h2>How likely are you to recommend Karur Vysya Bank?</h2>
-    <div class="q-sub">Tap a dot · 0 = Not at all · 10 = Absolutely</div>
+    <div class="q-sub">Tap a number · 0 = Not at all · 10 = Absolutely</div>
 
-    <div class="reveal-wrap">
-      <div class="reveal-card" id="revealCard" style="--mood-color:#C9A600;">
-        <div class="big-number-stage" id="bigNumberStage">
-          <div class="big-number" id="bigNumber">5</div>
-        </div>
-        <div class="mood-label" id="moodLabel">Neutral</div>
+    <div class="nps-grid" id="npsGrid"></div>
 
-        <div class="dot-strip" id="dotStrip"></div>
+    <div class="nps-bands">
+      <span class="band-detractor"><span class="band-dot"></span>Detractor 0–6</span>
+      <span class="band-passive"><span class="band-dot"></span>Passive 7–8</span>
+      <span class="band-promoter"><span class="band-dot"></span>Promoter 9–10</span>
+    </div>
 
-        <div class="dot-bands">
-          <span class="band-detractor"><span class="band-dot"></span>Detractor (0–6)</span>
-          <span class="band-passive"><span class="band-dot"></span>Passive (7–8)</span>
-          <span class="band-promoter"><span class="band-dot"></span>Promoter (9–10)</span>
-        </div>
-
-        <div class="reveal-hint">Tap a dot to rate</div>
-      </div>
+    <div class="nps-readout" id="npsReadout">
+      Tap a number above to rate
     </div>
   </div>
 
@@ -827,10 +718,10 @@
   // ═══════════════════════════════════════════════
   // STATE
   // ═══════════════════════════════════════════════
-  const state = { nps: 5, csat: null, ces: null };
+  const state = { nps: null, csat: null, ces: null };
 
   // ═══════════════════════════════════════════════
-  // NPS BIG NUMBER REVEAL
+  // SIMPLE NPS NUMBER GRID
   // ═══════════════════════════════════════════════
   const MOOD_COLORS = [
     '#B71C1C', // 0  deep red
@@ -838,7 +729,7 @@
     '#C65400', // 2  burnt orange
     '#D4813F', // 3
     '#C9A600', // 4  amber
-    '#A88300', // 5  neutral mustard
+    '#A88300', // 5  mustard
     '#7A9C1A', // 6  olive-lime
     '#4C7A12', // 7  lime
     '#2E7D32', // 8  green
@@ -858,88 +749,59 @@
     'Extremely likely',
     'Absolutely'
   ];
+  const BANDS = [
+    'Detractor', 'Detractor', 'Detractor', 'Detractor',
+    'Detractor', 'Detractor', 'Detractor',       // 0-6
+    'Passive', 'Passive',                          // 7-8
+    'Promoter', 'Promoter'                         // 9-10
+  ];
 
-  const bigNumber = document.getElementById('bigNumber');
-  const bigNumberStage = document.getElementById('bigNumberStage');
-  const moodLabel = document.getElementById('moodLabel');
-  const revealCard = document.getElementById('revealCard');
-  const dotStrip = document.getElementById('dotStrip');
+  const npsGrid = document.getElementById('npsGrid');
+  const npsReadout = document.getElementById('npsReadout');
 
-  let currentNPS = 5;
-
-  // Build the 11 dot buttons
-  function buildDotStrip() {
-    dotStrip.innerHTML = '';
+  function buildNPSGrid() {
+    npsGrid.innerHTML = '';
     for (let i = 0; i <= 10; i++) {
       const b = document.createElement('button');
-      b.className = 'dot-btn';
+      b.className = 'nps-btn';
       b.type = 'button';
       b.dataset.value = i;
+      b.textContent = i;
       b.setAttribute('aria-label', `Rate ${i} out of 10`);
       b.addEventListener('click', () => selectNPS(i));
-      dotStrip.appendChild(b);
+      npsGrid.appendChild(b);
     }
-  }
-
-  function updateMoodStyles(v) {
-    const color = MOOD_COLORS[v];
-    revealCard.style.setProperty('--mood-color', color);
-    bigNumber.style.color = color;
-    moodLabel.style.color = color;
-
-    // Fill dots up to and including selected
-    document.querySelectorAll('.dot-btn').forEach(btn => {
-      const val = parseInt(btn.dataset.value, 10);
-      btn.classList.toggle('filled', val <= v);
-      btn.classList.toggle('selected', val === v);
-    });
   }
 
   function selectNPS(v) {
     v = Math.max(0, Math.min(10, v));
-
-    // If value changed, do a flip animation
-    if (v !== currentNPS) {
-      const oldEl = bigNumber;
-      const newEl = document.createElement('div');
-      newEl.className = 'big-number flip-in';
-      newEl.textContent = v;
-      newEl.style.color = MOOD_COLORS[v];
-
-      oldEl.classList.remove('flip-in');
-      oldEl.classList.add('flip-out');
-
-      bigNumberStage.appendChild(newEl);
-
-      setTimeout(() => {
-        if (oldEl.parentNode) oldEl.parentNode.removeChild(oldEl);
-        newEl.classList.remove('flip-in');
-        newEl.id = 'bigNumber';
-        // rebind for next flip
-        window.bigNumber = newEl;
-      }, 420);
-
-      // Keep reference updated
-      window.bigNumber = newEl;
-    } else {
-      bigNumber.textContent = v;
-    }
-
-    currentNPS = v;
     state.nps = v;
 
-    moodLabel.textContent = MOOD_LABELS[v];
-    updateMoodStyles(v);
+    const mood = MOOD_COLORS[v];
+
+    // Apply mood to every button in the grid
+    document.querySelectorAll('.nps-btn').forEach(btn => {
+      const val = parseInt(btn.dataset.value, 10);
+      // filled = values ≤ selection (visual "path")
+      btn.classList.toggle('filled', val <= v);
+      btn.classList.toggle('selected', val === v);
+      // only the buttons up to selection get the mood color
+      if (val <= v) {
+        btn.style.setProperty('--nps-mood', mood);
+      } else {
+        btn.style.removeProperty('--nps-mood');
+      }
+    });
+
+    // Readout below
+    npsReadout.innerHTML =
+      `<strong>${v}</strong> · ${MOOD_LABELS[v]} · <em>${BANDS[v]}</em>`;
 
     if (navigator.vibrate) navigator.vibrate(15);
     checkReady();
   }
 
-  // Build once
-  buildDotStrip();
-  updateMoodStyles(currentNPS);
-  moodLabel.textContent = MOOD_LABELS[currentNPS];
-  state.nps = currentNPS;
+  buildNPSGrid();
 
   // ═══════════════════════════════════════════════
   // CSAT bouncing emojis
@@ -1030,7 +892,7 @@
   // ═══════════════════════════════════════════════
   // WEBSOCKET
   // ═══════════════════════════════════════════════
-  const WS_URL = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
+  const WS_URL = (location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + location.host;
   let ws = null;
 
   try {
