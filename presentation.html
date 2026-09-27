@@ -146,7 +146,7 @@
     color: #7A6D00; border: 1px solid #F0E48A;
   }
 
-  /* ── NEW: AI Insights + Word Cloud panel ── */
+  /* ── AI Insights + Word Cloud panel ── */
   .insights-row {
     display: grid;
     grid-template-columns: 1.3fr 1fr;
@@ -568,7 +568,6 @@
         </div>
       </div>
 
-      <!-- ⭐ NEW: AI Insights + Word Cloud row -->
       <div class="insights-row">
         <div class="ai-insights">
           <h4><span class="sparkle">✨</span> AI Insights <span style="font-size:0.7rem;font-weight:500;color:var(--text-muted);margin-left:auto;">powered by Groq</span></h4>
@@ -711,7 +710,6 @@
   showSlide(0);
 
   // ═══════════ SOUND CHIME ═══════════
-  // A short, pleasant two-note chime using Web Audio API (no file needed)
   let audioCtx = null;
   function playChime() {
     try {
@@ -730,11 +728,9 @@
         osc.start(now + i * 0.08);
         osc.stop(now + i * 0.08 + 0.4);
       });
-    } catch (e) { /* silent fail — some browsers block without user gesture */ }
+    } catch (e) { /* silent fail */ }
   }
 
-  // Browsers require a user gesture before AudioContext can play.
-  // Attach a one-time click listener to unlock audio on first interaction.
   let audioUnlocked = false;
   function unlockAudio() {
     if (audioUnlocked) return;
@@ -764,18 +760,15 @@
   function initCharts() {
     const commonOpts = { responsive: true, maintainAspectRatio: false };
 
-   
-       npsChart = new Chart(document.getElementById('npsChart'), {
+    npsChart = new Chart(document.getElementById('npsChart'), {
       type: 'doughnut',
       data: {
         labels: ['Promoters', 'Passives', 'Detractors'],
         datasets: [{
-          // Epsilon ensures every slice renders, even at 0
-          data: [0.001, 0.001, 0.001],
+          // Starts empty; refreshCharts fills in real data
+          data: [0, 0, 0],
           backgroundColor: [CHART_GREEN, CHART_YELLOW, CHART_RED],
-          borderWidth: 0,
-          borderColor: '#fff',
-          borderAlign: 'inner'
+          borderWidth: 0
         }]
       },
       options: {
@@ -787,11 +780,9 @@
               boxWidth: 12,
               font: { size: 11 },
               generateLabels: (chart) => {
-                const real = state.nps ? [
-                  state.nps.promoters,
-                  state.nps.passives,
-                  state.nps.detractors
-                ] : [0, 0, 0];
+                const real = state.nps
+                  ? [state.nps.promoters, state.nps.passives, state.nps.detractors]
+                  : [0, 0, 0];
                 return chart.data.labels.map((label, i) => ({
                   text: `${label} (${real[i]})`,
                   fillStyle: chart.data.datasets[0].backgroundColor[i],
@@ -852,12 +843,20 @@
     const p  = state.nps.promoters;
     const pa = state.nps.passives;
     const d  = state.nps.detractors;
-    const hasData = p + pa + d > 0;
+    const total = p + pa + d;
 
-    npsChart.data.datasets[0].data = hasData
-      ? [p || 0.001, pa || 0.001, d || 0.001]
-      : [1, 1, 1];
-
+    if (total === 0) {
+      // Nothing submitted yet — leave the donut empty
+      npsChart.data.datasets[0].data = [0, 0, 0];
+    } else {
+      // Use a tiny epsilon ONLY for buckets that are genuinely zero
+      // so the slice stays visible in the legend and on the chart
+      npsChart.data.datasets[0].data = [
+        p  > 0 ? p  : 0.0001,
+        pa > 0 ? pa : 0.0001,
+        d  > 0 ? d  : 0.0001
+      ];
+    }
     npsChart.update();
 
     csatChart.data.datasets[0].data = state.csat;
@@ -891,7 +890,6 @@
     updateCounter();
     updateWordCloud();
 
-    // Trigger a new AI insight refresh every 5 responses
     if (state.comments.length > 0 && state.comments.length % 5 === 0) {
       fetchAIInsights();
     }
@@ -959,14 +957,14 @@
     const palette = ['#007A3D', '#005F2E', '#C9A600', '#4C7A12', '#A88300'];
     container.innerHTML = '<h4>TOP THEMES</h4>' + words.map(([word, count], i) => {
       const t = max === min ? 1 : (count - min) / (max - min);
-      const size = 0.78 + t * 1.05; // 0.78rem .. 1.83rem
+      const size = 0.78 + t * 1.05;
       const weight = count >= max * 0.7 ? 800 : count >= max * 0.4 ? 700 : 600;
       const color = palette[i % palette.length];
       return `<span class="wc-word" style="font-size:${size}rem;font-weight:${weight};color:${color};" title="${count} mention${count > 1 ? 's' : ''}">${escapeHtml(word)}</span>`;
     }).join('');
   }
 
-  // ═══════════ AI INSIGHTS (Groq) ═══════════
+  // ═══════════ AI INSIGHTS ═══════════
   let aiInFlight = false;
   let lastAICommentCount = 0;
 
@@ -990,7 +988,7 @@
           messages: [
             {
               role: 'system',
-              content: 'You are a customer experience analyst. Given a list of customer comments, produce exactly 3 short, specific insights (max 12 words each). Output ONLY a JSON array of 3 strings, no other text. Focus on recurring themes, sentiment, and actionable takeaways.'
+              content: 'You are a customer experience analyst. Given a list of customer comments, produce exactly 3 short, specific insights (max 12 words each). Output ONLY a JSON object with key "insights" whose value is an array of 3 strings. Focus on recurring themes, sentiment, and actionable takeaways.'
             },
             {
               role: 'user',
@@ -1010,7 +1008,6 @@
         const parsed = JSON.parse(raw);
         insights = Array.isArray(parsed) ? parsed : (parsed.insights || parsed.points || []);
       } catch {
-        // fallback: split lines
         insights = raw.split('\n').map(s => s.replace(/^[\d\.\-\•\s]+/, '').trim()).filter(Boolean).slice(0, 3);
       }
 
@@ -1060,7 +1057,7 @@
       if (msg.type === 'init') rebuildFromScratch(msg.responses);
       else if (msg.type === 'new') {
         addResponse(msg.entry);
-        playChime(); // 🔊 chime on every new submission
+        playChime();
       }
       else if (msg.type === 'reset') clearDashboard();
     };
@@ -1087,7 +1084,6 @@
     updateWordCloud();
     connectWS();
 
-    // Periodic AI refresh every 30s, if there are fresh comments
     setInterval(() => { fetchAIInsights(); }, 30000);
   });
 </script>
