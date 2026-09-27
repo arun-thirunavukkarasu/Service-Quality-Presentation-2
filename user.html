@@ -37,7 +37,8 @@
       radial-gradient(circle at 80% 100%, var(--ambient-bottom), transparent 55%),
       var(--base-bg);
     min-height: 100vh;
-    padding: 16px 14px 110px;
+    /* Big bottom padding so the last comment box has room above the fixed submit button */
+    padding: 16px 14px 160px;
     color: var(--text-primary);
     transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -193,99 +194,121 @@
   }
 
   /* ═══════════════════════════════════════════════
-     CONCEPT A — NPS SLIDER with live-morphing face
+     CONCEPT D — NPS DIAL (tap-to-rotate)
      ═══════════════════════════════════════════════ */
-  .slider-wrap {
-    padding: 6px 4px 0;
-  }
-
-  .slider-face {
+  .dial-wrap {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
-    margin-bottom: 16px;
-    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  .slider-face .face-svg {
-    width: 92px;
-    height: 92px;
-    display: block;
-    transition: filter 0.4s, transform 0.4s;
-  }
-  .slider-face .face-value {
-    font-size: 1.6rem;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1;
-    transition: color 0.35s;
-  }
-  .slider-face .face-label {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    transition: color 0.35s;
+    padding: 6px 4px 0;
   }
 
-  .slider-input-wrap {
+  .dial-container {
     position: relative;
-    padding: 0 8px;
+    width: 220px;
+    height: 220px;
+    user-select: none;
+    touch-action: none;
   }
-  .slider-input {
-    -webkit-appearance: none;
-    appearance: none;
+
+  .dial-svg {
     width: 100%;
-    height: 10px;
-    border-radius: 20px;
-    background: linear-gradient(90deg,
-      #C15C5C 0%, #D4813F 25%, #E0C418 50%, #4CAF50 75%, #007A3D 100%);
-    outline: none;
-    cursor: pointer;
-    position: relative;
-    transition: box-shadow 0.2s;
+    height: 100%;
+    display: block;
+    overflow: visible;
   }
-  .slider-input:active {
-    box-shadow: 0 0 0 6px rgba(0, 122, 61, 0.10);
-  }
-  /* Thumb for WebKit */
-  .slider-input::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: #fff;
-    border: 3px solid var(--kvb-green);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
-    cursor: grab;
-    transition: transform 0.15s, border-color 0.3s;
-  }
-  .slider-input::-webkit-slider-thumb:active {
-    transform: scale(1.15);
-    cursor: grabbing;
-  }
-  /* Thumb for Firefox */
-  .slider-input::-moz-range-thumb {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: #fff;
-    border: 3px solid var(--kvb-green);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
-    cursor: grab;
-  }
-  .slider-input::-moz-range-thumb:active { transform: scale(1.15); }
 
-  .slider-scale {
+  /* Track ring — light grey */
+  .dial-track {
+    fill: none;
+    stroke: #EEEEEA;
+    stroke-width: 14;
+  }
+
+  /* Progress ring — colored by value, animates with stroke-dasharray */
+  .dial-progress {
+    fill: none;
+    stroke: #F5D000;
+    stroke-width: 14;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transition: stroke-dasharray 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                stroke 0.35s;
+  }
+
+  /* Tick marks around the dial */
+  .dial-tick {
+    stroke: #D6D6CC;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+  .dial-tick.major { stroke: #8E8E82; stroke-width: 2.5; }
+  .dial-tick.active { stroke: #005F2E; stroke-width: 3; }
+
+  /* Center display */
+  .dial-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .dial-value {
+    font-size: 3.2rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: #005F2E;
+    transition: color 0.35s, transform 0.2s;
+    font-variant-numeric: tabular-nums;
+  }
+  .dial-value.bump {
+    animation: dialBump 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes dialBump {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.18); }
+    100% { transform: scale(1); }
+  }
+  .dial-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8E8E82;
+    margin-top: 6px;
+    transition: color 0.35s;
+  }
+  .dial-hint {
+    font-size: 0.68rem;
+    color: #B8B8A8;
+    margin-top: 2px;
+    font-weight: 500;
+  }
+
+  /* Draggable knob indicator (a small dot on the ring) */
+  .dial-knob {
+    fill: #fff;
+    stroke: #005F2E;
+    stroke-width: 4;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.20));
+    transition: r 0.15s;
+    pointer-events: none;
+  }
+  .dial-container.dragging .dial-knob { r: 13; }
+
+  .dial-scale {
     display: flex;
     justify-content: space-between;
-    margin-top: 10px;
+    width: 220px;
+    margin-top: 12px;
     font-size: 0.68rem;
     color: var(--text-muted);
     font-weight: 500;
-    padding: 0 2px;
   }
 
   /* ═══════════════════════════════════════════════
@@ -309,7 +332,6 @@
     transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     overflow: hidden;
-    font-size: 2rem;
     user-select: none;
     animation: gentleBounce 2.4s ease-in-out infinite;
   }
@@ -336,7 +358,6 @@
     100% { transform: scale(1.15); }
   }
 
-  /* Emoji colors via background tint */
   .bounce-btn.emoji-1 { background: linear-gradient(135deg, #FFD1D1, #FFB8B8); }
   .bounce-btn.emoji-2 { background: linear-gradient(135deg, #FFD9B5, #FFC099); }
   .bounce-btn.emoji-3 { background: linear-gradient(135deg, #FFEEA8, #FFE07A); }
@@ -438,7 +459,7 @@
 
   /* Pop particles */
   .pop-particle {
-    position: absolute;
+    position: fixed;
     width: 6px;
     height: 6px;
     border-radius: 50%;
@@ -485,7 +506,7 @@
     font-size: 0.95rem;
     resize: none;
     outline: none;
-    min-height: 80px;
+    min-height: 90px;
     background: var(--surface-soft);
     transition: border 0.2s, background 0.2s, box-shadow 0.2s;
     color: var(--text-primary);
@@ -600,40 +621,45 @@
     <input type="text" id="userName" placeholder="e.g. Priya" maxlength="40" autocomplete="off">
   </div>
 
-  <!-- ═══════════ Q1 — NPS SLIDER ═══════════ -->
+  <!-- ═══════════ Q1 — NPS DIAL ═══════════ -->
   <div class="q-card">
     <h2>How likely are you to recommend Karur Vysya Bank?</h2>
-    <div class="q-sub">Drag the slider · 0 = Not at all · 10 = Absolutely</div>
+    <div class="q-sub">Rotate the dial · 0 = Not at all · 10 = Absolutely</div>
 
-    <div class="slider-wrap">
-      <div class="slider-face" id="sliderFace">
-        <svg class="face-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" id="faceSvg">
-          <!-- Outer ring -->
-          <circle cx="50" cy="50" r="44" fill="currentColor" opacity="0.14" id="faceCircleBg"/>
-          <circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="3" opacity="0.55" id="faceCircleStroke"/>
-          <!-- Eyes -->
-          <circle cx="36" cy="42" r="5" fill="currentColor" id="eyeLeft"/>
-          <circle cx="64" cy="42" r="5" fill="currentColor" id="eyeRight"/>
-          <!-- Mouth -->
-          <path id="faceMouth" d="M 32 66 Q 50 52 68 66"
-                stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none"/>
-          <!-- Eyebrows -->
-          <path id="browLeft" d="M 28 30 Q 36 26 44 30" stroke="currentColor" stroke-width="3.5"
-                stroke-linecap="round" fill="none"/>
-          <path id="browRight" d="M 56 30 Q 64 26 72 30" stroke="currentColor" stroke-width="3.5"
-                stroke-linecap="round" fill="none"/>
+    <div class="dial-wrap">
+      <div class="dial-container" id="dialContainer">
+        <svg class="dial-svg" viewBox="0 0 240 240" id="dialSvg">
+          <!-- Background track ring -->
+          <circle class="dial-track" cx="120" cy="120" r="88" />
+
+          <!-- Progress ring (stroke-dasharray animated) -->
+          <circle class="dial-progress" id="dialProgress"
+                  cx="120" cy="120" r="88"
+                  stroke-dasharray="0 553"
+                  stroke-dashoffset="0" />
+
+          <!-- Ticks around the ring (11 ticks for 0..10) -->
+          <g id="dialTicks"></g>
+
+          <!-- Draggable knob indicator -->
+          <circle class="dial-knob" id="dialKnob" cx="120" cy="32" r="10" />
+
+          <!-- Center display (as SVG for crisp rendering) -->
+          <text id="dialValueText" x="120" y="118" text-anchor="middle"
+                font-family="Inter, sans-serif" font-size="56" font-weight="800"
+                fill="#005F2E" letter-spacing="-2">5</text>
+          <text id="dialLabelText" x="120" y="152" text-anchor="middle"
+                font-family="Inter, sans-serif" font-size="11" font-weight="700"
+                fill="#8E8E82" letter-spacing="1.2">NEUTRAL</text>
+          <text x="120" y="168" text-anchor="middle"
+                font-family="Inter, sans-serif" font-size="9" font-weight="500"
+                fill="#B8B8A8">Drag to rate</text>
         </svg>
-        <div class="face-value" id="faceValue">—</div>
-        <div class="face-label" id="faceLabel">Drag to rate</div>
       </div>
 
-      <div class="slider-input-wrap">
-        <input type="range" class="slider-input" id="npsSlider" min="0" max="10" step="1" value="5">
-      </div>
-
-      <div class="slider-scale">
-        <span>Not likely</span>
-        <span>Very likely</span>
+      <div class="dial-scale">
+        <span>0 · Not likely</span>
+        <span>Very likely · 10</span>
       </div>
     </div>
   </div>
@@ -748,116 +774,188 @@
   // ═══════════════════════════════════════════════
   // STATE
   // ═══════════════════════════════════════════════
-  const state = { nps: null, csat: null, ces: null };
+  const state = { nps: 5, csat: null, ces: null }; // nps starts at 5 (visual default)
 
   // ═══════════════════════════════════════════════
-  // CONCEPT A — NPS SLIDER with live-morphing face
+  // CONCEPT D — NPS DIAL
   // ═══════════════════════════════════════════════
-  const slider = document.getElementById('npsSlider');
-  const faceValue = document.getElementById('faceValue');
-  const faceLabel = document.getElementById('faceLabel');
-  const faceSvg = document.getElementById('faceSvg');
-  const faceMouth = document.getElementById('faceMouth');
-  const browLeft = document.getElementById('browLeft');
-  const browRight = document.getElementById('browRight');
-  const eyeLeft = document.getElementById('eyeLeft');
-  const eyeRight = document.getElementById('eyeRight');
+  const dialContainer = document.getElementById('dialContainer');
+  const dialSvg = document.getElementById('dialSvg');
+  const dialProgress = document.getElementById('dialProgress');
+  const dialKnob = document.getElementById('dialKnob');
+  const dialValueText = document.getElementById('dialValueText');
+  const dialLabelText = document.getElementById('dialLabelText');
+  const dialTicksGroup = document.getElementById('dialTicks');
 
-  // Palette: index 0 (angry) → 10 (ecstatic)
-  const FACE_COLORS = [
+  const DIAL_CX = 120;
+  const DIAL_CY = 120;
+  const DIAL_R  = 88;
+  const TAU = Math.PI * 2;
+
+  // Full-sweep dasharray: 2*PI*R = ~552.9
+  const CIRCUMFERENCE = 2 * Math.PI * DIAL_R;
+
+  // Color palette for 0 → 10
+  const DIAL_COLORS = [
     '#B71C1C', '#C0392B', '#C65400', '#D4813F',
-    '#A88300', '#8A8A00', '#7A9C1A', '#4C7A12',
+    '#C9A600', '#A88300', '#7A9C1A', '#4C7A12',
     '#2E7D32', '#00853E', '#005F2E'
   ];
-  const FACE_LABELS = [
-    'Not at all', 'Very unlikely', 'Unlikely', 'Somewhat unlikely',
-    'Neutral', 'Somewhat likely', 'Likely', 'Quite likely',
-    'Very likely', 'Extremely likely', 'Absolutely'
-  ];
-  // Mouth path for each value — index 0 (deep frown) → 10 (big smile)
-  const MOUTH_PATHS = [
-    'M 28 68 Q 50 52 72 68',   // 0 deep frown
-    'M 30 66 Q 50 54 70 66',   // 1
-    'M 32 64 Q 50 56 68 64',   // 2
-    'M 34 62 Q 50 58 66 62',   // 3
-    'M 36 60 Q 50 60 64 60',   // 4
-    'M 36 60 L 64 60',         // 5 flat
-    'M 34 60 Q 50 64 66 60',   // 6
-    'M 32 60 Q 50 68 68 60',   // 7
-    'M 30 58 Q 50 72 70 58',   // 8
-    'M 28 56 Q 50 76 72 56',   // 9
-    'M 26 54 Q 50 82 74 54'    // 10 big smile
-  ];
-  const BROW_PATHS = [
-    // left brow, right brow — angrier = slant inward
-    ['M 26 28 Q 36 32 44 34', 'M 56 34 Q 64 32 74 28'], // 0 angry
-    ['M 26 29 Q 36 32 44 33', 'M 56 33 Q 64 32 74 29'], // 1
-    ['M 26 30 Q 36 32 44 32', 'M 56 32 Q 64 32 74 30'], // 2
-    ['M 26 31 Q 36 32 44 31', 'M 56 31 Q 64 32 74 31'], // 3
-    ['M 26 31 Q 36 31 44 31', 'M 56 31 Q 64 31 74 31'], // 4
-    ['M 26 30 Q 36 30 44 30', 'M 56 30 Q 64 30 74 30'], // 5 neutral
-    ['M 26 30 Q 36 29 44 30', 'M 56 30 Q 64 29 74 30'], // 6
-    ['M 26 30 Q 36 28 44 30', 'M 56 30 Q 64 28 74 30'], // 7
-    ['M 26 30 Q 36 27 44 29', 'M 56 29 Q 64 27 74 30'], // 8
-    ['M 26 30 Q 36 26 44 29', 'M 56 29 Q 64 26 74 30'], // 9
-    ['M 26 30 Q 36 25 44 29', 'M 56 29 Q 64 25 74 30']  // 10
+  const DIAL_LABELS = [
+    'NOT AT ALL', 'VERY UNLIKELY', 'UNLIKELY', 'SOMEWHAT UNLIKELY',
+    'NEUTRAL', 'SOMEWHAT LIKELY', 'LIKELY', 'QUITE LIKELY',
+    'VERY LIKELY', 'EXTREMELY LIKELY', 'ABSOLUTELY'
   ];
 
-  let npsTouched = false;
+  let dialValue = 5;
+  let isDragging = false;
 
-  function updateFace(value) {
-    const v = Math.max(0, Math.min(10, value));
+  // Build tick marks once
+  function buildTicks() {
+    for (let i = 0; i <= 10; i++) {
+      const angle = (i / 10) * TAU - Math.PI / 2;
+      const isMajor = i === 0 || i === 5 || i === 10;
+      const innerR = DIAL_R - 22;
+      const outerR = DIAL_R - 14;
+      const x1 = DIAL_CX + Math.cos(angle) * innerR;
+      const y1 = DIAL_CY + Math.sin(angle) * innerR;
+      const x2 = DIAL_CX + Math.cos(angle) * outerR;
+      const y2 = DIAL_CY + Math.sin(angle) * outerR;
 
-    // Mouth
-    faceMouth.setAttribute('d', MOUTH_PATHS[v]);
-
-    // Brows
-    browLeft.setAttribute('d', BROW_PATHS[v][0]);
-    browRight.setAttribute('d', BROW_PATHS[v][1]);
-
-    // Eye size varies — bigger eyes for happier
-    const eyeR = 4.4 + (v / 10) * 1.4;
-    eyeLeft.setAttribute('r', eyeR.toFixed(2));
-    eyeRight.setAttribute('r', eyeR.toFixed(2));
-
-    // Color
-    faceSvg.style.color = FACE_COLORS[v];
-
-    // Value + label
-    faceValue.textContent = v;
-    faceValue.style.color = FACE_COLORS[v];
-    faceLabel.textContent = FACE_LABELS[v];
-    faceLabel.style.color = FACE_COLORS[v];
-
-    // Small bounce when value changes
-    const face = document.getElementById('sliderFace');
-    face.style.transform = 'scale(1.08)';
-    setTimeout(() => { face.style.transform = 'scale(1)'; }, 140);
+      const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      tick.setAttribute('x1', x1);
+      tick.setAttribute('y1', y1);
+      tick.setAttribute('x2', x2);
+      tick.setAttribute('y2', y2);
+      tick.setAttribute('class', 'dial-tick' + (isMajor ? ' major' : ''));
+      tick.dataset.tickValue = i;
+      dialTicksGroup.appendChild(tick);
+    }
   }
 
-  slider.addEventListener('input', (e) => {
-    const v = parseInt(e.target.value, 10);
-    updateFace(v);
-    if (navigator.vibrate) navigator.vibrate(8);
-  });
+  function updateDial(v, animate = true) {
+    v = Math.max(0, Math.min(10, Math.round(v)));
+    dialValue = v;
 
-  slider.addEventListener('change', (e) => {
-    const v = parseInt(e.target.value, 10);
-    state.nps = v;
-    npsTouched = true;
-    if (navigator.vibrate) navigator.vibrate(20);
+    // progress ring: dasharray = [value-proportion, rest]
+    const portion = v / 10;
+    const dash = CIRCUMFERENCE * portion;
+    dialProgress.setAttribute('stroke-dasharray', `${dash} ${CIRCUMFERENCE}`);
+    dialProgress.setAttribute('stroke', DIAL_COLORS[v]);
+
+    // knob position
+    const angle = portion * TAU - Math.PI / 2;
+    const kx = DIAL_CX + Math.cos(angle) * DIAL_R;
+    const ky = DIAL_CY + Math.sin(angle) * DIAL_R;
+    dialKnob.setAttribute('cx', kx);
+    dialKnob.setAttribute('cy', ky);
+    dialKnob.setAttribute('stroke', DIAL_COLORS[v]);
+
+    // center texts
+    dialValueText.textContent = v;
+    dialValueText.setAttribute('fill', DIAL_COLORS[v]);
+    dialLabelText.textContent = DIAL_LABELS[v];
+    dialLabelText.setAttribute('fill', DIAL_COLORS[v]);
+
+    // active ticks (from 0 up to current value)
+    Array.from(dialTicksGroup.children).forEach(t => {
+      t.classList.toggle('active', parseInt(t.dataset.tickValue, 10) <= v);
+    });
+
+    if (animate) {
+      dialValueText.classList.remove('bump');
+      void dialValueText.offsetWidth; // force reflow
+      dialValueText.classList.add('bump');
+    }
+  }
+
+  // Convert pointer position to value 0..10
+  function pointerToValue(clientX, clientY) {
+    const rect = dialSvg.getBoundingClientRect();
+    const scale = 240 / rect.width; // viewBox 240 wide
+    const localX = (clientX - rect.left) * scale;
+    const localY = (clientY - rect.top) * scale;
+
+    // Angle from center, with -90° offset so top = start of arc
+    let angle = Math.atan2(localY - DIAL_CY, localX - DIAL_CX) + Math.PI / 2;
+    if (angle < 0) angle += TAU;
+
+    return (angle / TAU) * 10;
+  }
+
+  // Drag handlers
+  function startDrag(e) {
+    isDragging = true;
+    dialContainer.classList.add('dragging');
+    e.preventDefault();
+    handleDrag(e);
+  }
+  function moveDrag(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    handleDrag(e);
+  }
+  function endDrag() {
+    if (!isDragging) return;
+    isDragging = false;
+    dialContainer.classList.remove('dragging');
+
+    // Commit value
+    state.nps = dialValue;
     checkReady();
+    if (navigator.vibrate) navigator.vibrate(20);
+  }
+  function handleDrag(e) {
+    let cx, cy;
+    if (e.touches && e.touches[0]) {
+      cx = e.touches[0].clientX;
+      cy = e.touches[0].clientY;
+    } else {
+      cx = e.clientX;
+      cy = e.clientY;
+    }
+    const v = pointerToValue(cx, cy);
+    updateDial(v, false);
+
+    // Haptic feedback when crossing integer values
+    if (navigator.vibrate && Math.round(v) !== dialValue) {
+      navigator.vibrate(6);
+    }
+  }
+
+  dialContainer.addEventListener('mousedown', startDrag);
+  window.addEventListener('mousemove', moveDrag);
+  window.addEventListener('mouseup', endDrag);
+
+  dialContainer.addEventListener('touchstart', startDrag, { passive: false });
+  window.addEventListener('touchmove', moveDrag, { passive: false });
+  window.addEventListener('touchend', endDrag);
+  window.addEventListener('touchcancel', endDrag);
+
+  // Also allow tapping ticks or the ring directly
+  dialSvg.addEventListener('click', (e) => {
+    // Ignore the initial click if it's part of a drag
+    if (isDragging) return;
+    const v = pointerToValue(e.clientX, e.clientY);
+    state.nps = Math.round(v);
+    updateDial(state.nps);
+    checkReady();
+    if (navigator.vibrate) navigator.vibrate(15);
   });
 
-  // Initialize at value 5 without committing
-  updateFace(parseInt(slider.value, 10));
-  slider.addEventListener('touchstart', () => { npsTouched = true; }, { once: true });
-  slider.addEventListener('mousedown', () => { npsTouched = true; }, { once: true });
+  // Build and initialize
+  buildTicks();
+  updateDial(5, false);
+  // Mark nps as touched once the user drags/taps — until then it stays at default 5
+  let npsTouched = false;
+  function markNpsTouched() { npsTouched = true; }
+  dialContainer.addEventListener('mousedown', markNpsTouched, { once: true });
+  dialContainer.addEventListener('touchstart', markNpsTouched, { once: true });
+  dialSvg.addEventListener('click', markNpsTouched, { once: true });
 
   // ═══════════════════════════════════════════════
   // CONCEPT B — CSAT animated bouncing emojis
   // ═══════════════════════════════════════════════
-  // Full-screen ambient mood shift per selection
   const AMBIENT = {
     1: { top: 'rgba(198, 40, 40, 0.14)',  bottom: 'rgba(183, 28, 28, 0.10)' },
     2: { top: 'rgba(198, 84, 0, 0.12)',   bottom: 'rgba(230, 81, 0, 0.08)' },
@@ -874,7 +972,6 @@
       state.csat = v;
       if (navigator.vibrate) navigator.vibrate(18);
 
-      // Full-screen mood shift
       const amb = AMBIENT[v] || AMBIENT[3];
       document.documentElement.style.setProperty('--ambient-top', amb.top);
       document.documentElement.style.setProperty('--ambient-bottom', amb.bottom);
@@ -884,20 +981,15 @@
   });
 
   // ═══════════════════════════════════════════════
-  // CONCEPT C — CES floating bubbles that pop
+  // CONCEPT C — CES floating bubbles
   // ═══════════════════════════════════════════════
   document.querySelectorAll('.bubble').forEach(bubble => {
-    bubble.addEventListener('click', (e) => {
+    bubble.addEventListener('click', () => {
       const v = parseInt(bubble.dataset.value, 10);
-
-      // Trigger pop particles
       spawnBubbleParticles(bubble);
-
-      // Clear previous selection
       document.querySelectorAll('.bubble').forEach(b => b.classList.remove('selected'));
       bubble.classList.add('selected');
       state.ces = v;
-
       if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
       checkReady();
     });
@@ -908,17 +1000,14 @@
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
 
-    // Particles fly outward
     const count = 12;
     for (let i = 0; i < count; i++) {
       const el = document.createElement('span');
       el.className = 'pop-particle';
       el.style.left = cx + 'px';
       el.style.top  = cy + 'px';
-      el.style.position = 'fixed';
       el.style.zIndex = '9999';
 
-      // Random angle + distance
       const angle = (i / count) * Math.PI * 2 + Math.random() * 0.4;
       const dist = 30 + Math.random() * 30;
       const px = Math.cos(angle) * dist;
@@ -929,7 +1018,6 @@
       el.style.background = pickParticleColor();
 
       document.body.appendChild(el);
-
       setTimeout(() => {
         if (el.parentNode) el.parentNode.removeChild(el);
       }, 800);
@@ -942,13 +1030,10 @@
   }
 
   // ═══════════════════════════════════════════════
-  // READINESS — enables submit when all 3 are set
+  // READINESS
   // ═══════════════════════════════════════════════
   function checkReady() {
-    const ready =
-      state.nps !== null &&
-      state.csat !== null &&
-      state.ces !== null;
+    const ready = state.nps !== null && state.csat !== null && state.ces !== null;
     const btn = document.getElementById('submitBtn');
     btn.disabled = !ready;
     btn.classList.toggle('ready-pulse', ready);
