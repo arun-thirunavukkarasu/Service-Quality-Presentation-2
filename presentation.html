@@ -190,11 +190,7 @@
     font-style: italic;
     margin-bottom: 6px;
   }
-  .ai-insights ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
+  .ai-insights ul { list-style: none; padding: 0; margin: 0; }
   .ai-insights ul li {
     padding: 0.28rem 0 0.28rem 1.4rem;
     position: relative;
@@ -204,11 +200,8 @@
     animation: fadeInUp 0.4s ease;
   }
   .ai-insights ul li::before {
-    content: '▸';
-    position: absolute;
-    left: 0.4rem;
-    color: var(--kvb-green);
-    font-weight: 700;
+    content: '▸'; position: absolute; left: 0.4rem;
+    color: var(--kvb-green); font-weight: 700;
   }
   @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(4px); }
@@ -231,8 +224,7 @@
   }
   .wordcloud h4 {
     position: absolute;
-    top: 6px;
-    left: 14px;
+    top: 6px; left: 14px;
     font-size: 0.72rem;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -290,7 +282,7 @@
     margin: 0 2px; border: 1px solid rgba(255,255,255,0.1);
   }
 
-  /* ═══════════ FLOATING EMOJI BURST — 3.5s, scattered, fade-off ═══════════ */
+  /* ═══════════ FLOATING EMOJI BURST ═══════════ */
   #emojiBurstLayer {
     position: fixed;
     inset: 0;
@@ -309,7 +301,6 @@
     filter: drop-shadow(0 4px 10px rgba(0,0,0,0.14));
     user-select: none;
   }
-  /* 4-phase animation: appear → float up → hold → fade-off */
   @keyframes emojiFloat {
     0% {
       opacity: 0;
@@ -317,10 +308,7 @@
     }
     10% {
       opacity: 1;
-      transform:
-        translate(-50%, -50%)
-        scale(1.1)
-        rotate(var(--rot, 0deg));
+      transform: translate(-50%, -50%) scale(1.1) rotate(var(--rot, 0deg));
     }
     40% {
       opacity: 1;
@@ -347,6 +335,130 @@
   .float-emoji.small { font-size: 2rem;  animation-duration: 3.2s; }
   .float-emoji.large { font-size: 4.2rem; animation-duration: 3.8s; }
 
+  /* ═══════════ FLOATING COMMENT BUBBLES ═══════════ */
+  #commentBubbleLayer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9998;
+    overflow: hidden;
+  }
+  .float-bubble {
+    position: absolute;
+    max-width: 320px;
+    padding: 14px 18px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow:
+      0 10px 30px rgba(20, 60, 120, 0.18),
+      0 2px 6px rgba(0, 0, 0, 0.06);
+    border-left: 5px solid var(--kvb-green);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4) rotate(var(--rot, 0deg));
+    animation: bubbleFloat 3.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    /* subtle gradient sheen */
+    background-image: linear-gradient(135deg, #ffffff 0%, #fafcf9 100%);
+  }
+  /* Bubbles colored by mood */
+  .float-bubble.mood-promoter {
+    border-left-color: #007A3D;
+    background-image: linear-gradient(135deg, #ffffff 0%, #f2fbf5 100%);
+  }
+  .float-bubble.mood-passive {
+    border-left-color: #C9A600;
+    background-image: linear-gradient(135deg, #ffffff 0%, #fffaeb 100%);
+  }
+  .float-bubble.mood-detractor {
+    border-left-color: #C15C5C;
+    background-image: linear-gradient(135deg, #ffffff 0%, #fdf3f3 100%);
+  }
+
+  .float-bubble .bubble-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: var(--kvb-green-deep);
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+  .float-bubble .bubble-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--kvb-yellow), var(--kvb-green));
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    letter-spacing: 0;
+  }
+  .float-bubble .bubble-text {
+    font-size: 0.88rem;
+    color: var(--text-primary);
+    line-height: 1.4;
+    font-weight: 500;
+    word-wrap: break-word;
+  }
+  .float-bubble .bubble-rating {
+    margin-top: 6px;
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #7A6D00;
+    background: var(--kvb-yellow-soft);
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 1px solid #F0E48A;
+  }
+
+  /* Bubble animation: pop-in → hold → drift up → fade-off */
+  @keyframes bubbleFloat {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.4) rotate(var(--rot, 0deg));
+    }
+    12% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.06) rotate(var(--rot, 0deg));
+    }
+    25% {
+      opacity: 1;
+      transform:
+        translate(calc(-50% + 0px), calc(-50% + var(--dy1, -25px)))
+        scale(1)
+        rotate(var(--rot, 0deg));
+    }
+    65% {
+      opacity: 0.95;
+      transform:
+        translate(calc(-50% + var(--dx2, 0px)), calc(-50% + var(--dy2, -100px)))
+        scale(1)
+        rotate(var(--rot, 0deg));
+    }
+    100% {
+      opacity: 0;
+      transform:
+        translate(calc(-50% + var(--dx3, 0px)), calc(-50% + var(--dy3, -180px)))
+        scale(0.85)
+        rotate(var(--rot, 0deg));
+    }
+  }
+
+  /* Small pop effect right when a bubble appears */
+  @keyframes bubblePop {
+    0%   { transform: translate(-50%, -50%) scale(0.4); }
+    50%  { transform: translate(-50%, -50%) scale(1.12); }
+    100% { transform: translate(-50%, -50%) scale(1.06); }
+  }
+
   @media (max-width: 800px) {
     .slide { padding: 1.2rem 1.4rem; }
     .slide::after { left: 1.4rem; width: 110px; height: 35px; }
@@ -358,6 +470,7 @@
     .insights-row { grid-template-columns: 1fr; }
     .qr-block { transform: scale(0.75); transform-origin: top right; }
     .dashboard-header { padding-right: 100px; }
+    .float-bubble { max-width: 240px; }
   }
 </style>
 </head>
@@ -719,8 +832,9 @@
   </div>
 </div>
 
-<!-- ═══════════ FLOATING EMOJI LAYER ═══════════ -->
+<!-- ═══════════ FLOATING LAYERS ═══════════ -->
 <div id="emojiBurstLayer" aria-hidden="true"></div>
+<div id="commentBubbleLayer" aria-hidden="true"></div>
 
 <script>
   // ═══════════ SLIDE NAVIGATION ═══════════
@@ -787,22 +901,11 @@
     return audioCtx;
   }
 
-  /**
-   * Plays a 3-note arpeggio based on mood.
-   *
-   * @param {'promoter'|'passive'|'detractor'} mood
-   *
-   * Promoter  → bright major triad ascending (C6-E6-G6)  — feels celebratory
-   * Passive   → neutral perfect fifth (E5-B5)             — calm, unremarkable
-   * Detractor → soft descending minor (A5-F5-D5)          — lower, gentle, concerned
-   */
   function playMoodChime(mood) {
     const ctx = ensureAudioCtx();
     if (!ctx) return;
 
     const now = ctx.currentTime;
-
-    // Master volume — noticeably loud but not jarring
     const masterGain = ctx.createGain();
     masterGain.gain.value = 0.38;
     masterGain.connect(ctx.destination);
@@ -810,37 +913,24 @@
     let notes, stagger, baseDuration, oscType;
 
     if (mood === 'promoter') {
-      // Happy ascending major triad
-      notes = [1046.5, 1318.5, 1568.0];     // C6, E6, G6
-      stagger = 0.10;
-      baseDuration = 1.15;
-      oscType = 'triangle';
-
+      notes = [1046.5, 1318.5, 1568.0];     // C6, E6, G6 — happy ascending major
+      stagger = 0.10; baseDuration = 1.15; oscType = 'triangle';
     } else if (mood === 'passive') {
-      // Neutral perfect fifth, no strong emotional color
-      notes = [659.3, 987.8, 784.0];        // E5, B5, G5
-      stagger = 0.13;
-      baseDuration = 1.0;
-      oscType = 'sine';
-
+      notes = [659.3, 987.8, 784.0];        // E5, B5, G5 — neutral fifth
+      stagger = 0.13; baseDuration = 1.0;  oscType = 'sine';
     } else {
-      // Detractor: soft descending minor triad
-      notes = [880.0, 698.5, 587.3];        // A5, F5, D5 (descending)
-      stagger = 0.16;
-      baseDuration = 1.1;
-      oscType = 'sine';
+      notes = [880.0, 698.5, 587.3];        // A5, F5, D5 — descending minor
+      stagger = 0.16; baseDuration = 1.1;  oscType = 'sine';
     }
 
     notes.forEach((freq, i) => {
       const startTime = now + i * stagger;
       const duration = baseDuration + i * 0.12;
 
-      // Main oscillator
       const osc = ctx.createOscillator();
       osc.type = oscType;
       osc.frequency.value = freq;
 
-      // A soft harmonic layer for richness (quieter for detractor)
       const harmonic = ctx.createOscillator();
       harmonic.type = 'sine';
       harmonic.frequency.value = freq * 2.01;
@@ -858,7 +948,6 @@
 
       osc.connect(mainGain);
       mainGain.connect(masterGain);
-
       harmonic.connect(harmGain);
       harmGain.connect(masterGain);
 
@@ -869,16 +958,12 @@
     });
   }
 
-  /**
-   * Maps an entry's NPS score to a mood bucket.
-   */
   function moodForEntry(entry) {
     if (entry.nps >= 9) return 'promoter';
     if (entry.nps >= 7) return 'passive';
     return 'detractor';
   }
 
-  // Browsers require a user gesture before AudioContext can play.
   let audioUnlocked = false;
   function unlockAudio() {
     if (audioUnlocked) return;
@@ -901,31 +986,23 @@
   document.addEventListener('touchstart', unlockAudio, { once: false });
 
   // ═══════════════════════════════════════════════
-  // 🎉 SCATTERED FLOATING EMOJI BURST — 3.5s fade-off
+  // 🎉 SCATTERED FLOATING EMOJI BURST
   // ═══════════════════════════════════════════════
   const CHEER_EMOJIS  = ['🎉', '👏', '🌟', '💚', '🔥', '✨', '🙌', '💯', '🥳', '😍', '💫', '🏆'];
   const FROWN_EMOJIS  = ['😟', '😕', '😞', '💔', '😢', '😠', '👎', '😔'];
   const NEUTRAL_EMOJIS = ['👀', '💭', '🤔', '📊'];
 
-  /**
-   * Spawns emojis scattered ACROSS the entire screen
-   * (not just from one origin), each with its own drift path,
-   * all fading off over ~3.5 seconds.
-   */
   function spawnEmojiBurst(entry) {
     const layer = document.getElementById('emojiBurstLayer');
     if (!layer) return;
 
-    // Combined sentiment score: 0 (worst) to 1 (best)
     const npsScore  = Math.max(0, Math.min(10, entry.nps || 0)) / 10;
     const csatScore = Math.max(1, Math.min(5,  entry.csat || 3)) / 5;
     const cesScore  = Math.max(1, Math.min(5,  entry.ces  || 3)) / 5;
     const score = (npsScore * 0.4) + (csatScore * 0.3) + (cesScore * 0.3);
 
-    // Emoji count — good for a full-screen scatter
-    const count = 14 + Math.floor(Math.random() * 5); // 14-18
+    const count = 14 + Math.floor(Math.random() * 5);
 
-    // Pick emoji pool based on sentiment
     let pool;
     if (score >= 0.75) pool = CHEER_EMOJIS;
     else if (score >= 0.5) pool = [...CHEER_EMOJIS, ...NEUTRAL_EMOJIS];
@@ -935,13 +1012,10 @@
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
-    // Divide the screen into a loose 6-column × 3-row grid so emojis
-    // scatter evenly without piling up in the middle.
     const cols = 6;
     const rows = 3;
-    const cellsTotal = cols * rows; // 18 cells for 14-18 emojis
+    const cellsTotal = cols * rows;
 
-    // Shuffle cell indices for random distribution
     const cellIdx = Array.from({ length: cellsTotal }, (_, i) => i);
     for (let i = cellIdx.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -957,15 +1031,13 @@
 
       el.textContent = pool[Math.floor(Math.random() * pool.length)];
 
-      // Snap to a grid cell, then jitter inside it
       const cell = cellIdx[i % cellsTotal];
       const col = cell % cols;
       const row = Math.floor(cell / cols);
 
       const cellW = vw / cols;
-      const cellH = (vh * 0.85) / rows; // don't use bottom 15% (nav/console)
+      const cellH = (vh * 0.85) / rows;
 
-      // Position with jitter INSIDE the cell — this spreads them nicely
       const baseX = col * cellW + cellW * 0.5;
       const baseY = row * cellH + cellH * 0.5 + vh * 0.10;
 
@@ -978,14 +1050,13 @@
       el.style.left = startX + 'px';
       el.style.top  = startY + 'px';
 
-      // Each emoji drifts UP + slightly out — small random wander
       const driftX  = (Math.random() - 0.5) * 60;
       const driftX2 = driftX + (Math.random() - 0.5) * 70;
       const driftX3 = driftX2 + (Math.random() - 0.5) * 80;
 
-      const dy1 = -30 - Math.random() * 30;   // early
-      const dy2 = -80 - Math.random() * 60;   // mid
-      const dy3 = -160 - Math.random() * 120; // end (higher)
+      const dy1 = -30 - Math.random() * 30;
+      const dy2 = -80 - Math.random() * 60;
+      const dy3 = -160 - Math.random() * 120;
 
       const rot = (Math.random() - 0.5) * 40;
 
@@ -997,18 +1068,125 @@
       el.style.setProperty('--dy3', dy3 + 'px');
       el.style.setProperty('--rot', rot + 'deg');
 
-      // Staggered start — 60ms apart creates a natural cascade
-      // (fine for 14-18 emojis over ~1s + 3.5s animation = under 4.5s total)
       el.style.animationDelay = (i * 60 + Math.random() * 40) + 'ms';
 
       layer.appendChild(el);
 
-      // Auto-remove after animation ends
       const totalDelay = parseFloat(el.style.animationDelay) || 0;
       setTimeout(() => {
         if (el.parentNode) el.parentNode.removeChild(el);
       }, 4200 + totalDelay);
     }
+  }
+
+  // ═══════════════════════════════════════════════
+  // 💬 FLOATING COMMENT BUBBLES — same 3.5s window
+  // ═══════════════════════════════════════════════
+  function initialsFor(name) {
+    if (!name) return '?';
+    const parts = String(name).trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return '?';
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  }
+
+  function spawnCommentBubble(entry) {
+    const layer = document.getElementById('commentBubbleLayer');
+    if (!layer) return;
+
+    // Skip if there's truly nothing to show
+    const name = (entry.user || '').trim();
+    const text = (entry.comment || '').trim();
+    if (!name && !text) return;
+
+    const mood = moodForEntry(entry);
+
+    const el = document.createElement('div');
+    el.className = 'float-bubble mood-' + mood;
+
+    // Choose a display name
+    const displayName = name || 'Anonymous';
+
+    // Truncate very long comments
+    const displayText = text.length > 120 ? text.slice(0, 117) + '…' : text;
+
+    // Avatar initials
+    const avatar = initialsFor(displayName);
+
+    // Build inner HTML (escaped)
+    const safeName = escapeHtml(displayName);
+    const safeText = escapeHtml(displayText);
+    const rating = `NPS ${entry.nps} · CSAT ${entry.csat} · CES ${entry.ces}`;
+
+    el.innerHTML = `
+      <div class="bubble-user">
+        <span class="bubble-avatar">${avatar}</span>
+        <span>${safeName}</span>
+      </div>
+      ${safeText ? `<div class="bubble-text">"${safeText}"</div>` : ''}
+      <div class="bubble-rating">${rating}</div>
+    `;
+
+    // Positioning — scatter across TOP 55% of screen so it doesn't cover
+    // the charts and controls below
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    // Divide top area into a 3-column × 2-row grid = 6 cells for bubbles
+    // but we only spawn ONE bubble per submission, so pick a random cell
+    const cols = 3;
+    const rows = 2;
+    const cell = Math.floor(Math.random() * (cols * rows));
+    const col = cell % cols;
+    const row = Math.floor(cell / cols);
+
+    const cellW = vw / cols;
+    const cellH = (vh * 0.55) / rows;
+
+    const baseX = col * cellW + cellW * 0.5;
+    const baseY = row * cellH + cellH * 0.5 + vh * 0.06;
+
+    const jitterX = (Math.random() - 0.5) * cellW * 0.5;
+    const jitterY = (Math.random() - 0.5) * cellH * 0.4;
+
+    const startX = baseX + jitterX;
+    const startY = baseY + jitterY;
+
+    el.style.left = startX + 'px';
+    el.style.top  = startY + 'px';
+
+    // Drift parameters
+    const dx2 = (Math.random() - 0.5) * 100;
+    const dx3 = dx2 + (Math.random() - 0.5) * 80;
+    const dy1 = -25;
+    const dy2 = -100;
+    const dy3 = -180 - Math.random() * 60;
+
+    const rot = (Math.random() - 0.5) * 8; // subtle tilt
+
+    el.style.setProperty('--dy1', dy1 + 'px');
+    el.style.setProperty('--dx2', dx2 + 'px');
+    el.style.setProperty('--dy2', dy2 + 'px');
+    el.style.setProperty('--dx3', dx3 + 'px');
+    el.style.setProperty('--dy3', dy3 + 'px');
+    el.style.setProperty('--rot', rot + 'deg');
+
+    // Slight delay so it appears AFTER a couple of emojis (feels layered)
+    el.style.animationDelay = (250 + Math.random() * 200) + 'ms';
+
+    layer.appendChild(el);
+
+    // Remove after animation completes
+    const totalDelay = parseFloat(el.style.animationDelay) || 0;
+    setTimeout(() => {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    }, 4200 + totalDelay);
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, m => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[m]));
   }
 
   // ═══════════ DASHBOARD ═══════════
@@ -1156,6 +1334,7 @@
 
     if (!opts.silent) {
       spawnEmojiBurst(entry);
+      spawnCommentBubble(entry);
     }
 
     if (state.comments.length > 0 && state.comments.length % 5 === 0) {
@@ -1176,12 +1355,6 @@
         <span class="comment-rating">${c.rating}</span>
       </div>
     `).join('');
-  }
-
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, m => ({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-    }[m]));
   }
 
   function updateCounter() {
@@ -1325,7 +1498,6 @@
       if (msg.type === 'init') rebuildFromScratch(msg.responses);
       else if (msg.type === 'new') {
         addResponse(msg.entry);
-        // 🔊 Play chime according to mood (promoter / passive / detractor)
         playMoodChime(moodForEntry(msg.entry));
       }
       else if (msg.type === 'reset') clearDashboard();
