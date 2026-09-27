@@ -11,10 +11,8 @@
   :root {
     --kvb-yellow:       #F5D000;
     --kvb-yellow-soft:  #FFF8CC;
-    --kvb-yellow-deep:  #C9A600;
     --kvb-green:        #007A3D;
     --kvb-green-deep:   #005F2E;
-    --kvb-green-soft:   #E6F4EA;
     --base-bg:          #FBFBF6;
     --surface:          #FFFFFF;
     --surface-soft:     #F7F7F0;
@@ -23,7 +21,6 @@
     --text-secondary:   #5A5A50;
     --text-muted:       #8E8E82;
 
-    /* Dynamic mood variables — updated by JS when CSAT is selected */
     --ambient-top:      rgba(245, 208, 0, 0.06);
     --ambient-bottom:   rgba(0, 122, 61, 0.05);
   }
@@ -37,12 +34,18 @@
       radial-gradient(circle at 80% 100%, var(--ambient-bottom), transparent 55%),
       var(--base-bg);
     min-height: 100vh;
-    /* Big bottom padding so the last comment box has room above the fixed submit button */
-    padding: 16px 14px 160px;
+    /* Generous bottom padding so the comment box clears the fixed submit button */
+    padding: 16px 14px 180px;
     color: var(--text-primary);
     transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .container { max-width: 480px; margin: 0 auto; }
+
+  /* Guaranteed clearance above the fixed submit button */
+  .bottom-spacer {
+    height: 90px;
+    width: 100%;
+  }
 
   /* ── Header ── */
   .header {
@@ -194,7 +197,7 @@
   }
 
   /* ═══════════════════════════════════════════════
-     CONCEPT D — NPS DIAL (tap-to-rotate)
+     CONCEPT D — NPS DIAL with PROGRESSIVE gradient
      ═══════════════════════════════════════════════ */
   .dial-wrap {
     display: flex;
@@ -218,23 +221,31 @@
     overflow: visible;
   }
 
-  /* Track ring — light grey */
+  /* Track ring (bottom layer) — light grey */
   .dial-track {
     fill: none;
     stroke: #EEEEEA;
     stroke-width: 14;
   }
 
-  /* Progress ring — colored by value, animates with stroke-dasharray */
+  /* Base gradient ring (top layer) — full red→green gradient behind everything */
+  .dial-gradient-ring {
+    fill: none;
+    stroke: url(#dialGradient);
+    stroke-width: 14;
+    opacity: 0.18;  /* dimmed so the active arc pops on top */
+  }
+
+  /* Active progress ring — this is what fills up as user picks a value.
+     It shows the same gradient but at full opacity. */
   .dial-progress {
     fill: none;
-    stroke: #F5D000;
+    stroke: url(#dialGradient);
     stroke-width: 14;
     stroke-linecap: round;
     transform: rotate(-90deg);
     transform-origin: 50% 50%;
-    transition: stroke-dasharray 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-                stroke 0.35s;
+    transition: stroke-dasharray 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* Tick marks around the dial */
@@ -242,11 +253,12 @@
     stroke: #D6D6CC;
     stroke-width: 2;
     stroke-linecap: round;
+    transition: stroke 0.3s;
   }
   .dial-tick.major { stroke: #8E8E82; stroke-width: 2.5; }
-  .dial-tick.active { stroke: #005F2E; stroke-width: 3; }
+  .dial-tick.active { stroke-width: 3; }
 
-  /* Center display */
+  /* Center display container (HTML, positioned over the SVG) */
   .dial-center {
     position: absolute;
     inset: 0;
@@ -258,12 +270,12 @@
     z-index: 2;
   }
   .dial-value {
-    font-size: 3.2rem;
+    font-size: 3.4rem;
     font-weight: 800;
     letter-spacing: -0.04em;
     line-height: 1;
-    color: #005F2E;
-    transition: color 0.35s, transform 0.2s;
+    color: #C9A600;
+    transition: color 0.35s;
     font-variant-numeric: tabular-nums;
   }
   .dial-value.bump {
@@ -275,28 +287,28 @@
     100% { transform: scale(1); }
   }
   .dial-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: #8E8E82;
     margin-top: 6px;
     transition: color 0.35s;
   }
   .dial-hint {
-    font-size: 0.68rem;
+    font-size: 0.66rem;
     color: #B8B8A8;
     margin-top: 2px;
     font-weight: 500;
   }
 
-  /* Draggable knob indicator (a small dot on the ring) */
+  /* Draggable knob */
   .dial-knob {
     fill: #fff;
     stroke: #005F2E;
     stroke-width: 4;
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.20));
-    transition: r 0.15s;
+    transition: r 0.15s, stroke 0.3s;
     pointer-events: none;
   }
   .dial-container.dragging .dial-knob { r: 13; }
@@ -389,7 +401,7 @@
   }
 
   /* ═══════════════════════════════════════════════
-     CONCEPT C — CES floating bubbles that pop
+     CONCEPT C — CES floating bubbles
      ═══════════════════════════════════════════════ */
   .bubble-row {
     display: flex;
@@ -418,7 +430,7 @@
     animation: bubbleFloat 3.2s ease-in-out infinite;
     font-weight: 800;
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.95);
   }
   .bubble:nth-child(2) { animation-delay: 0.4s; }
   .bubble:nth-child(3) { animation-delay: 0.8s; }
@@ -457,7 +469,6 @@
     100% { opacity: 0; transform: scale(1.4); }
   }
 
-  /* Pop particles */
   .pop-particle {
     position: fixed;
     width: 6px;
@@ -506,7 +517,7 @@
     font-size: 0.95rem;
     resize: none;
     outline: none;
-    min-height: 90px;
+    min-height: 100px;
     background: var(--surface-soft);
     transition: border 0.2s, background 0.2s, box-shadow 0.2s;
     color: var(--text-primary);
@@ -629,32 +640,41 @@
     <div class="dial-wrap">
       <div class="dial-container" id="dialContainer">
         <svg class="dial-svg" viewBox="0 0 240 240" id="dialSvg">
-          <!-- Background track ring -->
+          <!-- Gradient definition: red → orange → yellow → lime → green, left to right -->
+          <defs>
+            <linearGradient id="dialGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"   stop-color="#B71C1C"/>
+              <stop offset="25%"  stop-color="#E07A20"/>
+              <stop offset="50%"  stop-color="#E0C418"/>
+              <stop offset="75%"  stop-color="#7ACB4A"/>
+              <stop offset="100%" stop-color="#005F2E"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Full dim gradient ring (visual reference for full range) -->
+          <circle class="dial-gradient-ring" cx="120" cy="120" r="88" />
+
+          <!-- Background track ring (empty state) -->
           <circle class="dial-track" cx="120" cy="120" r="88" />
 
-          <!-- Progress ring (stroke-dasharray animated) -->
+          <!-- Active progress ring (fills up to the current value) -->
           <circle class="dial-progress" id="dialProgress"
                   cx="120" cy="120" r="88"
                   stroke-dasharray="0 553"
                   stroke-dashoffset="0" />
 
-          <!-- Ticks around the ring (11 ticks for 0..10) -->
+          <!-- Tick marks (built by JS) -->
           <g id="dialTicks"></g>
 
-          <!-- Draggable knob indicator -->
+          <!-- Draggable knob -->
           <circle class="dial-knob" id="dialKnob" cx="120" cy="32" r="10" />
-
-          <!-- Center display (as SVG for crisp rendering) -->
-          <text id="dialValueText" x="120" y="118" text-anchor="middle"
-                font-family="Inter, sans-serif" font-size="56" font-weight="800"
-                fill="#005F2E" letter-spacing="-2">5</text>
-          <text id="dialLabelText" x="120" y="152" text-anchor="middle"
-                font-family="Inter, sans-serif" font-size="11" font-weight="700"
-                fill="#8E8E82" letter-spacing="1.2">NEUTRAL</text>
-          <text x="120" y="168" text-anchor="middle"
-                font-family="Inter, sans-serif" font-size="9" font-weight="500"
-                fill="#B8B8A8">Drag to rate</text>
         </svg>
+
+        <div class="dial-center">
+          <div class="dial-value" id="dialValueText">5</div>
+          <div class="dial-label" id="dialLabelText">NEUTRAL</div>
+          <div class="dial-hint">Drag to rate</div>
+        </div>
       </div>
 
       <div class="dial-scale">
@@ -741,6 +761,9 @@
     <label>Any comments about Karur Vysya Bank? (optional)</label>
     <textarea id="comment" placeholder="Tell us more..." maxlength="200"></textarea>
   </div>
+
+  <!-- ⭐ Guaranteed spacer so the fixed submit button never overlaps the comment box -->
+  <div class="bottom-spacer"></div>
 </div>
 
 <div class="thanks" id="thanksView">
@@ -774,10 +797,10 @@
   // ═══════════════════════════════════════════════
   // STATE
   // ═══════════════════════════════════════════════
-  const state = { nps: 5, csat: null, ces: null }; // nps starts at 5 (visual default)
+  const state = { nps: 5, csat: null, ces: null };
 
   // ═══════════════════════════════════════════════
-  // CONCEPT D — NPS DIAL
+  // CONCEPT D — NPS DIAL (progressive gradient)
   // ═══════════════════════════════════════════════
   const dialContainer = document.getElementById('dialContainer');
   const dialSvg = document.getElementById('dialSvg');
@@ -791,12 +814,10 @@
   const DIAL_CY = 120;
   const DIAL_R  = 88;
   const TAU = Math.PI * 2;
+  const CIRCUMFERENCE = 2 * Math.PI * DIAL_R;   // ≈ 552.9
 
-  // Full-sweep dasharray: 2*PI*R = ~552.9
-  const CIRCUMFERENCE = 2 * Math.PI * DIAL_R;
-
-  // Color palette for 0 → 10
-  const DIAL_COLORS = [
+  // Mood color palette for the value + label text + knob stroke
+  const MOOD_COLORS = [
     '#B71C1C', '#C0392B', '#C65400', '#D4813F',
     '#C9A600', '#A88300', '#7A9C1A', '#4C7A12',
     '#2E7D32', '#00853E', '#005F2E'
@@ -810,7 +831,7 @@
   let dialValue = 5;
   let isDragging = false;
 
-  // Build tick marks once
+  // Build tick marks
   function buildTicks() {
     for (let i = 0; i <= 10; i++) {
       const angle = (i / 10) * TAU - Math.PI / 2;
@@ -837,34 +858,40 @@
     v = Math.max(0, Math.min(10, Math.round(v)));
     dialValue = v;
 
-    // progress ring: dasharray = [value-proportion, rest]
+    // Progress ring shows only the portion for current value
     const portion = v / 10;
     const dash = CIRCUMFERENCE * portion;
     dialProgress.setAttribute('stroke-dasharray', `${dash} ${CIRCUMFERENCE}`);
-    dialProgress.setAttribute('stroke', DIAL_COLORS[v]);
 
-    // knob position
+    // Knob position around the ring
     const angle = portion * TAU - Math.PI / 2;
     const kx = DIAL_CX + Math.cos(angle) * DIAL_R;
     const ky = DIAL_CY + Math.sin(angle) * DIAL_R;
     dialKnob.setAttribute('cx', kx);
     dialKnob.setAttribute('cy', ky);
-    dialKnob.setAttribute('stroke', DIAL_COLORS[v]);
+    dialKnob.setAttribute('stroke', MOOD_COLORS[v]);
 
-    // center texts
+    // Center texts
     dialValueText.textContent = v;
-    dialValueText.setAttribute('fill', DIAL_COLORS[v]);
+    dialValueText.style.color = MOOD_COLORS[v];
     dialLabelText.textContent = DIAL_LABELS[v];
-    dialLabelText.setAttribute('fill', DIAL_COLORS[v]);
+    dialLabelText.style.color = MOOD_COLORS[v];
 
-    // active ticks (from 0 up to current value)
+    // Highlight ticks up to current value with the mood color
     Array.from(dialTicksGroup.children).forEach(t => {
-      t.classList.toggle('active', parseInt(t.dataset.tickValue, 10) <= v);
+      const tv = parseInt(t.dataset.tickValue, 10);
+      if (tv <= v) {
+        t.classList.add('active');
+        t.style.stroke = MOOD_COLORS[v];
+      } else {
+        t.classList.remove('active');
+        t.style.stroke = '';
+      }
     });
 
     if (animate) {
       dialValueText.classList.remove('bump');
-      void dialValueText.offsetWidth; // force reflow
+      void dialValueText.offsetWidth;
       dialValueText.classList.add('bump');
     }
   }
@@ -872,14 +899,12 @@
   // Convert pointer position to value 0..10
   function pointerToValue(clientX, clientY) {
     const rect = dialSvg.getBoundingClientRect();
-    const scale = 240 / rect.width; // viewBox 240 wide
+    const scale = 240 / rect.width;
     const localX = (clientX - rect.left) * scale;
     const localY = (clientY - rect.top) * scale;
 
-    // Angle from center, with -90° offset so top = start of arc
     let angle = Math.atan2(localY - DIAL_CY, localX - DIAL_CX) + Math.PI / 2;
     if (angle < 0) angle += TAU;
-
     return (angle / TAU) * 10;
   }
 
@@ -899,8 +924,6 @@
     if (!isDragging) return;
     isDragging = false;
     dialContainer.classList.remove('dragging');
-
-    // Commit value
     state.nps = dialValue;
     checkReady();
     if (navigator.vibrate) navigator.vibrate(20);
@@ -915,10 +938,9 @@
       cy = e.clientY;
     }
     const v = pointerToValue(cx, cy);
+    const previous = dialValue;
     updateDial(v, false);
-
-    // Haptic feedback when crossing integer values
-    if (navigator.vibrate && Math.round(v) !== dialValue) {
+    if (navigator.vibrate && Math.round(v) !== previous) {
       navigator.vibrate(6);
     }
   }
@@ -932,9 +954,8 @@
   window.addEventListener('touchend', endDrag);
   window.addEventListener('touchcancel', endDrag);
 
-  // Also allow tapping ticks or the ring directly
+  // Tap-to-jump
   dialSvg.addEventListener('click', (e) => {
-    // Ignore the initial click if it's part of a drag
     if (isDragging) return;
     const v = pointerToValue(e.clientX, e.clientY);
     state.nps = Math.round(v);
@@ -943,15 +964,9 @@
     if (navigator.vibrate) navigator.vibrate(15);
   });
 
-  // Build and initialize
+  // Build + initialize
   buildTicks();
   updateDial(5, false);
-  // Mark nps as touched once the user drags/taps — until then it stays at default 5
-  let npsTouched = false;
-  function markNpsTouched() { npsTouched = true; }
-  dialContainer.addEventListener('mousedown', markNpsTouched, { once: true });
-  dialContainer.addEventListener('touchstart', markNpsTouched, { once: true });
-  dialSvg.addEventListener('click', markNpsTouched, { once: true });
 
   // ═══════════════════════════════════════════════
   // CONCEPT B — CSAT animated bouncing emojis
