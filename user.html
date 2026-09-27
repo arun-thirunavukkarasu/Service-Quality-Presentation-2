@@ -34,14 +34,12 @@
       radial-gradient(circle at 80% 100%, var(--ambient-bottom), transparent 55%),
       var(--base-bg);
     min-height: 100vh;
-    /* Generous bottom padding so the comment box clears the fixed submit button */
     padding: 16px 14px 180px;
     color: var(--text-primary);
     transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .container { max-width: 480px; margin: 0 auto; }
 
-  /* Guaranteed clearance above the fixed submit button */
   .bottom-spacer {
     height: 90px;
     width: 100%;
@@ -197,7 +195,7 @@
   }
 
   /* ═══════════════════════════════════════════════
-     CONCEPT D — NPS DIAL with PROGRESSIVE gradient
+     CONCEPT D — NPS DIAL with angular gradient
      ═══════════════════════════════════════════════ */
   .dial-wrap {
     display: flex;
@@ -221,34 +219,33 @@
     overflow: visible;
   }
 
-  /* Track ring (bottom layer) — light grey */
+  /* Track ring (background) — light grey */
   .dial-track {
     fill: none;
     stroke: #EEEEEA;
     stroke-width: 14;
   }
 
-  /* Base gradient ring (top layer) — full red→green gradient behind everything */
+  /* Dim angular gradient ring — full circle, low opacity */
   .dial-gradient-ring {
     fill: none;
-    stroke: url(#dialGradient);
     stroke-width: 14;
-    opacity: 0.18;  /* dimmed so the active arc pops on top */
+    opacity: 0.18;
   }
 
-  /* Active progress ring — this is what fills up as user picks a value.
-     It shows the same gradient but at full opacity. */
-  .dial-progress {
-    fill: none;
-    stroke: url(#dialGradient);
-    stroke-width: 14;
-    stroke-linecap: round;
+  /* Active progress ring — uses a mask to reveal only the arc up to current value */
+  .dial-progress-group {
     transform: rotate(-90deg);
     transform-origin: 50% 50%;
+  }
+  .dial-progress-arc {
+    fill: none;
+    stroke-width: 14;
+    stroke-linecap: round;
     transition: stroke-dasharray 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Tick marks around the dial */
+  /* Tick marks */
   .dial-tick {
     stroke: #D6D6CC;
     stroke-width: 2;
@@ -258,7 +255,7 @@
   .dial-tick.major { stroke: #8E8E82; stroke-width: 2.5; }
   .dial-tick.active { stroke-width: 3; }
 
-  /* Center display container (HTML, positioned over the SVG) */
+  /* Center display */
   .dial-center {
     position: absolute;
     inset: 0;
@@ -323,9 +320,7 @@
     font-weight: 500;
   }
 
-  /* ═══════════════════════════════════════════════
-     CONCEPT B — CSAT animated bouncing emojis
-     ═══════════════════════════════════════════════ */
+  /* ── CSAT bouncing emojis ── */
   .bounce-row {
     display: flex;
     justify-content: space-between;
@@ -400,9 +395,7 @@
     padding: 0 2px;
   }
 
-  /* ═══════════════════════════════════════════════
-     CONCEPT C — CES floating bubbles
-     ═══════════════════════════════════════════════ */
+  /* ── CES floating bubbles ── */
   .bubble-row {
     display: flex;
     justify-content: space-between;
@@ -640,28 +633,26 @@
     <div class="dial-wrap">
       <div class="dial-container" id="dialContainer">
         <svg class="dial-svg" viewBox="0 0 240 240" id="dialSvg">
-          <!-- Gradient definition: red → orange → yellow → lime → green, left to right -->
-          <defs>
-            <linearGradient id="dialGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%"   stop-color="#B71C1C"/>
-              <stop offset="25%"  stop-color="#E07A20"/>
-              <stop offset="50%"  stop-color="#E0C418"/>
-              <stop offset="75%"  stop-color="#7ACB4A"/>
-              <stop offset="100%" stop-color="#005F2E"/>
-            </linearGradient>
-          </defs>
+          <!--
+            The angular gradient ring is built at runtime by JS:
+            we draw N thin arc segments, each interpolated along the
+            red→orange→yellow→lime→green palette in circular order.
+            This replaces the previous linear gradient that produced
+            the incorrect wrap-around color sequence.
+          -->
+          <g id="dialGradientRing"></g>
 
-          <!-- Full dim gradient ring (visual reference for full range) -->
-          <circle class="dial-gradient-ring" cx="120" cy="120" r="88" />
-
-          <!-- Background track ring (empty state) -->
+          <!-- Background track (light grey) -->
           <circle class="dial-track" cx="120" cy="120" r="88" />
 
-          <!-- Active progress ring (fills up to the current value) -->
-          <circle class="dial-progress" id="dialProgress"
+          <!-- Active progress arc: this is a single arc that mirrors the
+               current value. Its color is computed from the palette so
+               the arc's stroke matches the mood at that value. -->
+          <circle class="dial-progress-arc" id="dialProgress"
                   cx="120" cy="120" r="88"
                   stroke-dasharray="0 553"
-                  stroke-dashoffset="0" />
+                  stroke-dashoffset="0"
+                  stroke="#C9A600" />
 
           <!-- Tick marks (built by JS) -->
           <g id="dialTicks"></g>
@@ -762,7 +753,6 @@
     <textarea id="comment" placeholder="Tell us more..." maxlength="200"></textarea>
   </div>
 
-  <!-- ⭐ Guaranteed spacer so the fixed submit button never overlaps the comment box -->
   <div class="bottom-spacer"></div>
 </div>
 
@@ -800,7 +790,7 @@
   const state = { nps: 5, csat: null, ces: null };
 
   // ═══════════════════════════════════════════════
-  // CONCEPT D — NPS DIAL (progressive gradient)
+  // CONCEPT D — NPS DIAL
   // ═══════════════════════════════════════════════
   const dialContainer = document.getElementById('dialContainer');
   const dialSvg = document.getElementById('dialSvg');
@@ -809,27 +799,83 @@
   const dialValueText = document.getElementById('dialValueText');
   const dialLabelText = document.getElementById('dialLabelText');
   const dialTicksGroup = document.getElementById('dialTicks');
+  const dialGradientRing = document.getElementById('dialGradientRing');
 
   const DIAL_CX = 120;
   const DIAL_CY = 120;
   const DIAL_R  = 88;
   const TAU = Math.PI * 2;
-  const CIRCUMFERENCE = 2 * Math.PI * DIAL_R;   // ≈ 552.9
+  const CIRCUMFERENCE = 2 * Math.PI * DIAL_R;
 
-  // Mood color palette for the value + label text + knob stroke
+  // Full palette 0 → 10 (used for text + knob + arc color)
   const MOOD_COLORS = [
     '#B71C1C', '#C0392B', '#C65400', '#D4813F',
     '#C9A600', '#A88300', '#7A9C1A', '#4C7A12',
     '#2E7D32', '#00853E', '#005F2E'
   ];
   const DIAL_LABELS = [
-    'NOT AT ALL', 'VERY UNLIKELY', 'UNLIKELY', 'SOMEWHAT UNLIKELY',
-    'NEUTRAL', 'SOMEWHAT LIKELY', 'LIKELY', 'QUITE LIKELY',
+    'NOT AT ALL', 'VERY UNLIKELY', 'UNLIKELY', 'SOMETIMES UNLIKELY',
+    'NEUTRAL', 'SOMETIMES LIKELY', 'LIKELY', 'QUITE LIKELY',
     'VERY LIKELY', 'EXTREMELY LIKELY', 'ABSOLUTELY'
   ];
 
   let dialValue = 5;
   let isDragging = false;
+
+  // Helper: interpolate two hex colors
+  function lerpColor(a, b, t) {
+    const ah = a.replace('#','');
+    const bh = b.replace('#','');
+    const ar = parseInt(ah.substr(0,2), 16);
+    const ag = parseInt(ah.substr(2,2), 16);
+    const ab = parseInt(ah.substr(4,2), 16);
+    const br = parseInt(bh.substr(0,2), 16);
+    const bg = parseInt(bh.substr(2,2), 16);
+    const bb = parseInt(bh.substr(4,2), 16);
+    const rr = Math.round(ar + (br - ar) * t);
+    const rg = Math.round(ag + (bg - ag) * t);
+    const rb = Math.round(ab + (bb - ab) * t);
+    return '#' + [rr, rg, rb].map(v => v.toString(16).padStart(2, '0')).join('');
+  }
+
+  // Build the visible angular gradient ring using N small arcs
+  function buildAngularGradientRing() {
+    const segments = 120;  // 120 tiny arcs = smooth gradient
+    const radius = DIAL_R;
+    const sw = 14;         // stroke width
+    for (let i = 0; i < segments; i++) {
+      // Fraction around the circle 0..1
+      const t = i / segments;
+      // Angle in radians — start at top (-90deg), go clockwise
+      const angleStart = t * TAU - Math.PI / 2;
+      // Segment span
+      const span = TAU / segments;
+
+      // Color at this point: interpolate along the 11-color palette
+      // Palette has 11 stops (0..10), so t * 10 gives the continuous position
+      const p = t * 10;
+      const idx = Math.floor(p);
+      const frac = p - idx;
+      const c0 = MOOD_COLORS[Math.min(idx, 10)];
+      const c1 = MOOD_COLORS[Math.min(idx + 1, 10)];
+      const color = lerpColor(c0, c1, frac);
+
+      // Arc from angleStart to angleStart + span
+      const x1 = DIAL_CX + Math.cos(angleStart) * radius;
+      const y1 = DIAL_CY + Math.sin(angleStart) * radius;
+      const x2 = DIAL_CX + Math.cos(angleStart + span) * radius;
+      const y2 = DIAL_CY + Math.sin(angleStart + span) * radius;
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      const d = `M ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2}`;
+      path.setAttribute('d', d);
+      path.setAttribute('stroke', color);
+      path.setAttribute('stroke-width', sw);
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke-linecap', 'butt');
+      dialGradientRing.appendChild(path);
+    }
+  }
 
   // Build tick marks
   function buildTicks() {
@@ -858,12 +904,17 @@
     v = Math.max(0, Math.min(10, Math.round(v)));
     dialValue = v;
 
-    // Progress ring shows only the portion for current value
+    // Progress arc: reveal only up to the current value.
+    // Instead of a single stroke, we rotate the whole arc via dasharray.
+    // The arc's color is a single solid tone picked from the palette,
+    // matching the mood at the current value (so the end of the arc shows
+    // the correct endpoint color).
     const portion = v / 10;
     const dash = CIRCUMFERENCE * portion;
     dialProgress.setAttribute('stroke-dasharray', `${dash} ${CIRCUMFERENCE}`);
+    dialProgress.setAttribute('stroke', MOOD_COLORS[v]);
 
-    // Knob position around the ring
+    // Knob position
     const angle = portion * TAU - Math.PI / 2;
     const kx = DIAL_CX + Math.cos(angle) * DIAL_R;
     const ky = DIAL_CY + Math.sin(angle) * DIAL_R;
@@ -871,13 +922,13 @@
     dialKnob.setAttribute('cy', ky);
     dialKnob.setAttribute('stroke', MOOD_COLORS[v]);
 
-    // Center texts
+    // Center text
     dialValueText.textContent = v;
     dialValueText.style.color = MOOD_COLORS[v];
     dialLabelText.textContent = DIAL_LABELS[v];
     dialLabelText.style.color = MOOD_COLORS[v];
 
-    // Highlight ticks up to current value with the mood color
+    // Tick highlighting
     Array.from(dialTicksGroup.children).forEach(t => {
       const tv = parseInt(t.dataset.tickValue, 10);
       if (tv <= v) {
@@ -896,7 +947,6 @@
     }
   }
 
-  // Convert pointer position to value 0..10
   function pointerToValue(clientX, clientY) {
     const rect = dialSvg.getBoundingClientRect();
     const scale = 240 / rect.width;
@@ -908,7 +958,6 @@
     return (angle / TAU) * 10;
   }
 
-  // Drag handlers
   function startDrag(e) {
     isDragging = true;
     dialContainer.classList.add('dragging');
@@ -954,7 +1003,6 @@
   window.addEventListener('touchend', endDrag);
   window.addEventListener('touchcancel', endDrag);
 
-  // Tap-to-jump
   dialSvg.addEventListener('click', (e) => {
     if (isDragging) return;
     const v = pointerToValue(e.clientX, e.clientY);
@@ -964,12 +1012,13 @@
     if (navigator.vibrate) navigator.vibrate(15);
   });
 
-  // Build + initialize
+  // Build everything
+  buildAngularGradientRing();
   buildTicks();
   updateDial(5, false);
 
   // ═══════════════════════════════════════════════
-  // CONCEPT B — CSAT animated bouncing emojis
+  // CSAT bouncing emojis
   // ═══════════════════════════════════════════════
   const AMBIENT = {
     1: { top: 'rgba(198, 40, 40, 0.14)',  bottom: 'rgba(183, 28, 28, 0.10)' },
@@ -996,7 +1045,7 @@
   });
 
   // ═══════════════════════════════════════════════
-  // CONCEPT C — CES floating bubbles
+  // CES floating bubbles
   // ═══════════════════════════════════════════════
   document.querySelectorAll('.bubble').forEach(bubble => {
     bubble.addEventListener('click', () => {
