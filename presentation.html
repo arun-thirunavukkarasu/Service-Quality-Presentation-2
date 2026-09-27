@@ -764,19 +764,45 @@
   function initCharts() {
     const commonOpts = { responsive: true, maintainAspectRatio: false };
 
-    npsChart = new Chart(document.getElementById('npsChart'), {
+.
+       npsChart = new Chart(document.getElementById('npsChart'), {
       type: 'doughnut',
       data: {
         labels: ['Promoters', 'Passives', 'Detractors'],
         datasets: [{
-          data: [0, 0, 0],
+          // Epsilon ensures every slice renders, even at 0
+          data: [0.001, 0.001, 0.001],
           backgroundColor: [CHART_GREEN, CHART_YELLOW, CHART_RED],
-          borderWidth: 0
+          borderWidth: 0,
+          borderColor: '#fff',
+          borderAlign: 'inner'
         }]
       },
       options: {
         ...commonOpts,
-        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              boxWidth: 12,
+              font: { size: 11 },
+              generateLabels: (chart) => {
+                const real = state.nps ? [
+                  state.nps.promoters,
+                  state.nps.passives,
+                  state.nps.detractors
+                ] : [0, 0, 0];
+                return chart.data.labels.map((label, i) => ({
+                  text: `${label} (${real[i]})`,
+                  fillStyle: chart.data.datasets[0].backgroundColor[i],
+                  strokeStyle: chart.data.datasets[0].backgroundColor[i],
+                  fontColor: '#1A1A1A',
+                  lineWidth: 0
+                }));
+              }
+            }
+          }
+        },
         cutout: '60%'
       }
     });
@@ -823,10 +849,17 @@
   }
 
   function refreshCharts() {
-    npsChart.data.datasets[0].data = [
-      state.nps.promoters, state.nps.passives, state.nps.detractors
-    ];
+    const p  = state.nps.promoters;
+    const pa = state.nps.passives;
+    const d  = state.nps.detractors;
+    const hasData = p + pa + d > 0;
+
+    npsChart.data.datasets[0].data = hasData
+      ? [p || 0.001, pa || 0.001, d || 0.001]
+      : [1, 1, 1];
+
     npsChart.update();
+
     csatChart.data.datasets[0].data = state.csat;
     csatChart.update();
     cesChart.data.datasets[0].data = state.ces;
