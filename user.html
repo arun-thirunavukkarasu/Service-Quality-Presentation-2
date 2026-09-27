@@ -19,25 +19,31 @@
     --surface:          #FFFFFF;
     --surface-soft:     #F7F7F0;
     --border:           #EDEDE0;
-    --border-strong:    #E0E0D0;
     --text-primary:     #1A1A1A;
     --text-secondary:   #5A5A50;
     --text-muted:       #8E8E82;
+
+    /* Dynamic mood variables — updated by JS when CSAT is selected */
+    --ambient-top:      rgba(245, 208, 0, 0.06);
+    --ambient-bottom:   rgba(0, 122, 61, 0.05);
   }
+
+  html, body { height: 100%; }
 
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background:
-      radial-gradient(circle at 20% 0%, rgba(245, 208, 0, 0.06), transparent 55%),
-      radial-gradient(circle at 80% 100%, rgba(0, 122, 61, 0.05), transparent 55%),
+      radial-gradient(circle at 20% 0%, var(--ambient-top), transparent 55%),
+      radial-gradient(circle at 80% 100%, var(--ambient-bottom), transparent 55%),
       var(--base-bg);
     min-height: 100vh;
     padding: 16px 14px 110px;
     color: var(--text-primary);
+    transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .container { max-width: 480px; margin: 0 auto; }
 
-  /* ── Header — LOGO + NAME LOCKED TIGHTLY ── */
+  /* ── Header ── */
   .header {
     text-align: center;
     margin-bottom: 14px;
@@ -49,7 +55,6 @@
     position: relative;
     overflow: hidden;
   }
-  /* Brand gradient strip at top */
   .header::before {
     content: '';
     position: absolute;
@@ -57,17 +62,12 @@
     height: 6px;
     background: linear-gradient(90deg, var(--kvb-yellow) 0%, var(--kvb-yellow) 40%, var(--kvb-green) 100%);
   }
-
-  /* Logo wrapper */
   .logo-wrap {
     padding: 12px 0 0;
-    margin-bottom: 0;
     display: flex;
     justify-content: center;
     align-items: center;
   }
-
-  /* Logo — default: safe gap. Only tight when logo actually loads. */
   .header .kvb-logo {
     width: 220px;
     max-width: 78%;
@@ -76,11 +76,8 @@
     margin: 0 auto 8px;
     transition: margin 0.15s ease;
   }
-  .header.logo-loaded .kvb-logo {
-    margin: 0 auto -22px;   /* tight pull only when logo is present */
-  }
+  .header.logo-loaded .kvb-logo { margin: 0 auto -22px; }
 
-  /* Bank name — default: safe margin. Only tightened when logo loaded. */
   .header .bank-name {
     font-size: 1.75rem;
     font-weight: 800;
@@ -92,9 +89,7 @@
     z-index: 2;
     transition: margin 0.15s ease;
   }
-  .header.logo-loaded .bank-name {
-    margin: -6px 0 4px;     /* extra pull only when logo is present */
-  }
+  .header.logo-loaded .bank-name { margin: -6px 0 4px; }
 
   .header .tagline {
     font-size: 0.84rem;
@@ -168,7 +163,7 @@
   .q-card {
     background: #fff;
     border-radius: 22px;
-    padding: 18px 16px 16px 20px;
+    padding: 20px 18px 22px 22px;
     margin-bottom: 14px;
     box-shadow: 0 3px 14px rgba(26, 26, 26, 0.045);
     border: 1px solid var(--border);
@@ -194,56 +189,275 @@
   .q-card .q-sub {
     font-size: 0.76rem;
     color: var(--text-muted);
-    margin-bottom: 14px;
+    margin-bottom: 16px;
   }
 
-  /* ── Smiley row ── */
-  .smiley-row {
+  /* ═══════════════════════════════════════════════
+     CONCEPT A — NPS SLIDER with live-morphing face
+     ═══════════════════════════════════════════════ */
+  .slider-wrap {
+    padding: 6px 4px 0;
+  }
+
+  .slider-face {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 16px;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .slider-face .face-svg {
+    width: 92px;
+    height: 92px;
+    display: block;
+    transition: filter 0.4s, transform 0.4s;
+  }
+  .slider-face .face-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    transition: color 0.35s;
+  }
+  .slider-face .face-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: color 0.35s;
+  }
+
+  .slider-input-wrap {
+    position: relative;
+    padding: 0 8px;
+  }
+  .slider-input {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 10px;
+    border-radius: 20px;
+    background: linear-gradient(90deg,
+      #C15C5C 0%, #D4813F 25%, #E0C418 50%, #4CAF50 75%, #007A3D 100%);
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    transition: box-shadow 0.2s;
+  }
+  .slider-input:active {
+    box-shadow: 0 0 0 6px rgba(0, 122, 61, 0.10);
+  }
+  /* Thumb for WebKit */
+  .slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid var(--kvb-green);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+    cursor: grab;
+    transition: transform 0.15s, border-color 0.3s;
+  }
+  .slider-input::-webkit-slider-thumb:active {
+    transform: scale(1.15);
+    cursor: grabbing;
+  }
+  /* Thumb for Firefox */
+  .slider-input::-moz-range-thumb {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid var(--kvb-green);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+    cursor: grab;
+  }
+  .slider-input::-moz-range-thumb:active { transform: scale(1.15); }
+
+  .slider-scale {
     display: flex;
     justify-content: space-between;
-    gap: 6px;
-    margin-bottom: 10px;
+    margin-top: 10px;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 0 2px;
   }
-  .smiley {
+
+  /* ═══════════════════════════════════════════════
+     CONCEPT B — CSAT animated bouncing emojis
+     ═══════════════════════════════════════════════ */
+  .bounce-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .bounce-btn {
     flex: 1;
-    height: 52px;
-    border-radius: 50%;
+    height: 64px;
+    border-radius: 18px;
     border: 2px solid transparent;
+    background: #F5F8FC;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
-                box-shadow 0.18s,
-                border-color 0.18s;
-    user-select: none;
+    transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     overflow: hidden;
+    font-size: 2rem;
+    user-select: none;
+    animation: gentleBounce 2.4s ease-in-out infinite;
   }
-  .smiley svg { width: 62%; height: 62%; display: block; }
-  .smiley:active { transform: scale(0.9); }
-  .smiley.selected {
-    transform: scale(1.16);
-    border-color: #fff;
-    box-shadow: 0 0 0 3px currentColor, 0 5px 14px rgba(0,0,0,0.12);
-    z-index: 2;
+  .bounce-btn:nth-child(2) { animation-delay: 0.2s; }
+  .bounce-btn:nth-child(3) { animation-delay: 0.4s; }
+  .bounce-btn:nth-child(4) { animation-delay: 0.6s; }
+  .bounce-btn:nth-child(5) { animation-delay: 0.8s; }
+
+  @keyframes gentleBounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-4px); }
   }
-  .smiley-row.tight .smiley { height: 40px; }
-  .smiley-row.tight .smiley svg { width: 72%; height: 72%; }
 
-  .c-red    { background: #FFD1D1; color: #B71C1C; }
-  .c-orange { background: #FFD9B5; color: #C65400; }
-  .c-amber  { background: #FFEEA8; color: #A88300; }
-  .c-lime   { background: #DDF0B8; color: #4C7A12; }
-  .c-green  { background: #B8E6C2; color: var(--kvb-green-deep); }
+  .bounce-btn:active { transform: scale(0.9); }
+  .bounce-btn:not(.selected) { opacity: 0.85; }
 
-  .scale-labels {
+  .bounce-btn.selected {
+    transform: scale(1.15);
+    animation: selectedPulse 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  @keyframes selectedPulse {
+    0%   { transform: scale(0.9); }
+    60%  { transform: scale(1.22); }
+    100% { transform: scale(1.15); }
+  }
+
+  /* Emoji colors via background tint */
+  .bounce-btn.emoji-1 { background: linear-gradient(135deg, #FFD1D1, #FFB8B8); }
+  .bounce-btn.emoji-2 { background: linear-gradient(135deg, #FFD9B5, #FFC099); }
+  .bounce-btn.emoji-3 { background: linear-gradient(135deg, #FFEEA8, #FFE07A); }
+  .bounce-btn.emoji-4 { background: linear-gradient(135deg, #DDF0B8, #C8E898); }
+  .bounce-btn.emoji-5 { background: linear-gradient(135deg, #B8E6C2, #97D9A6); }
+
+  .bounce-btn.selected::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 24px;
+    border: 3px solid currentColor;
+    animation: ringFade 0.6s ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes ringFade {
+    0%   { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.15); }
+  }
+
+  .bounce-labels {
     display: flex;
     justify-content: space-between;
+    margin-top: 10px;
     font-size: 0.68rem;
     color: var(--text-muted);
-    padding: 0 2px;
     font-weight: 500;
+    padding: 0 2px;
+  }
+
+  /* ═══════════════════════════════════════════════
+     CONCEPT C — CES floating bubbles that pop
+     ═══════════════════════════════════════════════ */
+  .bubble-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 8px 4px 4px;
+    min-height: 80px;
+  }
+  .bubble {
+    flex: 1;
+    aspect-ratio: 1;
+    max-width: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+    box-shadow:
+      0 6px 14px rgba(0, 0, 0, 0.10),
+      inset 0 -6px 10px rgba(0, 0, 0, 0.06),
+      inset 0 6px 10px rgba(255, 255, 255, 0.6);
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: bubbleFloat 3.2s ease-in-out infinite;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  .bubble:nth-child(2) { animation-delay: 0.4s; }
+  .bubble:nth-child(3) { animation-delay: 0.8s; }
+  .bubble:nth-child(4) { animation-delay: 1.2s; }
+  .bubble:nth-child(5) { animation-delay: 1.6s; }
+
+  @keyframes bubbleFloat {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+  }
+
+  .bubble:active { transform: scale(0.92); }
+
+  .bubble.b1 { background: radial-gradient(circle at 30% 30%, #FF9595, #C15C5C); }
+  .bubble.b2 { background: radial-gradient(circle at 30% 30%, #F5A876, #D4813F); }
+  .bubble.b3 { background: radial-gradient(circle at 30% 30%, #F5D86C, #C9A600); }
+  .bubble.b4 { background: radial-gradient(circle at 30% 30%, #A0D8A8, #4C7A12); }
+  .bubble.b5 { background: radial-gradient(circle at 30% 30%, #4CBE6C, #007A3D); }
+
+  .bubble.selected {
+    transform: scale(1.2);
+    animation: none;
+    z-index: 2;
+  }
+  .bubble.selected::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    animation: bubbleRing 0.7s ease-out;
+    pointer-events: none;
+  }
+  @keyframes bubbleRing {
+    0%   { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.4); }
+  }
+
+  /* Pop particles */
+  .pop-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: particleFly 0.7s ease-out forwards;
+  }
+  @keyframes particleFly {
+    0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--px)), calc(-50% + var(--py))) scale(0.2); }
+  }
+
+  .bubble-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 0 2px;
   }
 
   /* ── Comment box ── */
@@ -300,7 +514,7 @@
     font-family: inherit;
     cursor: pointer;
     box-shadow: 0 6px 22px rgba(0, 122, 61, 0.28);
-    transition: all 0.2s;
+    transition: all 0.25s;
     z-index: 100;
     letter-spacing: 0.01em;
   }
@@ -312,7 +526,13 @@
   }
   .submit-btn:not(:disabled):active {
     transform: translateX(-50%) scale(0.98);
-    box-shadow: 0 3px 12px rgba(0, 122, 61, 0.22);
+  }
+  .submit-btn.ready-pulse {
+    animation: readyPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes readyPulse {
+    0%, 100% { box-shadow: 0 6px 22px rgba(0, 122, 61, 0.28); }
+    50%      { box-shadow: 0 6px 30px rgba(0, 122, 61, 0.55); }
   }
 
   /* ── Thank-you screen ── */
@@ -380,25 +600,115 @@
     <input type="text" id="userName" placeholder="e.g. Priya" maxlength="40" autocomplete="off">
   </div>
 
+  <!-- ═══════════ Q1 — NPS SLIDER ═══════════ -->
   <div class="q-card">
     <h2>How likely are you to recommend Karur Vysya Bank?</h2>
-    <div class="q-sub">0 = Not at all · 10 = Absolutely</div>
-    <div class="smiley-row tight" id="npsRow"></div>
-    <div class="scale-labels"><span>Not likely</span><span>Very likely</span></div>
+    <div class="q-sub">Drag the slider · 0 = Not at all · 10 = Absolutely</div>
+
+    <div class="slider-wrap">
+      <div class="slider-face" id="sliderFace">
+        <svg class="face-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" id="faceSvg">
+          <!-- Outer ring -->
+          <circle cx="50" cy="50" r="44" fill="currentColor" opacity="0.14" id="faceCircleBg"/>
+          <circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="3" opacity="0.55" id="faceCircleStroke"/>
+          <!-- Eyes -->
+          <circle cx="36" cy="42" r="5" fill="currentColor" id="eyeLeft"/>
+          <circle cx="64" cy="42" r="5" fill="currentColor" id="eyeRight"/>
+          <!-- Mouth -->
+          <path id="faceMouth" d="M 32 66 Q 50 52 68 66"
+                stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none"/>
+          <!-- Eyebrows -->
+          <path id="browLeft" d="M 28 30 Q 36 26 44 30" stroke="currentColor" stroke-width="3.5"
+                stroke-linecap="round" fill="none"/>
+          <path id="browRight" d="M 56 30 Q 64 26 72 30" stroke="currentColor" stroke-width="3.5"
+                stroke-linecap="round" fill="none"/>
+        </svg>
+        <div class="face-value" id="faceValue">—</div>
+        <div class="face-label" id="faceLabel">Drag to rate</div>
+      </div>
+
+      <div class="slider-input-wrap">
+        <input type="range" class="slider-input" id="npsSlider" min="0" max="10" step="1" value="5">
+      </div>
+
+      <div class="slider-scale">
+        <span>Not likely</span>
+        <span>Very likely</span>
+      </div>
+    </div>
   </div>
 
+  <!-- ═══════════ Q2 — CSAT ANIMATED EMOJIS ═══════════ -->
   <div class="q-card">
     <h2>How satisfied were you with Karur Vysya Bank today?</h2>
     <div class="q-sub">Tap the face that matches your feeling</div>
-    <div class="smiley-row" id="csatRow"></div>
-    <div class="scale-labels"><span>Very unhappy</span><span>Very happy</span></div>
+
+    <div class="bounce-row" id="csatRow">
+      <div class="bounce-btn emoji-1" data-value="1">
+        <svg viewBox="0 0 40 40" width="100%" height="100%" style="padding:8px;">
+          <circle cx="20" cy="20" r="17" fill="#C62828" opacity="0.18"/>
+          <circle cx="14" cy="15" r="2.3" fill="#B71C1C"/>
+          <circle cx="26" cy="15" r="2.3" fill="#B71C1C"/>
+          <path d="M 10 30 Q 20 18 30 30" stroke="#B71C1C" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="bounce-btn emoji-2" data-value="2">
+        <svg viewBox="0 0 40 40" width="100%" height="100%" style="padding:8px;">
+          <circle cx="20" cy="20" r="17" fill="#C65400" opacity="0.18"/>
+          <circle cx="14" cy="15" r="2.3" fill="#C65400"/>
+          <circle cx="26" cy="15" r="2.3" fill="#C65400"/>
+          <path d="M 10 29 Q 20 21 30 29" stroke="#C65400" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="bounce-btn emoji-3" data-value="3">
+        <svg viewBox="0 0 40 40" width="100%" height="100%" style="padding:8px;">
+          <circle cx="20" cy="20" r="17" fill="#A88300" opacity="0.18"/>
+          <circle cx="14" cy="15" r="2.3" fill="#A88300"/>
+          <circle cx="26" cy="15" r="2.3" fill="#A88300"/>
+          <path d="M 10 27 L 30 27" stroke="#A88300" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="bounce-btn emoji-4" data-value="4">
+        <svg viewBox="0 0 40 40" width="100%" height="100%" style="padding:8px;">
+          <circle cx="20" cy="20" r="17" fill="#4C7A12" opacity="0.18"/>
+          <circle cx="14" cy="15" r="2.3" fill="#4C7A12"/>
+          <circle cx="26" cy="15" r="2.3" fill="#4C7A12"/>
+          <path d="M 10 25 Q 20 33 30 25" stroke="#4C7A12" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="bounce-btn emoji-5" data-value="5">
+        <svg viewBox="0 0 40 40" width="100%" height="100%" style="padding:8px;">
+          <circle cx="20" cy="20" r="17" fill="#007A3D" opacity="0.18"/>
+          <circle cx="14" cy="15" r="2.3" fill="#007A3D"/>
+          <circle cx="26" cy="15" r="2.3" fill="#007A3D"/>
+          <path d="M 8 23 Q 20 36 32 23" stroke="#007A3D" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="bounce-labels">
+      <span>Very unhappy</span>
+      <span>Very happy</span>
+    </div>
   </div>
 
+  <!-- ═══════════ Q3 — CES FLOATING BUBBLES ═══════════ -->
   <div class="q-card">
-    <h2>How easy was it to get your work done at Karur Vysya Bank?</h2>
-    <div class="q-sub">Tap the face that matches your effort</div>
-    <div class="smiley-row" id="cesRow"></div>
-    <div class="scale-labels"><span>Very difficult</span><span>Very easy</span></div>
+    <h2>How easy was it to get your work done?</h2>
+    <div class="q-sub">Pop the bubble that matches your effort</div>
+
+    <div class="bubble-row" id="cesRow">
+      <div class="bubble b1" data-value="1">1</div>
+      <div class="bubble b2" data-value="2">2</div>
+      <div class="bubble b3" data-value="3">3</div>
+      <div class="bubble b4" data-value="4">4</div>
+      <div class="bubble b5" data-value="5">5</div>
+    </div>
+
+    <div class="bubble-labels">
+      <span>Very difficult</span>
+      <span>Very easy</span>
+    </div>
   </div>
 
   <div class="comment-card">
@@ -418,110 +728,235 @@
 <button class="submit-btn" id="submitBtn" disabled>Submit Feedback</button>
 
 <script>
-  // ═══════════ Logo loader — gracefully handles missing logo ═══════════
+  // ═══════════ Logo loader ═══════════
   (function() {
     const logo = document.getElementById('kvbLogo');
     const header = document.getElementById('pageHeader');
-
     if (!logo || !header) return;
 
-    logo.addEventListener('load', () => {
-      header.classList.add('logo-loaded');
-    });
-
+    logo.addEventListener('load', () => header.classList.add('logo-loaded'));
     logo.addEventListener('error', () => {
       header.classList.remove('logo-loaded');
       const wrap = document.getElementById('logoWrap');
       if (wrap) wrap.style.display = 'none';
-      console.log('ℹ️ Logo not found — showing bank name only.');
     });
-
-    // If already loaded from cache
     if (logo.complete && logo.naturalWidth > 0) {
       header.classList.add('logo-loaded');
     }
   })();
 
-  // ═══════════ STEP 1 — Build UI first ═══════════
-
-  function smileySVG(mood) {
-    const mouthPaths = [
-      'M 10 30 Q 20 18 30 30',
-      'M 10 29 Q 20 21 30 29',
-      'M 10 27 L 30 27',
-      'M 10 25 Q 20 33 30 25',
-      'M 8 23 Q 20 36 32 23'
-    ];
-    const eyeY = mood <= 1 ? 16 : 15;
-    const eyeR = mood >= 3 ? 2.4 : 2;
-    return `
-      <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="20" cy="20" r="17" fill="currentColor" opacity="0.15"/>
-        <circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.55"/>
-        <circle cx="14" cy="${eyeY}" r="${eyeR}" fill="currentColor"/>
-        <circle cx="26" cy="${eyeY}" r="${eyeR}" fill="currentColor"/>
-        <path d="${mouthPaths[mood]}" stroke="currentColor" stroke-width="2.2"
-              stroke-linecap="round" fill="none"/>
-      </svg>
-    `;
-  }
-
-  const npsColorMap = [
-    'c-red','c-red','c-red','c-orange','c-orange',
-    'c-amber','c-amber','c-lime','c-lime','c-green','c-green'
-  ];
-  const npsMoodMap = [0,0,0,0,1,1,2,2,3,4,4];
-  const scaleColors = ['c-red','c-orange','c-amber','c-lime','c-green'];
-  const scaleMoods  = [0,1,2,3,4];
+  // ═══════════════════════════════════════════════
+  // STATE
+  // ═══════════════════════════════════════════════
   const state = { nps: null, csat: null, ces: null };
 
-  function buildNPSRow() {
-    const row = document.getElementById('npsRow');
-    row.innerHTML = '';
-    for (let i = 0; i <= 10; i++) {
-      const el = document.createElement('div');
-      el.className = 'smiley ' + npsColorMap[i];
-      el.innerHTML = smileySVG(npsMoodMap[i]);
-      el.dataset.value = i;
-      el.addEventListener('click', () => select('nps', i, el));
-      row.appendChild(el);
-    }
+  // ═══════════════════════════════════════════════
+  // CONCEPT A — NPS SLIDER with live-morphing face
+  // ═══════════════════════════════════════════════
+  const slider = document.getElementById('npsSlider');
+  const faceValue = document.getElementById('faceValue');
+  const faceLabel = document.getElementById('faceLabel');
+  const faceSvg = document.getElementById('faceSvg');
+  const faceMouth = document.getElementById('faceMouth');
+  const browLeft = document.getElementById('browLeft');
+  const browRight = document.getElementById('browRight');
+  const eyeLeft = document.getElementById('eyeLeft');
+  const eyeRight = document.getElementById('eyeRight');
+
+  // Palette: index 0 (angry) → 10 (ecstatic)
+  const FACE_COLORS = [
+    '#B71C1C', '#C0392B', '#C65400', '#D4813F',
+    '#A88300', '#8A8A00', '#7A9C1A', '#4C7A12',
+    '#2E7D32', '#00853E', '#005F2E'
+  ];
+  const FACE_LABELS = [
+    'Not at all', 'Very unlikely', 'Unlikely', 'Somewhat unlikely',
+    'Neutral', 'Somewhat likely', 'Likely', 'Quite likely',
+    'Very likely', 'Extremely likely', 'Absolutely'
+  ];
+  // Mouth path for each value — index 0 (deep frown) → 10 (big smile)
+  const MOUTH_PATHS = [
+    'M 28 68 Q 50 52 72 68',   // 0 deep frown
+    'M 30 66 Q 50 54 70 66',   // 1
+    'M 32 64 Q 50 56 68 64',   // 2
+    'M 34 62 Q 50 58 66 62',   // 3
+    'M 36 60 Q 50 60 64 60',   // 4
+    'M 36 60 L 64 60',         // 5 flat
+    'M 34 60 Q 50 64 66 60',   // 6
+    'M 32 60 Q 50 68 68 60',   // 7
+    'M 30 58 Q 50 72 70 58',   // 8
+    'M 28 56 Q 50 76 72 56',   // 9
+    'M 26 54 Q 50 82 74 54'    // 10 big smile
+  ];
+  const BROW_PATHS = [
+    // left brow, right brow — angrier = slant inward
+    ['M 26 28 Q 36 32 44 34', 'M 56 34 Q 64 32 74 28'], // 0 angry
+    ['M 26 29 Q 36 32 44 33', 'M 56 33 Q 64 32 74 29'], // 1
+    ['M 26 30 Q 36 32 44 32', 'M 56 32 Q 64 32 74 30'], // 2
+    ['M 26 31 Q 36 32 44 31', 'M 56 31 Q 64 32 74 31'], // 3
+    ['M 26 31 Q 36 31 44 31', 'M 56 31 Q 64 31 74 31'], // 4
+    ['M 26 30 Q 36 30 44 30', 'M 56 30 Q 64 30 74 30'], // 5 neutral
+    ['M 26 30 Q 36 29 44 30', 'M 56 30 Q 64 29 74 30'], // 6
+    ['M 26 30 Q 36 28 44 30', 'M 56 30 Q 64 28 74 30'], // 7
+    ['M 26 30 Q 36 27 44 29', 'M 56 29 Q 64 27 74 30'], // 8
+    ['M 26 30 Q 36 26 44 29', 'M 56 29 Q 64 26 74 30'], // 9
+    ['M 26 30 Q 36 25 44 29', 'M 56 29 Q 64 25 74 30']  // 10
+  ];
+
+  let npsTouched = false;
+
+  function updateFace(value) {
+    const v = Math.max(0, Math.min(10, value));
+
+    // Mouth
+    faceMouth.setAttribute('d', MOUTH_PATHS[v]);
+
+    // Brows
+    browLeft.setAttribute('d', BROW_PATHS[v][0]);
+    browRight.setAttribute('d', BROW_PATHS[v][1]);
+
+    // Eye size varies — bigger eyes for happier
+    const eyeR = 4.4 + (v / 10) * 1.4;
+    eyeLeft.setAttribute('r', eyeR.toFixed(2));
+    eyeRight.setAttribute('r', eyeR.toFixed(2));
+
+    // Color
+    faceSvg.style.color = FACE_COLORS[v];
+
+    // Value + label
+    faceValue.textContent = v;
+    faceValue.style.color = FACE_COLORS[v];
+    faceLabel.textContent = FACE_LABELS[v];
+    faceLabel.style.color = FACE_COLORS[v];
+
+    // Small bounce when value changes
+    const face = document.getElementById('sliderFace');
+    face.style.transform = 'scale(1.08)';
+    setTimeout(() => { face.style.transform = 'scale(1)'; }, 140);
   }
 
-  function buildScaleRow(containerId, metric) {
-    const row = document.getElementById(containerId);
-    row.innerHTML = '';
-    for (let i = 0; i < 5; i++) {
-      const el = document.createElement('div');
-      el.className = 'smiley ' + scaleColors[i];
-      el.innerHTML = smileySVG(scaleMoods[i]);
-      el.dataset.value = i + 1;
-      el.addEventListener('click', () => select(metric, i + 1, el));
-      row.appendChild(el);
-    }
-  }
-
-  function select(metric, value, el) {
-    state[metric] = value;
-    document.querySelectorAll('#' + metric + 'Row .smiley')
-      .forEach(s => s.classList.remove('selected'));
-    el.classList.add('selected');
-    if (navigator.vibrate) navigator.vibrate(15);
-    checkReady();
-  }
-
-  function checkReady() {
-    document.getElementById('submitBtn').disabled =
-      state.nps === null || state.csat === null || state.ces === null;
-  }
-
-  window.addEventListener('load', () => {
-    buildNPSRow();
-    buildScaleRow('csatRow', 'csat');
-    buildScaleRow('cesRow',  'ces');
+  slider.addEventListener('input', (e) => {
+    const v = parseInt(e.target.value, 10);
+    updateFace(v);
+    if (navigator.vibrate) navigator.vibrate(8);
   });
 
-  // ═══════════ STEP 2 — WebSocket ═══════════
+  slider.addEventListener('change', (e) => {
+    const v = parseInt(e.target.value, 10);
+    state.nps = v;
+    npsTouched = true;
+    if (navigator.vibrate) navigator.vibrate(20);
+    checkReady();
+  });
+
+  // Initialize at value 5 without committing
+  updateFace(parseInt(slider.value, 10));
+  slider.addEventListener('touchstart', () => { npsTouched = true; }, { once: true });
+  slider.addEventListener('mousedown', () => { npsTouched = true; }, { once: true });
+
+  // ═══════════════════════════════════════════════
+  // CONCEPT B — CSAT animated bouncing emojis
+  // ═══════════════════════════════════════════════
+  // Full-screen ambient mood shift per selection
+  const AMBIENT = {
+    1: { top: 'rgba(198, 40, 40, 0.14)',  bottom: 'rgba(183, 28, 28, 0.10)' },
+    2: { top: 'rgba(198, 84, 0, 0.12)',   bottom: 'rgba(230, 81, 0, 0.08)' },
+    3: { top: 'rgba(245, 208, 0, 0.08)',  bottom: 'rgba(201, 166, 0, 0.06)' },
+    4: { top: 'rgba(76, 122, 18, 0.10)',  bottom: 'rgba(0, 122, 61, 0.08)' },
+    5: { top: 'rgba(0, 122, 61, 0.14)',   bottom: 'rgba(0, 95, 46, 0.12)' }
+  };
+
+  document.querySelectorAll('.bounce-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const v = parseInt(btn.dataset.value, 10);
+      document.querySelectorAll('.bounce-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      state.csat = v;
+      if (navigator.vibrate) navigator.vibrate(18);
+
+      // Full-screen mood shift
+      const amb = AMBIENT[v] || AMBIENT[3];
+      document.documentElement.style.setProperty('--ambient-top', amb.top);
+      document.documentElement.style.setProperty('--ambient-bottom', amb.bottom);
+
+      checkReady();
+    });
+  });
+
+  // ═══════════════════════════════════════════════
+  // CONCEPT C — CES floating bubbles that pop
+  // ═══════════════════════════════════════════════
+  document.querySelectorAll('.bubble').forEach(bubble => {
+    bubble.addEventListener('click', (e) => {
+      const v = parseInt(bubble.dataset.value, 10);
+
+      // Trigger pop particles
+      spawnBubbleParticles(bubble);
+
+      // Clear previous selection
+      document.querySelectorAll('.bubble').forEach(b => b.classList.remove('selected'));
+      bubble.classList.add('selected');
+      state.ces = v;
+
+      if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+      checkReady();
+    });
+  });
+
+  function spawnBubbleParticles(bubble) {
+    const rect = bubble.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    // Particles fly outward
+    const count = 12;
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('span');
+      el.className = 'pop-particle';
+      el.style.left = cx + 'px';
+      el.style.top  = cy + 'px';
+      el.style.position = 'fixed';
+      el.style.zIndex = '9999';
+
+      // Random angle + distance
+      const angle = (i / count) * Math.PI * 2 + Math.random() * 0.4;
+      const dist = 30 + Math.random() * 30;
+      const px = Math.cos(angle) * dist;
+      const py = Math.sin(angle) * dist;
+
+      el.style.setProperty('--px', px + 'px');
+      el.style.setProperty('--py', py + 'px');
+      el.style.background = pickParticleColor();
+
+      document.body.appendChild(el);
+
+      setTimeout(() => {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      }, 800);
+    }
+  }
+
+  function pickParticleColor() {
+    const colors = ['#F5D000', '#007A3D', '#C9A600', '#4CAF50', '#FFF9C4'];
+    return colors[Math.floor(Math.random() * colors.length)];
+  }
+
+  // ═══════════════════════════════════════════════
+  // READINESS — enables submit when all 3 are set
+  // ═══════════════════════════════════════════════
+  function checkReady() {
+    const ready =
+      state.nps !== null &&
+      state.csat !== null &&
+      state.ces !== null;
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = !ready;
+    btn.classList.toggle('ready-pulse', ready);
+  }
+
+  // ═══════════════════════════════════════════════
+  // WEBSOCKET
+  // ═══════════════════════════════════════════════
   const WS_URL = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
   let ws = null;
 
@@ -534,7 +969,9 @@
     console.error('❌ Could not create WebSocket:', err);
   }
 
-  // ═══════════ STEP 3 — Submit ═══════════
+  // ═══════════════════════════════════════════════
+  // SUBMIT
+  // ═══════════════════════════════════════════════
   document.getElementById('submitBtn').addEventListener('click', () => {
     const payload = {
       type: 'submit',
