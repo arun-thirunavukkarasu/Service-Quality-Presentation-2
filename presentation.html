@@ -146,7 +146,6 @@
     color: #7A6D00; border: 1px solid #F0E48A;
   }
 
-  /* ── AI Insights + Word Cloud panel ── */
   .insights-row {
     display: grid;
     grid-template-columns: 1.3fr 1fr;
@@ -290,6 +289,47 @@
     padding: 1px 6px; font-family: inherit; font-size: 0.72rem;
     margin: 0 2px; border: 1px solid rgba(255,255,255,0.1);
   }
+
+  /* ═══════════ FLOATING EMOJI BURST ═══════════ */
+  #emojiBurstLayer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+  }
+  .float-emoji {
+    position: absolute;
+    font-size: 3rem;
+    line-height: 1;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+    animation: emojiFloat 2.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    will-change: transform, opacity;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.15));
+    user-select: none;
+  }
+  @keyframes emojiFloat {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.3) rotate(0deg);
+    }
+    15% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.15) rotate(var(--rot, 0deg));
+    }
+    60% {
+      opacity: 1;
+      transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, -80px))) scale(1) rotate(var(--rot, 0deg));
+    }
+    100% {
+      opacity: 0;
+      transform: translate(calc(-50% + var(--dx-end, 0px)), calc(-50% + var(--dy-end, -220px))) scale(0.6) rotate(var(--rot, 0deg));
+    }
+  }
+  /* Small size variant for variety */
+  .float-emoji.small { font-size: 2rem; animation-duration: 2.2s; }
+  .float-emoji.large { font-size: 4.2rem; animation-duration: 3s; }
 
   @media (max-width: 800px) {
     .slide { padding: 1.2rem 1.4rem; }
@@ -663,6 +703,9 @@
   </div>
 </div>
 
+<!-- ═══════════ FLOATING EMOJI LAYER ═══════════ -->
+<div id="emojiBurstLayer" aria-hidden="true"></div>
+
 <script>
   // ═══════════ SLIDE NAVIGATION ═══════════
   const slides = document.querySelectorAll('.slide');
@@ -709,39 +752,189 @@
 
   showSlide(0);
 
-  // ═══════════ SOUND CHIME ═══════════
+  // ═══════════════════════════════════════════════
+  // 🔊 LOUDER, RICHER CHIME
+  // ═══════════════════════════════════════════════
   let audioCtx = null;
-  function playChime() {
-    try {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const now = audioCtx.currentTime;
-      [880, 1320].forEach((freq, i) => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0, now + i * 0.08);
-        gain.gain.linearRampToValueAtTime(0.08, now + i * 0.08 + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.08 + 0.35);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now + i * 0.08);
-        osc.stop(now + i * 0.08 + 0.4);
-      });
-    } catch (e) { /* silent fail */ }
+
+  function ensureAudioCtx() {
+    if (!audioCtx) {
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (e) {
+        console.warn('AudioContext not supported');
+      }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
   }
 
+  /**
+   * Plays a richer, louder 3-note ascending bell chime.
+   * Uses a triangle wave + slight detune + a longer decay tail
+   * to make it clearly audible in a training room.
+   */
+  function playChime() {
+    const ctx = ensureAudioCtx();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    const masterGain = ctx.createGain();
+    masterGain.gain.value = 0.32;   // overall volume (loud, but not deafening)
+    masterGain.connect(ctx.destination);
+
+    // Three ascending notes for a pleasant bell-like feel
+    // C6 → E6 → G6 (a clean major triad)
+    const notes = [1046.5, 1318.5, 1568.0];
+    notes.forEach((freq, i) => {
+      const startTime = now + i * 0.11; // stagger
+      const duration = 1.1 + i * 0.15;
+
+      // Oscillator 1 — main tone (triangle = bright but pleasant)
+      const osc1 = ctx.createOscillator();
+      osc1.type = 'triangle';
+      osc1.frequency.value = freq;
+
+      // Oscillator 2 — subtle detuned layer for richness
+      const osc2 = ctx.createOscillator();
+      osc2.type = 'sine';
+      osc2.frequency.value = freq * 2.01; // octave + tiny detune
+
+      // Envelope
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.9, startTime + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+      // Secondary gain for the harmonic layer (quieter)
+      const gain2 = ctx.createGain();
+      gain2.gain.setValueAtTime(0, startTime);
+      gain2.gain.linearRampToValueAtTime(0.25, startTime + 0.02);
+      gain2.gain.exponentialRampToValueAtTime(0.0001, startTime + duration * 0.7);
+
+      osc1.connect(gain);
+      gain.connect(masterGain);
+
+      osc2.connect(gain2);
+      gain2.connect(masterGain);
+
+      osc1.start(startTime);
+      osc1.stop(startTime + duration + 0.05);
+      osc2.start(startTime);
+      osc2.stop(startTime + duration + 0.05);
+    });
+  }
+
+  // Browsers require a user gesture before AudioContext can play.
   let audioUnlocked = false;
   function unlockAudio() {
     if (audioUnlocked) return;
-    try {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+    const ctx = ensureAudioCtx();
+    if (ctx) {
       audioUnlocked = true;
-    } catch (e) {}
+      // Small silent ping to fully unlock on some browsers
+      try {
+        const g = ctx.createGain();
+        g.gain.value = 0.0001;
+        g.connect(ctx.destination);
+        const o = ctx.createOscillator();
+        o.connect(g);
+        o.start();
+        o.stop(ctx.currentTime + 0.01);
+      } catch (e) {}
+    }
   }
   document.addEventListener('click', unlockAudio, { once: false });
   document.addEventListener('keydown', unlockAudio, { once: false });
+  document.addEventListener('touchstart', unlockAudio, { once: false });
+
+  // ═══════════════════════════════════════════════
+  // 🎉 FLOATING EMOJI BURST
+  // ═══════════════════════════════════════════════
+  const CHEER_EMOJIS  = ['🎉', '👏', '🌟', '💚', '🔥', '✨', '🙌', '💯', '🥳', '😍', '💫', '🏆'];
+  const FROWN_EMOJIS  = ['😟', '😕', '😞', '💔', '😢', '😠', '👎', '😔'];
+  const NEUTRAL_EMOJIS = ['👀', '💭', '🤔', '📊'];
+
+  /**
+   * Spawns a burst of emojis around the center of the viewport
+   * based on the sentiment of the submission.
+   *
+   * Sentiment is inferred from NPS + CSAT + CES combined:
+   *   - Strong positive → cheer emojis
+   *   - Strong negative → frown emojis
+   *   - Mixed → mixture
+   */
+  function spawnEmojiBurst(entry) {
+    const layer = document.getElementById('emojiBurstLayer');
+    if (!layer) return;
+
+    // Determine sentiment score: 0 (worst) to 1 (best)
+    const npsScore  = Math.max(0, Math.min(10, entry.nps || 0)) / 10;    // 0..1
+    const csatScore = Math.max(1, Math.min(5,  entry.csat || 3)) / 5;    // 0.2..1
+    const cesScore  = Math.max(1, Math.min(5,  entry.ces  || 3)) / 5;    // 0.2..1
+    const score = (npsScore * 0.4) + (csatScore * 0.3) + (cesScore * 0.3); // 0..1
+
+    // Number of emojis scales a bit with score (but caps low)
+    const count = 8 + Math.floor(Math.random() * 4); // 8-11 emojis per burst
+
+    // Pick emoji pool based on sentiment
+    let pool;
+    if (score >= 0.75) pool = CHEER_EMOJIS;
+    else if (score >= 0.5) pool = [...CHEER_EMOJIS, ...NEUTRAL_EMOJIS];
+    else if (score >= 0.3) pool = [...NEUTRAL_EMOJIS, ...FROWN_EMOJIS];
+    else pool = FROWN_EMOJIS;
+
+    // Viewport size
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    // Emojis generally burst from lower-center and float up-and-out
+    const originX = vw * (0.35 + Math.random() * 0.30); // 35%-65% of width
+    const originY = vh * (0.60 + Math.random() * 0.15); // 60%-75% of height
+
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('span');
+      el.className = 'float-emoji';
+      // Random size class for variety
+      const r = Math.random();
+      if (r < 0.25) el.classList.add('large');
+      else if (r < 0.65) el.classList.add('small');
+
+      el.textContent = pool[Math.floor(Math.random() * pool.length)];
+
+      // Position at burst origin with small jitter
+      const startX = originX + (Math.random() - 0.5) * 60;
+      const startY = originY + (Math.random() - 0.5) * 40;
+      el.style.left = startX + 'px';
+      el.style.top  = startY + 'px';
+
+      // Random drift
+      const dx = (Math.random() - 0.5) * 220;             // horizontal drift ±110px
+      const dy = -120 - Math.random() * 180;              // upward drift 120-300px
+      const dxEnd = dx + (Math.random() - 0.5) * 120;
+      const dyEnd = dy - 80 - Math.random() * 120;
+      const rot = (Math.random() - 0.5) * 30;             // rotation ±15deg
+
+      el.style.setProperty('--dx', dx + 'px');
+      el.style.setProperty('--dy', dy + 'px');
+      el.style.setProperty('--dx-end', dxEnd + 'px');
+      el.style.setProperty('--dy-end', dyEnd + 'px');
+      el.style.setProperty('--rot', rot + 'deg');
+
+      // Slight delay so they cascade
+      el.style.animationDelay = (i * 45 + Math.random() * 60) + 'ms';
+
+      layer.appendChild(el);
+
+      // Auto-remove from DOM when animation ends
+      const totalDelay = parseFloat(el.style.animationDelay) || 0;
+      setTimeout(() => {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      }, 3500 + totalDelay);
+    }
+  }
 
   // ═══════════ DASHBOARD ═══════════
   let npsChart, csatChart, cesChart;
@@ -765,7 +958,6 @@
       data: {
         labels: ['Promoters', 'Passives', 'Detractors'],
         datasets: [{
-          // Starts empty; refreshCharts fills in real data
           data: [0, 0, 0],
           backgroundColor: [CHART_GREEN, CHART_YELLOW, CHART_RED],
           borderWidth: 0
@@ -846,11 +1038,8 @@
     const total = p + pa + d;
 
     if (total === 0) {
-      // Nothing submitted yet — leave the donut empty
       npsChart.data.datasets[0].data = [0, 0, 0];
     } else {
-      // Use a tiny epsilon ONLY for buckets that are genuinely zero
-      // so the slice stays visible in the legend and on the chart
       npsChart.data.datasets[0].data = [
         p  > 0 ? p  : 0.0001,
         pa > 0 ? pa : 0.0001,
@@ -865,7 +1054,7 @@
     cesChart.update();
   }
 
-  function addResponse(entry) {
+  function addResponse(entry, opts = {}) {
     if (entry.nps >= 9) state.nps.promoters++;
     else if (entry.nps >= 7) state.nps.passives++;
     else state.nps.detractors++;
@@ -889,6 +1078,11 @@
     renderComments();
     updateCounter();
     updateWordCloud();
+
+    // Fire emoji burst only for LIVE submissions, not for the initial rebuild
+    if (!opts.silent) {
+      spawnEmojiBurst(entry);
+    }
 
     if (state.comments.length > 0 && state.comments.length % 5 === 0) {
       fetchAIInsights();
@@ -1042,7 +1236,8 @@
 
   function rebuildFromScratch(entries) {
     clearDashboard();
-    entries.forEach(e => addResponse(e));
+    // Rebuild silently — no chime, no emoji burst for past submissions
+    entries.forEach(e => addResponse(e, { silent: true }));
   }
 
   // ═══════════ WEBSOCKET ═══════════
