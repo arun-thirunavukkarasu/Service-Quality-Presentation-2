@@ -40,10 +40,7 @@
   }
   .container { max-width: 480px; margin: 0 auto; }
 
-  .bottom-spacer {
-    height: 90px;
-    width: 100%;
-  }
+  .bottom-spacer { height: 90px; width: 100%; }
 
   /* ── Header ── */
   .header {
@@ -195,125 +192,193 @@
   }
 
   /* ═══════════════════════════════════════════════
-     CONCEPT D — NPS DIAL with angular gradient
+     CONCEPT 3 — NPS BIG NUMBER REVEAL
      ═══════════════════════════════════════════════ */
-  .dial-wrap {
+  .reveal-wrap {
+    padding: 6px 4px 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 6px 4px 0;
   }
 
-  .dial-container {
+  /* Card behind the number */
+  .reveal-card {
     position: relative;
-    width: 220px;
-    height: 220px;
-    user-select: none;
-    touch-action: none;
-  }
-
-  .dial-svg {
     width: 100%;
-    height: 100%;
-    display: block;
-    overflow: visible;
+    max-width: 340px;
+    padding: 22px 16px 18px;
+    border-radius: 24px;
+    background: linear-gradient(180deg, #FFFFFF 0%, #F9FBF6 100%);
+    border: 1.5px solid #EDEDE0;
+    box-shadow:
+      0 8px 28px rgba(20, 60, 120, 0.06),
+      0 2px 6px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+    transition: border-color 0.4s, box-shadow 0.4s;
+  }
+  .reveal-card::before {
+    /* mood color top strip */
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: var(--mood-color, #C9A600);
+    transition: background 0.4s;
+    border-radius: 22px 22px 0 0;
   }
 
-  /* Track ring (background) — light grey */
-  .dial-track {
-    fill: none;
-    stroke: #EEEEEA;
-    stroke-width: 14;
+  /* Big number with flip animation */
+  .big-number-stage {
+    position: relative;
+    height: 140px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 800px;
+    margin-bottom: 4px;
   }
 
-  /* Dim angular gradient ring — full circle, low opacity */
-  .dial-gradient-ring {
-    fill: none;
-    stroke-width: 14;
-    opacity: 0.18;
-  }
-
-  /* Active progress ring — uses a mask to reveal only the arc up to current value */
-  .dial-progress-group {
-    transform: rotate(-90deg);
-    transform-origin: 50% 50%;
-  }
-  .dial-progress-arc {
-    fill: none;
-    stroke-width: 14;
-    stroke-linecap: round;
-    transition: stroke-dasharray 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Tick marks */
-  .dial-tick {
-    stroke: #D6D6CC;
-    stroke-width: 2;
-    stroke-linecap: round;
-    transition: stroke 0.3s;
-  }
-  .dial-tick.major { stroke: #8E8E82; stroke-width: 2.5; }
-  .dial-tick.active { stroke-width: 3; }
-
-  /* Center display */
-  .dial-center {
+  .big-number {
+    font-size: 8rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.06em;
+    color: var(--mood-color, #C9A600);
+    transition: color 0.4s;
+    font-variant-numeric: tabular-nums;
     position: absolute;
     inset: 0;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    pointer-events: none;
-    z-index: 2;
+    backface-visibility: hidden;
+    transform-origin: center;
+    will-change: transform, opacity;
   }
-  .dial-value {
-    font-size: 3.4rem;
-    font-weight: 800;
-    letter-spacing: -0.04em;
-    line-height: 1;
-    color: #C9A600;
-    transition: color 0.35s;
-    font-variant-numeric: tabular-nums;
+
+  /* Two animation variants: incoming and outgoing */
+  .big-number.flip-in {
+    animation: flipIn 0.42s cubic-bezier(0.34, 1.2, 0.5, 1) both;
   }
-  .dial-value.bump {
-    animation: dialBump 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  .big-number.flip-out {
+    animation: flipOut 0.42s cubic-bezier(0.34, 1.2, 0.5, 1) both;
   }
-  @keyframes dialBump {
-    0%   { transform: scale(1); }
-    50%  { transform: scale(1.18); }
-    100% { transform: scale(1); }
+
+  @keyframes flipIn {
+    0%   { opacity: 0; transform: rotateX(-90deg) translateY(-10px) scale(0.7); }
+    100% { opacity: 1; transform: rotateX(0deg) translateY(0) scale(1); }
   }
-  .dial-label {
-    font-size: 0.66rem;
+  @keyframes flipOut {
+    0%   { opacity: 1; transform: rotateX(0deg) translateY(0) scale(1); }
+    100% { opacity: 0; transform: rotateX(90deg) translateY(10px) scale(0.7); }
+  }
+
+  /* Mood label under the number */
+  .mood-label {
+    text-align: center;
+    font-size: 0.78rem;
     font-weight: 800;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: #8E8E82;
-    margin-top: 6px;
-    transition: color 0.35s;
-  }
-  .dial-hint {
-    font-size: 0.66rem;
-    color: #B8B8A8;
-    margin-top: 2px;
-    font-weight: 500;
+    color: var(--mood-color, #C9A600);
+    transition: color 0.4s;
+    margin-bottom: 18px;
+    min-height: 1.2em;
   }
 
-  /* Draggable knob */
-  .dial-knob {
-    fill: #fff;
-    stroke: #005F2E;
-    stroke-width: 4;
-    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.20));
-    transition: r 0.15s, stroke 0.3s;
-    pointer-events: none;
-  }
-  .dial-container.dragging .dial-knob { r: 13; }
-
-  .dial-scale {
+  /* Dot strip 0..10 */
+  .dot-strip {
     display: flex;
     justify-content: space-between;
-    width: 220px;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 6px 4px;
+    background: #F7F7F0;
+    border-radius: 18px;
+    border: 1px solid #EDEDE0;
+  }
+
+  .dot-btn {
+    flex: 1;
+    aspect-ratio: 1;
+    max-width: 26px;
+    min-width: 18px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    background: #FFFFFF;
+    cursor: pointer;
+    transition:
+      transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+      background 0.3s,
+      border-color 0.3s,
+      box-shadow 0.3s;
+    position: relative;
+    padding: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+  }
+  .dot-btn::after {
+    /* inner fill dot */
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    background: #E5E5DC;
+    transition: background 0.3s, transform 0.3s;
+  }
+
+  .dot-btn:active { transform: scale(0.9); }
+
+  .dot-btn.filled::after {
+    background: var(--mood-color, #C9A600);
+  }
+
+  .dot-btn.selected {
+    transform: scale(1.4);
+    border-color: var(--mood-color, #C9A600);
+    background: #fff;
+    box-shadow:
+      0 0 0 3px rgba(255,255,255,1),
+      0 0 0 6px var(--mood-color, #C9A600),
+      0 4px 12px rgba(0,0,0,0.12);
+    z-index: 2;
+  }
+  .dot-btn.selected::after {
+    transform: scale(1.15);
+  }
+
+  /* NPS band hints below the dots */
+  .dot-bands {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 0 4px;
+  }
+  .dot-bands span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .dot-bands .band-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .dot-bands .band-detractor .band-dot { background: #C15C5C; }
+  .dot-bands .band-passive .band-dot { background: #E0C418; }
+  .dot-bands .band-promoter .band-dot { background: #2E7D32; }
+
+  /* Subtle "tap a dot" hint */
+  .reveal-hint {
+    text-align: center;
     margin-top: 12px;
     font-size: 0.68rem;
     color: var(--text-muted);
@@ -625,52 +690,27 @@
     <input type="text" id="userName" placeholder="e.g. Priya" maxlength="40" autocomplete="off">
   </div>
 
-  <!-- ═══════════ Q1 — NPS DIAL ═══════════ -->
+  <!-- ═══════════ Q1 — NPS BIG NUMBER REVEAL ═══════════ -->
   <div class="q-card">
     <h2>How likely are you to recommend Karur Vysya Bank?</h2>
-    <div class="q-sub">Rotate the dial · 0 = Not at all · 10 = Absolutely</div>
+    <div class="q-sub">Tap a dot · 0 = Not at all · 10 = Absolutely</div>
 
-    <div class="dial-wrap">
-      <div class="dial-container" id="dialContainer">
-        <svg class="dial-svg" viewBox="0 0 240 240" id="dialSvg">
-          <!--
-            The angular gradient ring is built at runtime by JS:
-            we draw N thin arc segments, each interpolated along the
-            red→orange→yellow→lime→green palette in circular order.
-            This replaces the previous linear gradient that produced
-            the incorrect wrap-around color sequence.
-          -->
-          <g id="dialGradientRing"></g>
-
-          <!-- Background track (light grey) -->
-          <circle class="dial-track" cx="120" cy="120" r="88" />
-
-          <!-- Active progress arc: this is a single arc that mirrors the
-               current value. Its color is computed from the palette so
-               the arc's stroke matches the mood at that value. -->
-          <circle class="dial-progress-arc" id="dialProgress"
-                  cx="120" cy="120" r="88"
-                  stroke-dasharray="0 553"
-                  stroke-dashoffset="0"
-                  stroke="#C9A600" />
-
-          <!-- Tick marks (built by JS) -->
-          <g id="dialTicks"></g>
-
-          <!-- Draggable knob -->
-          <circle class="dial-knob" id="dialKnob" cx="120" cy="32" r="10" />
-        </svg>
-
-        <div class="dial-center">
-          <div class="dial-value" id="dialValueText">5</div>
-          <div class="dial-label" id="dialLabelText">NEUTRAL</div>
-          <div class="dial-hint">Drag to rate</div>
+    <div class="reveal-wrap">
+      <div class="reveal-card" id="revealCard" style="--mood-color:#C9A600;">
+        <div class="big-number-stage" id="bigNumberStage">
+          <div class="big-number" id="bigNumber">5</div>
         </div>
-      </div>
+        <div class="mood-label" id="moodLabel">Neutral</div>
 
-      <div class="dial-scale">
-        <span>0 · Not likely</span>
-        <span>Very likely · 10</span>
+        <div class="dot-strip" id="dotStrip"></div>
+
+        <div class="dot-bands">
+          <span class="band-detractor"><span class="band-dot"></span>Detractor (0–6)</span>
+          <span class="band-passive"><span class="band-dot"></span>Passive (7–8)</span>
+          <span class="band-promoter"><span class="band-dot"></span>Promoter (9–10)</span>
+        </div>
+
+        <div class="reveal-hint">Tap a dot to rate</div>
       </div>
     </div>
   </div>
@@ -790,232 +830,116 @@
   const state = { nps: 5, csat: null, ces: null };
 
   // ═══════════════════════════════════════════════
-  // CONCEPT D — NPS DIAL
+  // NPS BIG NUMBER REVEAL
   // ═══════════════════════════════════════════════
-  const dialContainer = document.getElementById('dialContainer');
-  const dialSvg = document.getElementById('dialSvg');
-  const dialProgress = document.getElementById('dialProgress');
-  const dialKnob = document.getElementById('dialKnob');
-  const dialValueText = document.getElementById('dialValueText');
-  const dialLabelText = document.getElementById('dialLabelText');
-  const dialTicksGroup = document.getElementById('dialTicks');
-  const dialGradientRing = document.getElementById('dialGradientRing');
-
-  const DIAL_CX = 120;
-  const DIAL_CY = 120;
-  const DIAL_R  = 88;
-  const TAU = Math.PI * 2;
-  const CIRCUMFERENCE = 2 * Math.PI * DIAL_R;
-
-  // Full palette 0 → 10 (used for text + knob + arc color)
   const MOOD_COLORS = [
-    '#B71C1C', '#C0392B', '#C65400', '#D4813F',
-    '#C9A600', '#A88300', '#7A9C1A', '#4C7A12',
-    '#2E7D32', '#00853E', '#005F2E'
+    '#B71C1C', // 0  deep red
+    '#C0392B', // 1
+    '#C65400', // 2  burnt orange
+    '#D4813F', // 3
+    '#C9A600', // 4  amber
+    '#A88300', // 5  neutral mustard
+    '#7A9C1A', // 6  olive-lime
+    '#4C7A12', // 7  lime
+    '#2E7D32', // 8  green
+    '#00853E', // 9  KVB green
+    '#005F2E'  // 10 KVB green deep
   ];
-  const DIAL_LABELS = [
-    'NOT AT ALL', 'VERY UNLIKELY', 'UNLIKELY', 'SOMETIMES UNLIKELY',
-    'NEUTRAL', 'SOMETIMES LIKELY', 'LIKELY', 'QUITE LIKELY',
-    'VERY LIKELY', 'EXTREMELY LIKELY', 'ABSOLUTELY'
+  const MOOD_LABELS = [
+    'Not at all',
+    'Very unlikely',
+    'Unlikely',
+    'Somewhat unlikely',
+    'Neutral',
+    'Somewhat likely',
+    'Likely',
+    'Quite likely',
+    'Very likely',
+    'Extremely likely',
+    'Absolutely'
   ];
 
-  let dialValue = 5;
-  let isDragging = false;
+  const bigNumber = document.getElementById('bigNumber');
+  const bigNumberStage = document.getElementById('bigNumberStage');
+  const moodLabel = document.getElementById('moodLabel');
+  const revealCard = document.getElementById('revealCard');
+  const dotStrip = document.getElementById('dotStrip');
 
-  // Helper: interpolate two hex colors
-  function lerpColor(a, b, t) {
-    const ah = a.replace('#','');
-    const bh = b.replace('#','');
-    const ar = parseInt(ah.substr(0,2), 16);
-    const ag = parseInt(ah.substr(2,2), 16);
-    const ab = parseInt(ah.substr(4,2), 16);
-    const br = parseInt(bh.substr(0,2), 16);
-    const bg = parseInt(bh.substr(2,2), 16);
-    const bb = parseInt(bh.substr(4,2), 16);
-    const rr = Math.round(ar + (br - ar) * t);
-    const rg = Math.round(ag + (bg - ag) * t);
-    const rb = Math.round(ab + (bb - ab) * t);
-    return '#' + [rr, rg, rb].map(v => v.toString(16).padStart(2, '0')).join('');
-  }
+  let currentNPS = 5;
 
-  // Build the visible angular gradient ring using N small arcs
-  function buildAngularGradientRing() {
-    const segments = 120;  // 120 tiny arcs = smooth gradient
-    const radius = DIAL_R;
-    const sw = 14;         // stroke width
-    for (let i = 0; i < segments; i++) {
-      // Fraction around the circle 0..1
-      const t = i / segments;
-      // Angle in radians — start at top (-90deg), go clockwise
-      const angleStart = t * TAU - Math.PI / 2;
-      // Segment span
-      const span = TAU / segments;
-
-      // Color at this point: interpolate along the 11-color palette
-      // Palette has 11 stops (0..10), so t * 10 gives the continuous position
-      const p = t * 10;
-      const idx = Math.floor(p);
-      const frac = p - idx;
-      const c0 = MOOD_COLORS[Math.min(idx, 10)];
-      const c1 = MOOD_COLORS[Math.min(idx + 1, 10)];
-      const color = lerpColor(c0, c1, frac);
-
-      // Arc from angleStart to angleStart + span
-      const x1 = DIAL_CX + Math.cos(angleStart) * radius;
-      const y1 = DIAL_CY + Math.sin(angleStart) * radius;
-      const x2 = DIAL_CX + Math.cos(angleStart + span) * radius;
-      const y2 = DIAL_CY + Math.sin(angleStart + span) * radius;
-
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      const d = `M ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2}`;
-      path.setAttribute('d', d);
-      path.setAttribute('stroke', color);
-      path.setAttribute('stroke-width', sw);
-      path.setAttribute('fill', 'none');
-      path.setAttribute('stroke-linecap', 'butt');
-      dialGradientRing.appendChild(path);
-    }
-  }
-
-  // Build tick marks
-  function buildTicks() {
+  // Build the 11 dot buttons
+  function buildDotStrip() {
+    dotStrip.innerHTML = '';
     for (let i = 0; i <= 10; i++) {
-      const angle = (i / 10) * TAU - Math.PI / 2;
-      const isMajor = i === 0 || i === 5 || i === 10;
-      const innerR = DIAL_R - 22;
-      const outerR = DIAL_R - 14;
-      const x1 = DIAL_CX + Math.cos(angle) * innerR;
-      const y1 = DIAL_CY + Math.sin(angle) * innerR;
-      const x2 = DIAL_CX + Math.cos(angle) * outerR;
-      const y2 = DIAL_CY + Math.sin(angle) * outerR;
-
-      const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      tick.setAttribute('x1', x1);
-      tick.setAttribute('y1', y1);
-      tick.setAttribute('x2', x2);
-      tick.setAttribute('y2', y2);
-      tick.setAttribute('class', 'dial-tick' + (isMajor ? ' major' : ''));
-      tick.dataset.tickValue = i;
-      dialTicksGroup.appendChild(tick);
+      const b = document.createElement('button');
+      b.className = 'dot-btn';
+      b.type = 'button';
+      b.dataset.value = i;
+      b.setAttribute('aria-label', `Rate ${i} out of 10`);
+      b.addEventListener('click', () => selectNPS(i));
+      dotStrip.appendChild(b);
     }
   }
 
-  function updateDial(v, animate = true) {
-    v = Math.max(0, Math.min(10, Math.round(v)));
-    dialValue = v;
+  function updateMoodStyles(v) {
+    const color = MOOD_COLORS[v];
+    revealCard.style.setProperty('--mood-color', color);
+    bigNumber.style.color = color;
+    moodLabel.style.color = color;
 
-    // Progress arc: reveal only up to the current value.
-    // Instead of a single stroke, we rotate the whole arc via dasharray.
-    // The arc's color is a single solid tone picked from the palette,
-    // matching the mood at the current value (so the end of the arc shows
-    // the correct endpoint color).
-    const portion = v / 10;
-    const dash = CIRCUMFERENCE * portion;
-    dialProgress.setAttribute('stroke-dasharray', `${dash} ${CIRCUMFERENCE}`);
-    dialProgress.setAttribute('stroke', MOOD_COLORS[v]);
-
-    // Knob position
-    const angle = portion * TAU - Math.PI / 2;
-    const kx = DIAL_CX + Math.cos(angle) * DIAL_R;
-    const ky = DIAL_CY + Math.sin(angle) * DIAL_R;
-    dialKnob.setAttribute('cx', kx);
-    dialKnob.setAttribute('cy', ky);
-    dialKnob.setAttribute('stroke', MOOD_COLORS[v]);
-
-    // Center text
-    dialValueText.textContent = v;
-    dialValueText.style.color = MOOD_COLORS[v];
-    dialLabelText.textContent = DIAL_LABELS[v];
-    dialLabelText.style.color = MOOD_COLORS[v];
-
-    // Tick highlighting
-    Array.from(dialTicksGroup.children).forEach(t => {
-      const tv = parseInt(t.dataset.tickValue, 10);
-      if (tv <= v) {
-        t.classList.add('active');
-        t.style.stroke = MOOD_COLORS[v];
-      } else {
-        t.classList.remove('active');
-        t.style.stroke = '';
-      }
+    // Fill dots up to and including selected
+    document.querySelectorAll('.dot-btn').forEach(btn => {
+      const val = parseInt(btn.dataset.value, 10);
+      btn.classList.toggle('filled', val <= v);
+      btn.classList.toggle('selected', val === v);
     });
-
-    if (animate) {
-      dialValueText.classList.remove('bump');
-      void dialValueText.offsetWidth;
-      dialValueText.classList.add('bump');
-    }
   }
 
-  function pointerToValue(clientX, clientY) {
-    const rect = dialSvg.getBoundingClientRect();
-    const scale = 240 / rect.width;
-    const localX = (clientX - rect.left) * scale;
-    const localY = (clientY - rect.top) * scale;
+  function selectNPS(v) {
+    v = Math.max(0, Math.min(10, v));
 
-    let angle = Math.atan2(localY - DIAL_CY, localX - DIAL_CX) + Math.PI / 2;
-    if (angle < 0) angle += TAU;
-    return (angle / TAU) * 10;
-  }
+    // If value changed, do a flip animation
+    if (v !== currentNPS) {
+      const oldEl = bigNumber;
+      const newEl = document.createElement('div');
+      newEl.className = 'big-number flip-in';
+      newEl.textContent = v;
+      newEl.style.color = MOOD_COLORS[v];
 
-  function startDrag(e) {
-    isDragging = true;
-    dialContainer.classList.add('dragging');
-    e.preventDefault();
-    handleDrag(e);
-  }
-  function moveDrag(e) {
-    if (!isDragging) return;
-    e.preventDefault();
-    handleDrag(e);
-  }
-  function endDrag() {
-    if (!isDragging) return;
-    isDragging = false;
-    dialContainer.classList.remove('dragging');
-    state.nps = dialValue;
-    checkReady();
-    if (navigator.vibrate) navigator.vibrate(20);
-  }
-  function handleDrag(e) {
-    let cx, cy;
-    if (e.touches && e.touches[0]) {
-      cx = e.touches[0].clientX;
-      cy = e.touches[0].clientY;
+      oldEl.classList.remove('flip-in');
+      oldEl.classList.add('flip-out');
+
+      bigNumberStage.appendChild(newEl);
+
+      setTimeout(() => {
+        if (oldEl.parentNode) oldEl.parentNode.removeChild(oldEl);
+        newEl.classList.remove('flip-in');
+        newEl.id = 'bigNumber';
+        // rebind for next flip
+        window.bigNumber = newEl;
+      }, 420);
+
+      // Keep reference updated
+      window.bigNumber = newEl;
     } else {
-      cx = e.clientX;
-      cy = e.clientY;
+      bigNumber.textContent = v;
     }
-    const v = pointerToValue(cx, cy);
-    const previous = dialValue;
-    updateDial(v, false);
-    if (navigator.vibrate && Math.round(v) !== previous) {
-      navigator.vibrate(6);
-    }
+
+    currentNPS = v;
+    state.nps = v;
+
+    moodLabel.textContent = MOOD_LABELS[v];
+    updateMoodStyles(v);
+
+    if (navigator.vibrate) navigator.vibrate(15);
+    checkReady();
   }
 
-  dialContainer.addEventListener('mousedown', startDrag);
-  window.addEventListener('mousemove', moveDrag);
-  window.addEventListener('mouseup', endDrag);
-
-  dialContainer.addEventListener('touchstart', startDrag, { passive: false });
-  window.addEventListener('touchmove', moveDrag, { passive: false });
-  window.addEventListener('touchend', endDrag);
-  window.addEventListener('touchcancel', endDrag);
-
-  dialSvg.addEventListener('click', (e) => {
-    if (isDragging) return;
-    const v = pointerToValue(e.clientX, e.clientY);
-    state.nps = Math.round(v);
-    updateDial(state.nps);
-    checkReady();
-    if (navigator.vibrate) navigator.vibrate(15);
-  });
-
-  // Build everything
-  buildAngularGradientRing();
-  buildTicks();
-  updateDial(5, false);
+  // Build once
+  buildDotStrip();
+  updateMoodStyles(currentNPS);
+  moodLabel.textContent = MOOD_LABELS[currentNPS];
+  state.nps = currentNPS;
 
   // ═══════════════════════════════════════════════
   // CSAT bouncing emojis
