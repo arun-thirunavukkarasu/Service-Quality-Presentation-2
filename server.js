@@ -7,17 +7,18 @@ const app = express();
 app.use(express.json({ limit: '1mb' }));
 app.use(express.static(path.join(__dirname)));
 
-// ⭐ Redirect root to the presentation
+// ⭐ Root redirect
 app.get('/', (req, res) => {
   res.redirect('/presentation.html');
 });
 
-// ⭐ Groq proxy — keeps the API key on the server, never in the browser
+// ⭐ Groq Proxy Route
 app.post('/groq', async (req, res) => {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'GROQ_API_KEY not set on server.' });
+    return res.status(500).json({ error: 'GROQ_API_KEY is missing from Render Environment Variables.' });
   }
+  
   try {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -27,10 +28,16 @@ app.post('/groq', async (req, res) => {
       },
       body: JSON.stringify(req.body)
     });
+    
     const data = await response.json();
-    res.status(response.status).json(data);
+    
+    if (!response.ok) {
+        return res.status(response.status).json({ error: data.error?.message || 'Groq API Error' });
+    }
+    
+    res.status(200).json(data);
   } catch (err) {
-    res.status(500).json({ error: 'Groq request failed: ' + err.message });
+    res.status(500).json({ error: 'Network error reaching Groq: ' + err.message });
   }
 });
 
