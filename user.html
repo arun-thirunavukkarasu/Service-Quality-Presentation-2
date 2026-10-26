@@ -192,63 +192,131 @@
   }
 
   /* ═══════════════════════════════════════════════
-     NPS — NUMBER GRID (Option 1)
+     OPTION E: NPS THUMB ZONE SLIDER
      ═══════════════════════════════════════════════ */
-  .nps-grid-wrap {
-    padding: 6px 4px 0;
+  .nps-slider-wrap {
+    padding: 10px 4px 0;
+    position: relative;
   }
 
-  .nps-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 8px;
-    margin-bottom: 16px;
+  /* Dynamic readout below slider */
+  .nps-readout {
+    text-align: center;
+    margin-top: 20px;
+    height: 40px;
+    transition: opacity 0.3s;
+    opacity: 0.3; /* Dimmed until interacted */
   }
-
-  .nps-btn {
-    aspect-ratio: 1;
-    border-radius: 14px;
-    border: 2px solid transparent;
-    background: #F5F5EE;
-    color: #1A1A1A;
-    font-family: inherit;
-    font-size: 1.05rem;
+  .nps-readout.active {
+    opacity: 1;
+  }
+  .nps-readout .label {
+    display: block;
+    font-size: 0.75rem;
     font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    transition: color 0.3s;
+  }
+  .nps-readout.active .label {
+    color: var(--nps-mood, #C9A600);
+  }
+
+  /* The Slider Track */
+  .nps-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 14px;
+    border-radius: 20px;
+    outline: none;
     cursor: pointer;
-    transition:
-      transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
-      background 0.2s,
-      color 0.2s,
-      box-shadow 0.2s;
+    background: #EBEBE4; /* Neutral grey by default */
+    transition: box-shadow 0.2s, background 0.3s;
+    padding: 0;
+    margin: 8px 0;
+  }
+  .nps-slider.active {
+    background: linear-gradient(90deg,
+        #B71C1C 0%,
+        #C65400 20%,
+        #C9A600 45%,
+        #4C7A12 70%,
+        #007A3D 100%);
+  }
+  .nps-slider:active {
+    box-shadow: 0 0 0 8px rgba(0, 122, 61, 0.10);
+  }
+
+  /* The Thumb (Number lives here) */
+  .nps-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 4px solid #DCDCD0; /* Neutral border initially */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    cursor: grab;
+    transition: border-color 0.3s, transform 0.12s;
+    /* Center the number inside the thumb */
     display: flex;
     align-items: center;
     justify-content: center;
-    user-select: none;
-    -webkit-appearance: none;
-    appearance: none;
-    outline: none;
-    padding: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text-muted);
+  }
+  .nps-slider.active::-webkit-slider-thumb {
+    border-color: var(--nps-mood, #C9A600);
+    color: var(--nps-mood, #C9A600);
+  }
+  .nps-slider::-webkit-slider-thumb:active {
+    transform: scale(1.1);
+    cursor: grabbing;
   }
 
-  .nps-btn:active {
-    transform: scale(0.92);
+  /* Firefox Thumb */
+  .nps-slider::-moz-range-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 4px solid #DCDCD0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    cursor: grab;
+    transition: border-color 0.3s, transform 0.12s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text-muted);
+  }
+  .nps-slider.active::-moz-range-thumb {
+    border-color: var(--nps-mood, #C9A600);
+    color: var(--nps-mood, #C9A600);
   }
 
-  .nps-btn.selected {
-    transform: scale(1.12);
-    border-color: #fff;
-    box-shadow:
-      0 0 0 3px var(--nps-mood, #C9A600),
-      0 6px 16px rgba(0, 0, 0, 0.18);
-    z-index: 2;
-    color: #fff;
-    background: var(--nps-mood, #C9A600);
+  .nps-scale {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    padding: 0 2px;
   }
 
   .nps-bands {
     display: flex;
     justify-content: space-between;
-    margin-top: 12px;
+    margin-top: 14px;
     font-size: 0.64rem;
     color: var(--text-muted);
     font-weight: 600;
@@ -566,13 +634,30 @@
     <input type="text" id="userName" placeholder="e.g. Priya" maxlength="40" autocomplete="off">
   </div>
 
-  <!-- Q1 — NPS NUMBER GRID -->
+  <!-- Q1 — NPS THUMB ZONE SLIDER -->
   <div class="q-card">
     <h2>How likely are you to recommend Karur Vysya Bank?</h2>
-    <div class="q-sub">Tap a number · 0 = Not at all · 10 = Absolutely</div>
+    <div class="q-sub">Drag the thumb to rate · 0 = Not at all · 10 = Absolutely</div>
 
-    <div class="nps-grid-wrap">
-      <div class="nps-grid" id="npsGrid"></div>
+    <div class="nps-slider-wrap">
+      <div class="nps-readout" id="npsReadout">
+        <span class="label" id="npsLabel">Drag to rate</span>
+      </div>
+
+      <!-- Value is 5, but we intercept it so it doesn't count as "selected" until touched -->
+      <input
+        type="range"
+        class="nps-slider"
+        id="npsSlider"
+        min="0"
+        max="10"
+        step="1"
+        value="5">
+
+      <div class="nps-scale">
+        <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+      </div>
+
       <div class="nps-bands">
         <span class="band-detractor"><span class="band-dot"></span>Detractor 0–6</span>
         <span class="band-passive"><span class="band-dot"></span>Passive 7–8</span>
@@ -696,51 +781,78 @@
   const state = { nps: null, csat: null, ces: null };
 
   // ═══════════════════════════════════════════════
-  // OPTION 1: NPS NUMBER GRID
+  // OPTION E: NPS THUMB ZONE SLIDER
   // ═══════════════════════════════════════════════
   const MOOD_COLORS = [
     '#B71C1C', '#C0392B', '#C65400', '#D4813F',
     '#C9A600', '#A88300', '#7A9C1A', '#4C7A12',
     '#2E7D32', '#00853E', '#005F2E'
   ];
+  const MOOD_LABELS = [
+    'Not at all', 'Very unlikely', 'Unlikely', 'Somewhat unlikely',
+    'Neutral', 'Somewhat likely', 'Likely', 'Quite likely',
+    'Very likely', 'Extremely likely', 'Absolutely'
+  ];
 
-  const npsGrid = document.getElementById('npsGrid');
+  const npsSlider   = document.getElementById('npsSlider');
+  const npsLabel    = document.getElementById('npsLabel');
+  const npsReadout  = document.getElementById('npsReadout');
+  let npsInteracted = false;
 
-  function buildNPSGrid() {
-    npsGrid.innerHTML = '';
-    for (let i = 0; i <= 10; i++) {
-      const b = document.createElement('button');
-      b.className = 'nps-btn';
-      b.type = 'button';
-      b.dataset.value = i;
-      b.textContent = i;
-      b.addEventListener('click', () => selectNPS(i));
-      npsGrid.appendChild(b);
-    }
-  }
-
-  function selectNPS(v) {
-    state.nps = v;
+  function updateSliderUI(v, isActive) {
     const mood = MOOD_COLORS[v];
+    
+    // Update label text and color
+    npsLabel.textContent = isActive ? MOOD_LABELS[v] : 'Drag to rate';
+    document.documentElement.style.setProperty('--nps-mood', mood);
 
-    // Reset all buttons
-    document.querySelectorAll('.nps-btn').forEach(btn => {
-      btn.classList.remove('selected');
-      btn.style.removeProperty('--nps-mood');
-    });
-
-    // Highlight the one selected
-    const selectedBtn = npsGrid.querySelector(`[data-value="${v}"]`);
-    if (selectedBtn) {
-      selectedBtn.classList.add('selected');
-      selectedBtn.style.setProperty('--nps-mood', mood);
+    // Toggle active classes (turns on the color gradient)
+    if (isActive) {
+      npsSlider.classList.add('active');
+      npsReadout.classList.add('active');
     }
-
-    if (navigator.vibrate) navigator.vibrate(15);
-    checkReady();
   }
 
-  buildNPSGrid();
+  // 1. On initial drag start (mousedown/touchstart), activate the visual bias
+  npsSlider.addEventListener('pointerdown', () => {
+    if (!npsInteracted) {
+      npsInteracted = true;
+      // If the thumb was at 5, nudge it slightly so it feels responsive immediately
+      if (npsSlider.value === '5') {
+        npsSlider.value = '4'; 
+      }
+      state.nps = parseInt(npsSlider.value, 10);
+      updateSliderUI(state.nps, true);
+      checkReady();
+    }
+  });
+
+  // 2. On live drag (input), update the visuals
+  npsSlider.addEventListener('input', (e) => {
+    const v = parseInt(e.target.value, 10);
+    if (!npsInteracted) {
+      npsInteracted = true;
+      updateSliderUI(v, true);
+    } else {
+      updateSliderUI(v, true);
+    }
+    state.nps = v;
+    checkReady();
+  });
+
+  // 3. On release (change/pointerup), finalize the value
+  npsSlider.addEventListener('change', (e) => {
+    const v = parseInt(e.target.value, 10);
+    state.nps = v;
+    npsInteracted = true;
+    updateSliderUI(v, true);
+    if (navigator.vibrate) navigator.vibrate(18);
+    checkReady();
+  });
+
+  // Set initial state (5) but WITHOUT the active class, so it looks grey
+  npsSlider.value = '5';
+  updateSliderUI(5, false);
 
   // ═══════════════════════════════════════════════
   // CSAT bouncing emojis
