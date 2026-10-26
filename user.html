@@ -192,24 +192,21 @@
   }
 
   /* ═══════════════════════════════════════════════
-     OPTION E: NPS THUMB ZONE SLIDER
+     NPS THUMB ZONE SLIDER
      ═══════════════════════════════════════════════ */
   .nps-slider-wrap {
     padding: 10px 4px 0;
     position: relative;
   }
 
-  /* Dynamic readout below slider */
   .nps-readout {
     text-align: center;
     margin-top: 20px;
     height: 40px;
     transition: opacity 0.3s;
-    opacity: 0.3; /* Dimmed until interacted */
+    opacity: 0.3;
   }
-  .nps-readout.active {
-    opacity: 1;
-  }
+  .nps-readout.active { opacity: 1; }
   .nps-readout .label {
     display: block;
     font-size: 0.75rem;
@@ -219,11 +216,8 @@
     color: var(--text-muted);
     transition: color 0.3s;
   }
-  .nps-readout.active .label {
-    color: var(--nps-mood, #C9A600);
-  }
+  .nps-readout.active .label { color: var(--nps-mood, #C9A600); }
 
-  /* The Slider Track */
   .nps-slider {
     -webkit-appearance: none;
     appearance: none;
@@ -232,10 +226,11 @@
     border-radius: 20px;
     outline: none;
     cursor: pointer;
-    background: #EBEBE4; /* Neutral grey by default */
+    background: #EBEBE4;
     transition: box-shadow 0.2s, background 0.3s;
     padding: 0;
     margin: 8px 0;
+    position: relative;
   }
   .nps-slider.active {
     background: linear-gradient(90deg,
@@ -245,11 +240,8 @@
         #4C7A12 70%,
         #007A3D 100%);
   }
-  .nps-slider:active {
-    box-shadow: 0 0 0 8px rgba(0, 122, 61, 0.10);
-  }
+  .nps-slider:active { box-shadow: 0 0 0 8px rgba(0, 122, 61, 0.10); }
 
-  /* The Thumb (Number lives here) */
   .nps-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
@@ -257,11 +249,10 @@
     height: 44px;
     border-radius: 50%;
     background: #ffffff;
-    border: 4px solid #DCDCD0; /* Neutral border initially */
+    border: 4px solid #DCDCD0;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     cursor: grab;
     transition: border-color 0.3s, transform 0.12s;
-    /* Center the number inside the thumb */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -278,8 +269,6 @@
     transform: scale(1.1);
     cursor: grabbing;
   }
-
-  /* Firefox Thumb */
   .nps-slider::-moz-range-thumb {
     width: 44px;
     height: 44px;
@@ -328,6 +317,35 @@
   .nps-bands .band-detractor .band-dot { background: #C15C5C; }
   .nps-bands .band-passive .band-dot { background: #E0C418; }
   .nps-bands .band-promoter .band-dot { background: #2E7D32; }
+
+  /* Floating NPS value bubble (appears during drag) */
+  .nps-value-bubble {
+    position: absolute;
+    top: 18px;
+    padding: 5px 12px;
+    background: var(--nps-mood, var(--kvb-green));
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.95rem;
+    border-radius: 20px;
+    opacity: 0;
+    transform: translateX(-50%) scale(0.7);
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 5;
+    white-space: nowrap;
+  }
+  .nps-value-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -5px; left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--nps-mood, var(--kvb-green));
+    border-bottom: 0;
+  }
+  .nps-value-bubble.show { opacity: 1; transform: translateX(-50%) scale(1); }
 
   /* ── CSAT bouncing emojis ── */
   .bounce-row {
@@ -615,6 +633,25 @@
     animation: pulse 1.2s infinite;
     vertical-align: middle;
   }
+  .thanks .submit-again {
+    display: inline-block;
+    margin-top: 22px;
+    background: #fff;
+    color: var(--kvb-green-deep);
+    border: 2px solid var(--kvb-green);
+    padding: 11px 22px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 0.92rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .thanks .submit-again:hover {
+    background: var(--kvb-green);
+    color: #fff;
+  }
+  .thanks .submit-again.hidden { display: none; }
 </style>
 </head>
 <body>
@@ -640,11 +677,12 @@
     <div class="q-sub">Drag the thumb to rate · 0 = Not at all · 10 = Absolutely</div>
 
     <div class="nps-slider-wrap">
+      <div class="nps-value-bubble" id="npsValueBubble">5</div>
       <div class="nps-readout" id="npsReadout">
         <span class="label" id="npsLabel">Drag to rate</span>
       </div>
 
-      <!-- Value is 5, but we intercept it so it doesn't count as "selected" until touched -->
+      <!-- Value is 5, but npsInteracted flag blocks selection until user moves it -->
       <input
         type="range"
         class="nps-slider"
@@ -753,6 +791,9 @@
   <p>Your feedback for Karur Vysya Bank has been received.</p>
   <p>Look at the big screen — you're part of the live picture now.</p>
   <div class="live-tag">Live on dashboard</div>
+  <div>
+    <button class="submit-again hidden" id="submitAgainBtn">Submit another response</button>
+  </div>
 </div>
 
 <button class="submit-btn" id="submitBtn" disabled>Submit Feedback</button>
@@ -775,13 +816,21 @@
     }
   })();
 
+  // ═══════════ Remember name across submissions ═══════════
+  (function prefillName() {
+    try {
+      const saved = localStorage.getItem('kvb_user_name');
+      if (saved) document.getElementById('userName').value = saved;
+    } catch {}
+  })();
+
   // ═══════════════════════════════════════════════
   // STATE
   // ═══════════════════════════════════════════════
   const state = { nps: null, csat: null, ces: null };
 
   // ═══════════════════════════════════════════════
-  // OPTION E: NPS THUMB ZONE SLIDER
+  // NPS THUMB ZONE SLIDER (snap-to-4 bug FIXED)
   // ═══════════════════════════════════════════════
   const MOOD_COLORS = [
     '#B71C1C', '#C0392B', '#C65400', '#D4813F',
@@ -797,50 +846,59 @@
   const npsSlider   = document.getElementById('npsSlider');
   const npsLabel    = document.getElementById('npsLabel');
   const npsReadout  = document.getElementById('npsReadout');
+  const npsValueBubble = document.getElementById('npsValueBubble');
   let npsInteracted = false;
 
   function updateSliderUI(v, isActive) {
     const mood = MOOD_COLORS[v];
-    
-    // Update label text and color
     npsLabel.textContent = isActive ? MOOD_LABELS[v] : 'Drag to rate';
     document.documentElement.style.setProperty('--nps-mood', mood);
 
-    // Toggle active classes (turns on the color gradient)
+    // Update the floating value bubble
+    npsValueBubble.textContent = v;
+
     if (isActive) {
       npsSlider.classList.add('active');
       npsReadout.classList.add('active');
     }
   }
 
-  // 1. On initial drag start (mousedown/touchstart), activate the visual bias
-  npsSlider.addEventListener('pointerdown', () => {
+  // Position the floating bubble above the thumb
+  function positionValueBubble() {
+    const v = parseInt(npsSlider.value, 10);
+    const rect = npsSlider.getBoundingClientRect();
+    const thumbSize = 44;
+    const usableWidth = rect.width - thumbSize;
+    const x = rect.left + (v / 10) * usableWidth + thumbSize / 2;
+    npsValueBubble.style.left = (x - rect.left) + 'px';
+  }
+
+  // FIXED: no more snap-to-4. Tapping the thumb alone counts as interaction at its current value.
+  function activateNps() {
     if (!npsInteracted) {
       npsInteracted = true;
-      // If the thumb was at 5, nudge it slightly so it feels responsive immediately
-      if (npsSlider.value === '5') {
-        npsSlider.value = '4'; 
-      }
       state.nps = parseInt(npsSlider.value, 10);
       updateSliderUI(state.nps, true);
       checkReady();
     }
+  }
+
+  npsSlider.addEventListener('pointerdown', () => {
+    activateNps();
+    positionValueBubble();
+    npsValueBubble.classList.add('show');
   });
 
-  // 2. On live drag (input), update the visuals
   npsSlider.addEventListener('input', (e) => {
     const v = parseInt(e.target.value, 10);
-    if (!npsInteracted) {
-      npsInteracted = true;
-      updateSliderUI(v, true);
-    } else {
-      updateSliderUI(v, true);
-    }
+    activateNps();
+    updateSliderUI(v, true);
     state.nps = v;
+    positionValueBubble();
+    npsValueBubble.classList.add('show');
     checkReady();
   });
 
-  // 3. On release (change/pointerup), finalize the value
   npsSlider.addEventListener('change', (e) => {
     const v = parseInt(e.target.value, 10);
     state.nps = v;
@@ -848,11 +906,22 @@
     updateSliderUI(v, true);
     if (navigator.vibrate) navigator.vibrate(18);
     checkReady();
+    setTimeout(() => npsValueBubble.classList.remove('show'), 900);
   });
 
-  // Set initial state (5) but WITHOUT the active class, so it looks grey
+  // Hide bubble shortly after interaction ends
+  npsSlider.addEventListener('pointerup', () => {
+    setTimeout(() => npsValueBubble.classList.remove('show'), 800);
+  });
+  npsSlider.addEventListener('pointercancel', () => {
+    npsValueBubble.classList.remove('show');
+  });
+
+  // Initial state
   npsSlider.value = '5';
   updateSliderUI(5, false);
+  window.addEventListener('load', positionValueBubble);
+  window.addEventListener('resize', positionValueBubble);
 
   // ═══════════════════════════════════════════════
   // CSAT bouncing emojis
@@ -871,7 +940,7 @@
       document.querySelectorAll('.bounce-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       state.csat = v;
-      if (navigator.vibrate) navigator.vibrate(18);
+      if (navigator.vibrate) navigator.vibrate([15, 25, 15]);
 
       const amb = AMBIENT[v] || AMBIENT[3];
       document.documentElement.style.setProperty('--ambient-top', amb.top);
@@ -951,15 +1020,32 @@
     ws.onopen  = () => console.log('✅ WebSocket connected');
     ws.onerror = (e) => console.warn('⚠️ WebSocket error', e);
     ws.onclose = () => console.warn('⚠️ WebSocket closed');
+    ws.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.type === 'error') console.warn('Server error:', msg.reason);
+      } catch {}
+    };
   } catch (err) {
     console.error('❌ Could not create WebSocket:', err);
   }
 
   document.getElementById('submitBtn').addEventListener('click', () => {
+    // Client-side validation (server validates too)
+    if (!Number.isInteger(state.nps) || state.nps < 0 || state.nps > 10 ||
+        !Number.isInteger(state.csat) || state.csat < 1 || state.csat > 5 ||
+        !Number.isInteger(state.ces) || state.ces < 1 || state.ces > 5) {
+      alert('Please make sure all three questions are answered.');
+      return;
+    }
+
+    const nameVal = document.getElementById('userName').value.trim();
+    try { if (nameVal) localStorage.setItem('kvb_user_name', nameVal); } catch {}
+
     const payload = {
       type: 'submit',
       data: {
-        user:    document.getElementById('userName').value.trim() || 'Anonymous',
+        user:    nameVal || 'Anonymous',
         nps:     state.nps,
         csat:    state.csat,
         ces:     state.ces,
@@ -979,6 +1065,46 @@
     document.getElementById('formView').style.display = 'none';
     document.getElementById('submitBtn').style.display = 'none';
     document.getElementById('thanksView').classList.add('show');
+    window.scrollTo(0, 0);
+
+    // Reveal "Submit another response" after 5 seconds
+    const btn = document.getElementById('submitAgainBtn');
+    btn.classList.add('hidden');
+    setTimeout(() => btn.classList.remove('hidden'), 5000);
+  }
+
+  document.getElementById('submitAgainBtn').addEventListener('click', resetForResubmit);
+
+  function resetForResubmit() {
+    // Reset state
+    state.nps = null; state.csat = null; state.ces = null;
+    npsInteracted = false;
+
+    // Reset NPS slider
+    npsSlider.value = '5';
+    updateSliderUI(5, false);
+    npsSlider.classList.remove('active');
+    npsReadout.classList.remove('active');
+    npsValueBubble.classList.remove('show');
+
+    // Reset CSAT selection + ambient
+    document.querySelectorAll('.bounce-btn').forEach(b => b.classList.remove('selected'));
+    document.documentElement.style.setProperty('--ambient-top', 'rgba(245, 208, 0, 0.06)');
+    document.documentElement.style.setProperty('--ambient-bottom', 'rgba(0, 122, 61, 0.05)');
+
+    // Reset CES selection
+    document.querySelectorAll('.bubble').forEach(b => b.classList.remove('selected'));
+
+    // Reset comment
+    document.getElementById('comment').value = '';
+
+    // Show form
+    document.getElementById('formView').style.display = '';
+    document.getElementById('submitBtn').style.display = '';
+    document.getElementById('thanksView').classList.remove('show');
+    document.getElementById('submitAgainBtn').classList.add('hidden');
+
+    checkReady();
     window.scrollTo(0, 0);
   }
 </script>
