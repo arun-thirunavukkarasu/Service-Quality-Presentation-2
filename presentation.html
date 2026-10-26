@@ -14,7 +14,6 @@
     --kvb-yellow-soft: #FFF8CC;
     --kvb-green:       #007A3D;
     --kvb-green-deep:  #005F2E;
-    --kvb-green-soft:  #E6F4EA;
     --kvb-green-tint:  #F1F8F3;
     --matte-base:      #FBFBF6;
     --matte-surface:   #F5F5F0;
@@ -38,8 +37,7 @@
     width: 1280px; max-width: 96vw;
     background: var(--matte-base);
     border-radius: 26px;
-    box-shadow: 0 8px 32px rgba(26, 26, 26, 0.08),
-                0 2px 8px rgba(26, 26, 26, 0.04);
+    box-shadow: 0 8px 32px rgba(26, 26, 26, 0.08), 0 2px 8px rgba(26, 26, 26, 0.04);
     border: 1px solid var(--matte-border);
     overflow: hidden;
     position: relative;
@@ -108,7 +106,42 @@
   .slide-img { width: 100%; height: 165px; object-fit: cover; border-radius: 16px; margin: 0.6rem 0 1rem; filter: saturate(0.92); border: 1px solid var(--matte-border); }
   .img-small { height: 115px; }
 
-  /* ── Dashboard ── */
+  /* --- NEW: GAMIFIED REVEAL BUTTON --- */
+  .reveal-btn {
+    background: var(--kvb-yellow);
+    color: var(--kvb-green-deep);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: all 0.2s;
+    box-shadow: 0 4px 10px rgba(245, 208, 0, 0.3);
+    display: inline-block;
+  }
+  .reveal-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(245, 208, 0, 0.4); }
+  .reveal-btn:active { transform: translateY(0); }
+  
+  .reveal-answer {
+    display: none;
+    margin-top: 1rem;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--kvb-green);
+    background: #E8F5E9;
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .reveal-answer.show { display: block; }
+  @keyframes popIn {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* --- DASHBOARD STYLES --- */
   .dashboard-header { display: flex; justify-content: space-between; align-items: center; padding-right: 150px; margin-bottom: 0.4rem; }
   .reset-btn {
     background: #fff; border: 1.5px solid #C15C1E; color: #C15C1E;
@@ -117,15 +150,39 @@
   }
   .reset-btn:hover { background: #C15C1E; color: #fff; }
 
-  .charts-row { display: flex; gap: 1.1rem; margin: 1.1rem 0; flex-wrap: wrap; }
+  /* NEW: Live Score Summary Strip */
+  .score-strip {
+    display: flex;
+    gap: 1rem;
+    margin: 0.8rem 0 1rem;
+  }
+  .score-pill {
+    flex: 1;
+    background: #fff;
+    border: 1px solid var(--matte-border);
+    border-radius: 14px;
+    padding: 0.8rem 1rem;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    transition: transform 0.2s;
+  }
+  .score-pill:hover { transform: translateY(-2px); }
+  .score-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; margin-bottom: 4px; }
+  .score-val { font-size: 1.6rem; font-weight: 800; line-height: 1; }
+  .nps-val { color: var(--kvb-green); }
+  .csat-val { color: #E0C418; }
+  .ces-val { color: #D4813F; }
+
+  .charts-row { display: flex; gap: 1.1rem; margin: 0 0 1.1rem 0; flex-wrap: wrap; }
   .chart-box { flex: 1; min-width: 200px; background: #fff; border-radius: 16px; padding: 0.85rem; border: 1px solid var(--matte-border); box-shadow: 0 2px 8px rgba(26, 26, 26, 0.03); }
   .chart-box h4 { font-size: 0.92rem; font-weight: 700; color: var(--kvb-green-deep); margin-bottom: 0.55rem; text-align: center; }
   .chart-container { position: relative; height: 165px; width: 100%; }
 
   .comments-section {
     background: #fff; border-radius: 16px; padding: 0.95rem 1.25rem;
-    border: 1px solid var(--matte-border); max-height: 180px; overflow-y: auto;
-    box-shadow: 0 2px 8px rgba(26, 26, 26, 0.03);
+    border: 1px solid var(--matte-border); max-height: 150px; overflow-y: auto;
+    box-shadow: 0 2px 8px rgba(26, 26, 26, 0.03); margin-bottom: 1rem;
   }
   .comments-section h4 { font-size: 0.92rem; color: var(--kvb-green-deep); margin-bottom: 0.45rem; }
   .comment-item {
@@ -133,345 +190,57 @@
     font-size: 0.88rem; display: flex; justify-content: space-between; align-items: center;
     animation: slideIn 0.4s ease;
   }
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
   .comment-item:last-child { border-bottom: none; }
   .comment-user { font-weight: 700; color: var(--kvb-green-deep); min-width: 80px; }
   .comment-text { color: var(--text-secondary); flex: 1; margin: 0 1rem; }
-  .comment-rating {
-    background: var(--kvb-yellow-soft); padding: 0.2rem 0.7rem;
-    border-radius: 20px; font-weight: 700; font-size: 0.76rem;
-    color: #7A6D00; border: 1px solid #F0E48A;
-  }
+  .comment-rating { background: var(--kvb-yellow-soft); padding: 0.2rem 0.7rem; border-radius: 20px; font-weight: 700; font-size: 0.76rem; color: #7A6D00; border: 1px solid #F0E48A; }
 
-  .insights-row {
-    display: grid;
-    grid-template-columns: 1.3fr 1fr;
-    gap: 1.1rem;
-    margin-top: 1rem;
-  }
+  .insights-row { display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.1rem; }
   .ai-insights {
     background: linear-gradient(135deg, #F1F8F3 0%, #FFFFFF 100%);
-    border: 1px solid #DCEEDF;
-    border-radius: 16px;
-    padding: 0.95rem 1.2rem;
-    position: relative;
-    min-height: 130px;
-    overflow: hidden;
+    border: 1px solid #DCEEDF; border-radius: 16px; padding: 0.95rem 1.2rem;
+    position: relative; min-height: 130px; overflow: hidden;
   }
-  .ai-insights::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--kvb-yellow), var(--kvb-green));
-  }
-  .ai-insights h4 {
-    font-size: 0.92rem;
-    color: var(--kvb-green-deep);
-    margin-bottom: 0.55rem;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .ai-insights h4 .sparkle {
-    display: inline-block;
-    animation: sparkle 2s ease-in-out infinite;
-  }
-  @keyframes sparkle {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50%      { opacity: 0.55; transform: scale(1.15); }
-  }
-  .ai-insights .ai-status {
-    font-size: 0.82rem;
-    color: var(--text-muted);
-    font-style: italic;
-    margin-bottom: 6px;
-  }
+  .ai-insights::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--kvb-yellow), var(--kvb-green)); }
+  .ai-insights h4 { font-size: 0.92rem; color: var(--kvb-green-deep); margin-bottom: 0.55rem; display: flex; align-items: center; gap: 6px; }
+  .ai-status { font-size: 0.82rem; color: var(--text-muted); font-style: italic; margin-bottom: 6px; }
   .ai-insights ul { list-style: none; padding: 0; margin: 0; }
-  .ai-insights ul li {
-    padding: 0.28rem 0 0.28rem 1.4rem;
-    position: relative;
-    font-size: 0.9rem;
-    line-height: 1.45;
-    color: var(--text-primary);
-    animation: fadeInUp 0.4s ease;
-  }
-  .ai-insights ul li::before {
-    content: '▸'; position: absolute; left: 0.4rem;
-    color: var(--kvb-green); font-weight: 700;
-  }
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(4px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  .ai-insights ul li { padding: 0.28rem 0 0.28rem 1.4rem; position: relative; font-size: 0.9rem; line-height: 1.45; color: var(--text-primary); animation: fadeInUp 0.4s ease; }
+  .ai-insights ul li::before { content: '▸'; position: absolute; left: 0.4rem; color: var(--kvb-green); font-weight: 700; }
 
   .wordcloud {
-    background: #FFFFFF;
-    border: 1px solid var(--matte-border);
-    border-radius: 16px;
-    padding: 0.95rem 1rem;
-    min-height: 130px;
-    display: flex;
-    flex-wrap: wrap;
-    align-content: center;
-    justify-content: center;
-    gap: 4px 8px;
-    overflow: hidden;
-    position: relative;
+    background: #FFFFFF; border: 1px solid var(--matte-border);
+    border-radius: 16px; padding: 0.95rem 1rem; min-height: 130px;
+    display: flex; flex-wrap: wrap; align-content: center; justify-content: center;
+    gap: 4px 8px; overflow: hidden; position: relative;
   }
-  .wordcloud h4 {
-    position: absolute;
-    top: 6px; left: 14px;
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-weight: 700;
-    margin: 0;
-  }
-  .wordcloud .wc-word {
-    display: inline-block;
-    font-weight: 700;
-    line-height: 1;
-    transition: all 0.4s ease;
-    cursor: default;
-    padding: 2px 4px;
-  }
-  .wordcloud .empty {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    font-style: italic;
-  }
+  .wordcloud h4 { position: absolute; top: 6px; left: 14px; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; margin: 0; }
+  .wordcloud .wc-word { display: inline-block; font-weight: 700; line-height: 1; transition: all 0.4s ease; cursor: default; padding: 2px 4px; }
+  .wordcloud .empty { color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
 
   .qr-block {
     position: absolute; top: 1.1rem; right: 1.1rem;
-    text-align: center; background: #fff;
-    padding: 10px; border-radius: 14px;
-    box-shadow: 0 3px 14px rgba(26, 26, 26, 0.08);
-    border: 2px solid var(--kvb-yellow);
-    z-index: 20;
+    text-align: center; background: #fff; padding: 10px; border-radius: 14px;
+    box-shadow: 0 3px 14px rgba(26, 26, 26, 0.08); border: 2px solid var(--kvb-yellow); z-index: 20;
   }
   .qr-block img { width: 105px; height: 105px; display: block; border-radius: 8px; }
   .qr-block p { font-size: 0.66rem; color: var(--kvb-green-deep); margin-top: 5px; font-weight: 700; }
 
-  /* ── Navigation ── */
   .nav-controls {
     display: flex; justify-content: space-between; align-items: center;
     padding: 0.85rem 1.7rem; background: var(--text-primary); color: #fff;
-    border-top: 4px solid transparent;
-    border-image: linear-gradient(90deg, var(--kvb-yellow), var(--kvb-green)) 1;
+    border-top: 4px solid transparent; border-image: linear-gradient(90deg, var(--kvb-yellow), var(--kvb-green)) 1;
   }
   .nav-btn {
-    background: rgba(255,255,255,0.1); color: #fff;
-    border: 1px solid rgba(255,255,255,0.15);
-    padding: 0.55rem 1.5rem; border-radius: 40px;
-    font-weight: 600; font-size: 0.92rem; cursor: pointer;
-    transition: all 0.2s; font-family: inherit;
+    background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.15);
+    padding: 0.55rem 1.5rem; border-radius: 40px; font-weight: 600; font-size: 0.92rem; cursor: pointer; transition: all 0.2s; font-family: inherit;
   }
   .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
   .nav-btn:not(:disabled):hover { background: rgba(245, 208, 0, 0.2); border-color: var(--kvb-yellow); }
 
   .slide-counter { font-weight: 700; color: var(--kvb-yellow); font-size: 0.92rem; }
   .shortcut-hint { font-size: 0.72rem; color: rgba(255,255,255,0.6); margin-top: 0.15rem; }
-  .shortcut-hint kbd {
-    background: rgba(255,255,255,0.15); border-radius: 4px;
-    padding: 1px 6px; font-family: inherit; font-size: 0.72rem;
-    margin: 0 2px; border: 1px solid rgba(255,255,255,0.1);
-  }
-
-  /* ═══════════ FLOATING EMOJI BURST ═══════════ */
-  #emojiBurstLayer {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 9999;
-    overflow: hidden;
-  }
-  .float-emoji {
-    position: absolute;
-    font-size: 3rem;
-    line-height: 1;
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.3);
-    animation: emojiFloat 3.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    will-change: transform, opacity;
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.14));
-    user-select: none;
-  }
-  @keyframes emojiFloat {
-    0% {
-      opacity: 0;
-      transform: translate(-50%, -50%) scale(0.3) rotate(0deg);
-    }
-    10% {
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1.1) rotate(var(--rot, 0deg));
-    }
-    40% {
-      opacity: 1;
-      transform:
-        translate(calc(-50% + var(--dx1, 0px)), calc(-50% + var(--dy1, -60px)))
-        scale(1)
-        rotate(var(--rot, 0deg));
-    }
-    70% {
-      opacity: 0.85;
-      transform:
-        translate(calc(-50% + var(--dx2, 0px)), calc(-50% + var(--dy2, -140px)))
-        scale(1.02)
-        rotate(var(--rot, 0deg));
-    }
-    100% {
-      opacity: 0;
-      transform:
-        translate(calc(-50% + var(--dx3, 0px)), calc(-50% + var(--dy3, -220px)))
-        scale(0.55)
-        rotate(var(--rot, 0deg));
-    }
-  }
-  .float-emoji.small { font-size: 2rem;  animation-duration: 3.2s; }
-  .float-emoji.large { font-size: 4.2rem; animation-duration: 3.8s; }
-
-  /* ═══════════ FLOATING COMMENT BUBBLES ═══════════ */
-  #commentBubbleLayer {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 9998;
-    overflow: hidden;
-  }
-  .float-bubble {
-    position: absolute;
-    max-width: 320px;
-    padding: 14px 18px;
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow:
-      0 10px 30px rgba(20, 60, 120, 0.18),
-      0 2px 6px rgba(0, 0, 0, 0.06);
-    border-left: 5px solid var(--kvb-green);
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.4) rotate(var(--rot, 0deg));
-    animation: bubbleFloat 3.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    will-change: transform, opacity;
-    font-family: 'Inter', sans-serif;
-    overflow: hidden;
-    /* subtle gradient sheen */
-    background-image: linear-gradient(135deg, #ffffff 0%, #fafcf9 100%);
-  }
-  /* Bubbles colored by mood */
-  .float-bubble.mood-promoter {
-    border-left-color: #007A3D;
-    background-image: linear-gradient(135deg, #ffffff 0%, #f2fbf5 100%);
-  }
-  .float-bubble.mood-passive {
-    border-left-color: #C9A600;
-    background-image: linear-gradient(135deg, #ffffff 0%, #fffaeb 100%);
-  }
-  .float-bubble.mood-detractor {
-    border-left-color: #C15C5C;
-    background-image: linear-gradient(135deg, #ffffff 0%, #fdf3f3 100%);
-  }
-
-  .float-bubble .bubble-user {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.92rem;
-    font-weight: 800;
-    color: var(--kvb-green-deep);
-    margin-bottom: 4px;
-    letter-spacing: -0.01em;
-  }
-  .float-bubble .bubble-avatar {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--kvb-yellow), var(--kvb-green));
-    color: #fff;
-    font-size: 0.72rem;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    letter-spacing: 0;
-  }
-  .float-bubble .bubble-text {
-    font-size: 0.88rem;
-    color: var(--text-primary);
-    line-height: 1.4;
-    font-weight: 500;
-    word-wrap: break-word;
-  }
-  .float-bubble .bubble-rating {
-    margin-top: 6px;
-    display: inline-block;
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: #7A6D00;
-    background: var(--kvb-yellow-soft);
-    padding: 2px 8px;
-    border-radius: 10px;
-    border: 1px solid #F0E48A;
-  }
-
-  /* Bubble animation: pop-in → hold → drift up → fade-off */
-  @keyframes bubbleFloat {
-    0% {
-      opacity: 0;
-      transform: translate(-50%, -50%) scale(0.4) rotate(var(--rot, 0deg));
-    }
-    12% {
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1.06) rotate(var(--rot, 0deg));
-    }
-    25% {
-      opacity: 1;
-      transform:
-        translate(calc(-50% + 0px), calc(-50% + var(--dy1, -25px)))
-        scale(1)
-        rotate(var(--rot, 0deg));
-    }
-    65% {
-      opacity: 0.95;
-      transform:
-        translate(calc(-50% + var(--dx2, 0px)), calc(-50% + var(--dy2, -100px)))
-        scale(1)
-        rotate(var(--rot, 0deg));
-    }
-    100% {
-      opacity: 0;
-      transform:
-        translate(calc(-50% + var(--dx3, 0px)), calc(-50% + var(--dy3, -180px)))
-        scale(0.85)
-        rotate(var(--rot, 0deg));
-    }
-  }
-
-  /* Small pop effect right when a bubble appears */
-  @keyframes bubblePop {
-    0%   { transform: translate(-50%, -50%) scale(0.4); }
-    50%  { transform: translate(-50%, -50%) scale(1.12); }
-    100% { transform: translate(-50%, -50%) scale(1.06); }
-  }
-
-  @media (max-width: 800px) {
-    .slide { padding: 1.2rem 1.4rem; }
-    .slide::after { left: 1.4rem; width: 110px; height: 35px; }
-    h1 { font-size: 1.45rem; }
-    h2 { font-size: 1.2rem; }
-    p, li, ul.bullets li { font-size: 0.9rem; }
-    .grid-2 { grid-template-columns: 1fr; gap: 1rem; }
-    .charts-row { flex-direction: column; }
-    .insights-row { grid-template-columns: 1fr; }
-    .qr-block { transform: scale(0.75); transform-origin: top right; }
-    .dashboard-header { padding-right: 100px; }
-    .float-bubble { max-width: 240px; }
-  }
+  .shortcut-hint kbd { background: rgba(255,255,255,0.15); border-radius: 4px; padding: 1px 6px; font-family: inherit; font-size: 0.72rem; margin: 0 2px; border: 1px solid rgba(255,255,255,0.1); }
 </style>
 </head>
 <body>
@@ -480,18 +249,14 @@
 
     <!-- SLIDE 1 -->
     <div class="slide active">
-      <h1>How Do We Know Customers Are Happy?
-        <span class="sub">Karur Vysya Bank · Customer Experience & Loyalty Training</span>
-      </h1>
+      <h1>How Do We Know Customers Are Happy?<span class="sub">Karur Vysya Bank · Customer Experience & Loyalty Training</span></h1>
       <img class="slide-img" src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&h=300&fit=crop" alt="">
       <ul class="bullets">
         <li>If we provide good service today, how do we know customers are satisfied?</li>
         <li>How do we measure their experience?</li>
         <li>How do we know they will stay with Karur Vysya Bank?</li>
       </ul>
-      <div class="metric-badge">
-        <p><strong>Answer:</strong> Organizations use customer metrics to measure sentiment and loyalty.</p>
-      </div>
+      <div class="metric-badge"><p><strong>Answer:</strong> Organizations use customer metrics to measure sentiment and loyalty.</p></div>
       <ul class="bullets">
         <li>📊 <strong>CSAT</strong> — Satisfaction with today's interaction</li>
         <li>⚡ <strong>CES</strong> — Effort required to get work done</li>
@@ -526,7 +291,7 @@
       </div>
     </div>
 
-    <!-- SLIDE 3 -->
+    <!-- SLIDE 3 - Modified -->
     <div class="slide">
       <h1>CSAT <span class="sub">Customer Satisfaction Score</span></h1>
       <img class="slide-img img-small" src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1200&h=200&fit=crop" alt="">
@@ -542,11 +307,14 @@
         </div>
         <div class="card tinted-yellow">
           <h3>🤔 Audience Poll</h3>
-          <ul class="bullets">
-            <li>"Can a customer be satisfied today but leave Karur Vysya Bank tomorrow?"</li>
-            <li><strong style="color:var(--kvb-green);">Answer: Yes</strong></li>
-            <li>Satisfaction alone does not guarantee loyalty.</li>
-          </ul>
+          <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;">"Can a customer be satisfied today but leave Karur Vysya Bank tomorrow?"</p>
+          <button class="reveal-btn" onclick="this.style.display='none'; document.getElementById('csat-answer').classList.add('show');">Reveal Answer</button>
+          <div class="reveal-answer" id="csat-answer">
+            ✅ YES<br>
+            <span style="font-size: 0.95rem; font-weight: 500; color: var(--text-primary); display:block; margin-top:0.5rem;">
+              Satisfaction alone does not guarantee loyalty.
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -704,16 +472,31 @@
     <!-- SLIDE 10 — LIVE DASHBOARD -->
     <div class="slide" id="dashboardSlide">
       <div class="qr-block">
-        <img src="qr.png" alt="Scan to rate Karur Vysya Bank"
-             onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&color=005F2E&bgcolor=FFFFFF&data='+encodeURIComponent(location.origin+'/user.html')">
+        <img src="qr.png" alt="Scan to rate Karur Vysya Bank" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&color=005F2E&bgcolor=FFFFFF&data='+encodeURIComponent(location.origin+'/user.html')">
         <p>📱 SCAN TO RATE KVB</p>
       </div>
 
       <div class="dashboard-header">
-        <h1 style="margin:1.5rem 0 0.3rem;font-size:1.85rem;">📊 Live Experience Dashboard</h1>
+        <h1 style="margin:1rem 0 0.1rem;font-size:1.75rem;">📊 Live Experience Dashboard</h1>
         <button class="reset-btn" id="resetDashboardBtn">🔄 Reset</button>
       </div>
-      <p style="color:var(--text-secondary);">Real-time feedback from Karur Vysya Bank participants — NPS · CSAT · CES</p>
+      <p style="color:var(--text-secondary); font-size:0.9rem;">Real-time feedback from Karur Vysya Bank participants.</p>
+
+      <!-- NEW: Metric Summary Strip -->
+      <div class="score-strip">
+        <div class="score-pill">
+          <span class="score-label">NPS Score</span>
+          <span class="score-val nps-val" id="val-nps">—</span>
+        </div>
+        <div class="score-pill">
+          <span class="score-label">CSAT Score</span>
+          <span class="score-val csat-val" id="val-csat">—</span>
+        </div>
+        <div class="score-pill">
+          <span class="score-label">CES Score</span>
+          <span class="score-val ces-val" id="val-ces">—</span>
+        </div>
+      </div>
 
       <div class="charts-row">
         <div class="chart-box">
@@ -732,15 +515,13 @@
 
       <div class="comments-section" id="commentsSection">
         <h4>💬 Recent Comments</h4>
-        <div id="commentsList">
-          <p style="color:var(--text-muted);font-size:.88rem;">Waiting for responses…</p>
-        </div>
+        <div id="commentsList"><p style="color:var(--text-muted);font-size:.88rem;">Waiting for responses…</p></div>
       </div>
 
       <div class="insights-row">
         <div class="ai-insights">
           <h4><span class="sparkle">✨</span> AI Insights <span style="font-size:0.7rem;font-weight:500;color:var(--text-muted);margin-left:auto;">powered by Groq</span></h4>
-          <div class="ai-status" id="aiStatus">Gathering comments…</div>
+          <div class="ai-status" id="aiStatus">Waiting for at least 3 comments to analyze…</div>
           <ul id="aiInsightsList"></ul>
         </div>
         <div class="wordcloud" id="wordcloud">
@@ -748,13 +529,9 @@
           <span class="empty">Awaiting comments…</span>
         </div>
       </div>
-
-      <div style="margin-top:.7rem;font-size:.84rem;color:var(--text-secondary);">
-        <span id="liveCounter">0 responses received</span>
-      </div>
     </div>
 
-    <!-- SLIDE 11 -->
+    <!-- SLIDE 11 - Modified -->
     <div class="slide">
       <h1>Why Promoters Matter?</h1>
       <img class="slide-img img-small" src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1200&h=200&fit=crop" alt="">
@@ -771,9 +548,14 @@
         </div>
         <div class="card tinted-yellow">
           <h3>💬 Discussion Question</h3>
-          <ul class="bullets">
-            <li>"Which is more powerful: A Karur Vysya Bank advertisement or a genuine customer recommendation?"</li>
-          </ul>
+          <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;">"Which is more powerful: A Karur Vysya Bank advertisement or a genuine customer recommendation?"</p>
+          <button class="reveal-btn" onclick="this.style.display='none'; document.getElementById('promo-answer').classList.add('show');">Reveal Answer</button>
+          <div class="reveal-answer" id="promo-answer">
+            🗣️ GENUINE RECOMMENDATION<br>
+            <span style="font-size: 0.95rem; font-weight: 500; color: var(--text-primary); display:block; margin-top:0.5rem;">
+              Word-of-mouth from real customers builds deep trust and drives loyalty far better than paid advertisements.
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -790,9 +572,7 @@
         <li>Ownership</li>
         <li>Professional behaviour</li>
       </ul>
-      <div class="metric-badge">
-        <p><strong>Key Message:</strong> Every interaction can create either a promoter or a detractor.</p>
-      </div>
+      <div class="metric-badge"><p><strong>Key Message:</strong> Every interaction can create either a promoter or a detractor.</p></div>
     </div>
 
     <!-- SLIDE 13 -->
@@ -824,17 +604,11 @@
     <button class="nav-btn" id="prevBtn" disabled>← Previous</button>
     <div style="text-align:center;">
       <span class="slide-counter" id="slideCounter">1 / 13</span>
-      <div class="shortcut-hint">
-        <kbd>←</kbd> <kbd>→</kbd> navigate · <kbd>F</kbd> fullscreen · <kbd>Esc</kbd> exit
-      </div>
+      <div class="shortcut-hint"><kbd>←</kbd> <kbd>→</kbd> navigate · <kbd>F</kbd> fullscreen · <kbd>Esc</kbd> exit</div>
     </div>
     <button class="nav-btn" id="nextBtn">Next →</button>
   </div>
 </div>
-
-<!-- ═══════════ FLOATING LAYERS ═══════════ -->
-<div id="emojiBurstLayer" aria-hidden="true"></div>
-<div id="commentBubbleLayer" aria-hidden="true"></div>
 
 <script>
   // ═══════════ SLIDE NAVIGATION ═══════════
@@ -861,13 +635,9 @@
     const tag = document.activeElement.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
-    if (e.key === 'ArrowRight' || e.key === ' ') {
-      e.preventDefault(); showSlide(currentSlide + 1);
-    } else if (e.key === 'ArrowLeft') {
-      e.preventDefault(); showSlide(currentSlide - 1);
-    } else if (e.key === 'f' || e.key === 'F') {
-      e.preventDefault(); toggleFullscreen();
-    }
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); showSlide(currentSlide + 1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); showSlide(currentSlide - 1); }
+    else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFullscreen(); }
   });
 
   function toggleFullscreen() {
@@ -879,84 +649,46 @@
       if (document.exitFullscreen) document.exitFullscreen();
     }
   }
-
   showSlide(0);
 
-  // ═══════════════════════════════════════════════
-  // 🔊 MOOD-BASED CHIMES
-  // ═══════════════════════════════════════════════
+  // ═══════════ SOUND CHIME ═══════════
   let audioCtx = null;
-
-  function ensureAudioCtx() {
-    if (!audioCtx) {
-      try {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      } catch (e) {
-        console.warn('AudioContext not supported');
-      }
-    }
-    if (audioCtx && audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
-    return audioCtx;
-  }
-
   function playMoodChime(mood) {
-    const ctx = ensureAudioCtx();
-    if (!ctx) return;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      
+      const now = audioCtx.currentTime;
+      const masterGain = audioCtx.createGain();
+      masterGain.gain.value = 0.38;
+      masterGain.connect(audioCtx.destination);
 
-    const now = ctx.currentTime;
-    const masterGain = ctx.createGain();
-    masterGain.gain.value = 0.38;
-    masterGain.connect(ctx.destination);
+      let notes, stagger, baseDuration, oscType;
+      if (mood === 'promoter') { notes = [1046.5, 1318.5, 1568.0]; stagger = 0.10; baseDuration = 1.15; oscType = 'triangle'; }
+      else if (mood === 'passive') { notes = [659.3, 987.8, 784.0]; stagger = 0.13; baseDuration = 1.0; oscType = 'sine'; }
+      else { notes = [880.0, 698.5, 587.3]; stagger = 0.16; baseDuration = 1.1; oscType = 'sine'; }
 
-    let notes, stagger, baseDuration, oscType;
-
-    if (mood === 'promoter') {
-      notes = [1046.5, 1318.5, 1568.0];     // C6, E6, G6 — happy ascending major
-      stagger = 0.10; baseDuration = 1.15; oscType = 'triangle';
-    } else if (mood === 'passive') {
-      notes = [659.3, 987.8, 784.0];        // E5, B5, G5 — neutral fifth
-      stagger = 0.13; baseDuration = 1.0;  oscType = 'sine';
-    } else {
-      notes = [880.0, 698.5, 587.3];        // A5, F5, D5 — descending minor
-      stagger = 0.16; baseDuration = 1.1;  oscType = 'sine';
-    }
-
-    notes.forEach((freq, i) => {
-      const startTime = now + i * stagger;
-      const duration = baseDuration + i * 0.12;
-
-      const osc = ctx.createOscillator();
-      osc.type = oscType;
-      osc.frequency.value = freq;
-
-      const harmonic = ctx.createOscillator();
-      harmonic.type = 'sine';
-      harmonic.frequency.value = freq * 2.01;
-
-      const mainGain = ctx.createGain();
-      mainGain.gain.setValueAtTime(0, startTime);
-      mainGain.gain.linearRampToValueAtTime(0.9, startTime + 0.015);
-      mainGain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-
-      const harmGain = ctx.createGain();
-      const harmLevel = mood === 'detractor' ? 0.15 : 0.28;
-      harmGain.gain.setValueAtTime(0, startTime);
-      harmGain.gain.linearRampToValueAtTime(harmLevel, startTime + 0.02);
-      harmGain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration * 0.7);
-
-      osc.connect(mainGain);
-      mainGain.connect(masterGain);
-      harmonic.connect(harmGain);
-      harmGain.connect(masterGain);
-
-      osc.start(startTime);
-      osc.stop(startTime + duration + 0.05);
-      harmonic.start(startTime);
-      harmonic.stop(startTime + duration + 0.05);
-    });
+      notes.forEach((freq, i) => {
+        const startTime = now + i * stagger;
+        const duration = baseDuration + i * 0.12;
+        const osc = audioCtx.createOscillator(); osc.type = oscType; osc.frequency.value = freq;
+        const harmonic = audioCtx.createOscillator(); harmonic.type = 'sine'; harmonic.frequency.value = freq * 2.01;
+        
+        const mainGain = audioCtx.createGain(); mainGain.gain.setValueAtTime(0, startTime); mainGain.gain.linearRampToValueAtTime(0.9, startTime + 0.015); mainGain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+        const harmGain = audioCtx.createGain(); harmGain.gain.setValueAtTime(0, startTime); harmGain.gain.linearRampToValueAtTime(0.28, startTime + 0.02); harmGain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration * 0.7);
+        
+        osc.connect(mainGain); mainGain.connect(masterGain);
+        harmonic.connect(harmGain); harmGain.connect(masterGain);
+        
+        osc.start(startTime); osc.stop(startTime + duration + 0.05);
+        harmonic.start(startTime); harmonic.stop(startTime + duration + 0.05);
+      });
+    } catch (e) {}
   }
+  
+  // Unlock audio on first user gesture
+  let audioUnlocked = false;
+  document.addEventListener('click', () => { if(!audioUnlocked && audioCtx) { audioCtx.resume(); audioUnlocked = true; } });
 
   function moodForEntry(entry) {
     if (entry.nps >= 9) return 'promoter';
@@ -964,451 +696,170 @@
     return 'detractor';
   }
 
-  let audioUnlocked = false;
-  function unlockAudio() {
-    if (audioUnlocked) return;
-    const ctx = ensureAudioCtx();
-    if (ctx) {
-      audioUnlocked = true;
-      try {
-        const g = ctx.createGain();
-        g.gain.value = 0.0001;
-        g.connect(ctx.destination);
-        const o = ctx.createOscillator();
-        o.connect(g);
-        o.start();
-        o.stop(ctx.currentTime + 0.01);
-      } catch (e) {}
-    }
-  }
-  document.addEventListener('click', unlockAudio, { once: false });
-  document.addEventListener('keydown', unlockAudio, { once: false });
-  document.addEventListener('touchstart', unlockAudio, { once: false });
-
-  // ═══════════════════════════════════════════════
-  // 🎉 SCATTERED FLOATING EMOJI BURST
-  // ═══════════════════════════════════════════════
-  const CHEER_EMOJIS  = ['🎉', '👏', '🌟', '💚', '🔥', '✨', '🙌', '💯', '🥳', '😍', '💫', '🏆'];
-  const FROWN_EMOJIS  = ['😟', '😕', '😞', '💔', '😢', '😠', '👎', '😔'];
-  const NEUTRAL_EMOJIS = ['👀', '💭', '🤔', '📊'];
-
+  // ═══════════ EMOJI BURST ═══════════
   function spawnEmojiBurst(entry) {
     const layer = document.getElementById('emojiBurstLayer');
     if (!layer) return;
-
-    const npsScore  = Math.max(0, Math.min(10, entry.nps || 0)) / 10;
-    const csatScore = Math.max(1, Math.min(5,  entry.csat || 3)) / 5;
-    const cesScore  = Math.max(1, Math.min(5,  entry.ces  || 3)) / 5;
-    const score = (npsScore * 0.4) + (csatScore * 0.3) + (cesScore * 0.3);
-
-    const count = 14 + Math.floor(Math.random() * 5);
-
-    let pool;
-    if (score >= 0.75) pool = CHEER_EMOJIS;
-    else if (score >= 0.5) pool = [...CHEER_EMOJIS, ...NEUTRAL_EMOJIS];
-    else if (score >= 0.3) pool = [...NEUTRAL_EMOJIS, ...FROWN_EMOJIS];
-    else pool = FROWN_EMOJIS;
-
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-
-    const cols = 6;
-    const rows = 3;
-    const cellsTotal = cols * rows;
-
-    const cellIdx = Array.from({ length: cellsTotal }, (_, i) => i);
-    for (let i = cellIdx.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [cellIdx[i], cellIdx[j]] = [cellIdx[j], cellIdx[i]];
-    }
-
-    for (let i = 0; i < count; i++) {
-      const el = document.createElement('span');
-      el.className = 'float-emoji';
-      const r = Math.random();
-      if (r < 0.28) el.classList.add('large');
-      else if (r < 0.68) el.classList.add('small');
-
+    const npsScore = Math.max(0, Math.min(10, entry.nps || 0)) / 10;
+    const score = (npsScore * 0.4) + ((entry.csat/5) * 0.3) + ((entry.ces/5) * 0.3);
+    let pool = score >= 0.75 ? ['🎉','👏','🌟','💚','🔥','✨','🙌','💯','🥳','😍'] : (score >= 0.4 ? ['👀','💭','🤔','📊'] : ['😟','😕','😞','💔','😢','😠','👎','😔']);
+    const vw = window.innerWidth, vh = window.innerHeight;
+    
+    for (let i = 0; i < 15; i++) {
+      const el = document.createElement('span'); el.className = 'float-emoji';
       el.textContent = pool[Math.floor(Math.random() * pool.length)];
-
-      const cell = cellIdx[i % cellsTotal];
-      const col = cell % cols;
-      const row = Math.floor(cell / cols);
-
-      const cellW = vw / cols;
-      const cellH = (vh * 0.85) / rows;
-
-      const baseX = col * cellW + cellW * 0.5;
-      const baseY = row * cellH + cellH * 0.5 + vh * 0.10;
-
-      const jitterX = (Math.random() - 0.5) * cellW * 0.6;
-      const jitterY = (Math.random() - 0.5) * cellH * 0.5;
-
-      const startX = baseX + jitterX;
-      const startY = baseY + jitterY;
-
-      el.style.left = startX + 'px';
-      el.style.top  = startY + 'px';
-
-      const driftX  = (Math.random() - 0.5) * 60;
-      const driftX2 = driftX + (Math.random() - 0.5) * 70;
-      const driftX3 = driftX2 + (Math.random() - 0.5) * 80;
-
-      const dy1 = -30 - Math.random() * 30;
-      const dy2 = -80 - Math.random() * 60;
-      const dy3 = -160 - Math.random() * 120;
-
-      const rot = (Math.random() - 0.5) * 40;
-
-      el.style.setProperty('--dx1', driftX  + 'px');
-      el.style.setProperty('--dy1', dy1 + 'px');
-      el.style.setProperty('--dx2', driftX2 + 'px');
-      el.style.setProperty('--dy2', dy2 + 'px');
-      el.style.setProperty('--dx3', driftX3 + 'px');
-      el.style.setProperty('--dy3', dy3 + 'px');
-      el.style.setProperty('--rot', rot + 'deg');
-
-      el.style.animationDelay = (i * 60 + Math.random() * 40) + 'ms';
-
-      layer.appendChild(el);
-
-      const totalDelay = parseFloat(el.style.animationDelay) || 0;
-      setTimeout(() => {
-        if (el.parentNode) el.parentNode.removeChild(el);
-      }, 4200 + totalDelay);
+      const startX = (vw/6)*(i%6) + Math.random()*(vw/6), startY = vh*0.6 + Math.random()*vh*0.3;
+      el.style.left = startX+'px'; el.style.top = startY+'px';
+      el.style.setProperty('--dx1', (Math.random()-0.5)*60+'px'); el.style.setProperty('--dy1', -60+'px');
+      el.style.setProperty('--dx2', (Math.random()-0.5)*120+'px'); el.style.setProperty('--dy2', -140+'px');
+      el.style.setProperty('--dx3', (Math.random()-0.5)*180+'px'); el.style.setProperty('--dy3', -220+'px');
+      el.style.setProperty('--rot', (Math.random()-0.5)*30+'deg'); el.style.animationDelay = (i*40)+'ms';
+      layer.appendChild(el); setTimeout(() => el.remove(), 3800 + i*40);
     }
   }
 
-  // ═══════════════════════════════════════════════
-  // 💬 FLOATING COMMENT BUBBLES — same 3.5s window
-  // ═══════════════════════════════════════════════
-  function initialsFor(name) {
-    if (!name) return '?';
-    const parts = String(name).trim().split(/\s+/).filter(Boolean);
-    if (!parts.length) return '?';
-    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
-  }
-
+  // ═══════════ COMMENT BUBBLE ═══════════
   function spawnCommentBubble(entry) {
     const layer = document.getElementById('commentBubbleLayer');
     if (!layer) return;
-
-    // Skip if there's truly nothing to show
-    const name = (entry.user || '').trim();
-    const text = (entry.comment || '').trim();
-    if (!name && !text) return;
-
-    const mood = moodForEntry(entry);
-
-    const el = document.createElement('div');
-    el.className = 'float-bubble mood-' + mood;
-
-    // Choose a display name
-    const displayName = name || 'Anonymous';
-
-    // Truncate very long comments
-    const displayText = text.length > 120 ? text.slice(0, 117) + '…' : text;
-
-    // Avatar initials
-    const avatar = initialsFor(displayName);
-
-    // Build inner HTML (escaped)
-    const safeName = escapeHtml(displayName);
-    const safeText = escapeHtml(displayText);
-    const rating = `NPS ${entry.nps} · CSAT ${entry.csat} · CES ${entry.ces}`;
-
-    el.innerHTML = `
-      <div class="bubble-user">
-        <span class="bubble-avatar">${avatar}</span>
-        <span>${safeName}</span>
-      </div>
-      ${safeText ? `<div class="bubble-text">"${safeText}"</div>` : ''}
-      <div class="bubble-rating">${rating}</div>
-    `;
-
-    // Positioning — scatter across TOP 55% of screen so it doesn't cover
-    // the charts and controls below
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-
-    // Divide top area into a 3-column × 2-row grid = 6 cells for bubbles
-    // but we only spawn ONE bubble per submission, so pick a random cell
-    const cols = 3;
-    const rows = 2;
-    const cell = Math.floor(Math.random() * (cols * rows));
-    const col = cell % cols;
-    const row = Math.floor(cell / cols);
-
-    const cellW = vw / cols;
-    const cellH = (vh * 0.55) / rows;
-
-    const baseX = col * cellW + cellW * 0.5;
-    const baseY = row * cellH + cellH * 0.5 + vh * 0.06;
-
-    const jitterX = (Math.random() - 0.5) * cellW * 0.5;
-    const jitterY = (Math.random() - 0.5) * cellH * 0.4;
-
-    const startX = baseX + jitterX;
-    const startY = baseY + jitterY;
-
-    el.style.left = startX + 'px';
-    el.style.top  = startY + 'px';
-
-    // Drift parameters
-    const dx2 = (Math.random() - 0.5) * 100;
-    const dx3 = dx2 + (Math.random() - 0.5) * 80;
-    const dy1 = -25;
-    const dy2 = -100;
-    const dy3 = -180 - Math.random() * 60;
-
-    const rot = (Math.random() - 0.5) * 8; // subtle tilt
-
-    el.style.setProperty('--dy1', dy1 + 'px');
-    el.style.setProperty('--dx2', dx2 + 'px');
-    el.style.setProperty('--dy2', dy2 + 'px');
-    el.style.setProperty('--dx3', dx3 + 'px');
-    el.style.setProperty('--dy3', dy3 + 'px');
-    el.style.setProperty('--rot', rot + 'deg');
-
-    // Slight delay so it appears AFTER a couple of emojis (feels layered)
-    el.style.animationDelay = (250 + Math.random() * 200) + 'ms';
-
-    layer.appendChild(el);
-
-    // Remove after animation completes
-    const totalDelay = parseFloat(el.style.animationDelay) || 0;
-    setTimeout(() => {
-      if (el.parentNode) el.parentNode.removeChild(el);
-    }, 4200 + totalDelay);
+    const name = (entry.user || 'Anonymous').trim(), text = (entry.comment || '').trim();
+    if (!text) return;
+    const el = document.createElement('div'); el.className = 'float-bubble mood-' + moodForEntry(entry);
+    el.innerHTML = `<div class="bubble-user"><span class="bubble-avatar">${name[0].toUpperCase()}</span>${name}</div><div class="bubble-text">"${text}"</div>`;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    el.style.left = (vw*0.2 + Math.random()*vw*0.6)+'px'; el.style.top = (vh*0.3 + Math.random()*vh*0.3)+'px';
+    el.style.setProperty('--dy1', -25+'px'); el.style.setProperty('--dx2', (Math.random()-0.5)*80+'px'); el.style.setProperty('--dy2', -100+'px'); el.style.setProperty('--dx3', (Math.random()-0.5)*120+'px'); el.style.setProperty('--dy3', -180+'px'); el.style.setProperty('--rot', '0deg');
+    el.style.animationDelay = '200ms';
+    layer.appendChild(el); setTimeout(() => el.remove(), 4000);
   }
 
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, m => ({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-    }[m]));
-  }
-
-  // ═══════════ DASHBOARD ═══════════
+  // ═══════════ DASHBOARD STATE & CHARTS ═══════════
   let npsChart, csatChart, cesChart;
-  const state = {
-    nps: { promoters: 0, passives: 0, detractors: 0 },
-    csat: [0, 0, 0, 0, 0],
-    ces:  [0, 0, 0, 0, 0],
-    comments: []
-  };
-
-  const CHART_GREEN  = '#4CAF50';
-  const CHART_YELLOW = '#E0C418';
-  const CHART_RED    = '#C15C5C';
-  const CHART_ORANGE = '#D4813F';
+  const state = { nps: { promoters: 0, passives: 0, detractors: 0 }, csat: [0,0,0,0,0], ces: [0,0,0,0,0], comments: [] };
 
   function initCharts() {
     const commonOpts = { responsive: true, maintainAspectRatio: false };
-
     npsChart = new Chart(document.getElementById('npsChart'), {
       type: 'doughnut',
-      data: {
-        labels: ['Promoters', 'Passives', 'Detractors'],
-        datasets: [{
-          data: [0, 0, 0],
-          backgroundColor: [CHART_GREEN, CHART_YELLOW, CHART_RED],
-          borderWidth: 0
-        }]
-      },
-      options: {
-        ...commonOpts,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              boxWidth: 12,
-              font: { size: 11 },
-              generateLabels: (chart) => {
-                const real = state.nps
-                  ? [state.nps.promoters, state.nps.passives, state.nps.detractors]
-                  : [0, 0, 0];
-                return chart.data.labels.map((label, i) => ({
-                  text: `${label} (${real[i]})`,
-                  fillStyle: chart.data.datasets[0].backgroundColor[i],
-                  strokeStyle: chart.data.datasets[0].backgroundColor[i],
-                  fontColor: '#1A1A1A',
-                  lineWidth: 0
-                }));
-              }
-            }
-          }
-        },
-        cutout: '60%'
-      }
+      data: { labels: ['Promoters', 'Passives', 'Detractors'], datasets: [{ data: [0,0,0], backgroundColor: ['#4CAF50', '#E0C418', '#C15C5C'], borderWidth: 0 }] },
+      options: { ...commonOpts, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: {size: 11} } } }, cutout: '60%' }
     });
-
     csatChart = new Chart(document.getElementById('csatChart'), {
       type: 'bar',
-      data: {
-        labels: ['1★', '2★', '3★', '4★', '5★'],
-        datasets: [{
-          data: [0, 0, 0, 0, 0],
-          backgroundColor: [CHART_RED, CHART_ORANGE, CHART_YELLOW, CHART_GREEN, '#2E7D32'],
-          borderRadius: 6
-        }]
-      },
-      options: {
-        ...commonOpts,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, grid: { color: '#EDEDE5' }, ticks: { stepSize: 1, precision: 0 } },
-          x: { grid: { display: false } }
-        }
-      }
+      data: { labels: ['1★', '2★', '3★', '4★', '5★'], datasets: [{ data: [0,0,0,0,0], backgroundColor: ['#C15C5C', '#D4813F', '#E0C418', '#4CAF50', '#2E7D32'], borderRadius: 6 }] },
+      options: { ...commonOpts, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { grid: { display: false } } } }
     });
-
     cesChart = new Chart(document.getElementById('cesChart'), {
       type: 'bar',
-      data: {
-        labels: ['😫', '😟', '😐', '🙂', '😎'],
-        datasets: [{
-          data: [0, 0, 0, 0, 0],
-          backgroundColor: [CHART_RED, CHART_ORANGE, CHART_YELLOW, CHART_GREEN, '#2E7D32'],
-          borderRadius: 6
-        }]
-      },
-      options: {
-        ...commonOpts,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, grid: { color: '#EDEDE5' }, ticks: { stepSize: 1, precision: 0 } },
-          x: { grid: { display: false } }
-        }
-      }
+      data: { labels: ['😫', '😟', '😐', '🙂', '😎'], datasets: [{ data: [0,0,0,0,0], backgroundColor: ['#C15C5C', '#D4813F', '#E0C418', '#4CAF50', '#2E7D32'], borderRadius: 6 }] },
+      options: { ...commonOpts, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { grid: { display: false } } } }
     });
   }
 
-  function refreshCharts() {
-    const p  = state.nps.promoters;
-    const pa = state.nps.passives;
-    const d  = state.nps.detractors;
-    const total = p + pa + d;
-
-    if (total === 0) {
-      npsChart.data.datasets[0].data = [0, 0, 0];
-    } else {
-      npsChart.data.datasets[0].data = [
-        p  > 0 ? p  : 0.0001,
-        pa > 0 ? pa : 0.0001,
-        d  > 0 ? d  : 0.0001
-      ];
-    }
+  function refreshDashboard() {
+    const total = state.nps.promoters + state.nps.passives + state.nps.detractors;
+    
+    // Update Charts
+    npsChart.data.datasets[0].data = total === 0 ? [0,0,0] : [state.nps.promoters||0.001, state.nps.passives||0.001, state.nps.detractors||0.001];
     npsChart.update();
+    csatChart.data.datasets[0].data = state.csat; csatChart.update();
+    cesChart.data.datasets[0].data = state.ces; cesChart.update();
 
-    csatChart.data.datasets[0].data = state.csat;
-    csatChart.update();
-    cesChart.data.datasets[0].data = state.ces;
-    cesChart.update();
-  }
+    // Update Live Scores
+    if (total === 0) {
+      document.getElementById('val-nps').textContent = '—';
+      document.getElementById('val-csat').textContent = '—';
+      document.getElementById('val-ces').textContent = '—';
+    } else {
+      // NPS: % Promoters - % Detractors
+      const npsVal = Math.round(((state.nps.promoters / total) - (state.nps.detractors / total)) * 100);
+      document.getElementById('val-nps').textContent = (npsVal > 0 ? '+' : '') + npsVal;
 
-  function addResponse(entry, opts = {}) {
-    if (entry.nps >= 9) state.nps.promoters++;
-    else if (entry.nps >= 7) state.nps.passives++;
-    else state.nps.detractors++;
+      // CSAT: Percentage of 4s and 5s
+      const csatGood = state.csat[3] + state.csat[4];
+      const csatPct = Math.round((csatGood / total) * 100);
+      document.getElementById('val-csat').textContent = csatPct + '%';
 
-    const csatIdx = Math.max(0, Math.min(4, entry.csat - 1));
-    state.csat[csatIdx]++;
-
-    const cesIdx = Math.max(0, Math.min(4, entry.ces - 1));
-    state.ces[cesIdx]++;
-
-    if (entry.comment || entry.user) {
-      state.comments.unshift({
-        user: entry.user || 'Anonymous',
-        text: entry.comment || '(no comment)',
-        rating: `NPS ${entry.nps} · CSAT ${entry.csat} · CES ${entry.ces}`
-      });
-      if (state.comments.length > 20) state.comments.pop();
+      // CES: Average (1-5)
+      let cesSum = 0;
+      state.ces.forEach((count, i) => { cesSum += (i + 1) * count; });
+      document.getElementById('val-ces').textContent = (cesSum / total).toFixed(1);
     }
 
-    refreshCharts();
-    renderComments();
-    updateCounter();
-    updateWordCloud();
-
-    if (!opts.silent) {
-      spawnEmojiBurst(entry);
-      spawnCommentBubble(entry);
-    }
-
-    if (state.comments.length > 0 && state.comments.length % 5 === 0) {
-      fetchAIInsights();
-    }
-  }
-
-  function renderComments() {
+    // Update Comments Feed
     const list = document.getElementById('commentsList');
-    if (!state.comments.length) {
-      list.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;">Waiting for responses…</p>';
-      return;
-    }
-    list.innerHTML = state.comments.slice(0, 5).map(c => `
+    if (!state.comments.length) list.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;">Waiting for responses…</p>';
+    else list.innerHTML = state.comments.slice(0, 5).map(c => `
       <div class="comment-item">
-        <span class="comment-user">${escapeHtml(c.user)}</span>
-        <span class="comment-text">${escapeHtml(c.text)}</span>
+        <span class="comment-user">${c.user}</span>
+        <span class="comment-text">${c.text || '(no comment)'}</span>
         <span class="comment-rating">${c.rating}</span>
       </div>
     `).join('');
   }
 
-  function updateCounter() {
-    const total = state.nps.promoters + state.nps.passives + state.nps.detractors;
-    document.getElementById('liveCounter').textContent = `${total} responses received`;
+  function addResponse(entry, silent = false) {
+    if (entry.nps >= 9) state.nps.promoters++;
+    else if (entry.nps >= 7) state.nps.passives++;
+    else state.nps.detractors++;
+
+    state.csat[Math.max(0, Math.min(4, entry.csat - 1))]++;
+    state.ces[Math.max(0, Math.min(4, entry.ces - 1))]++;
+
+    if (entry.comment || entry.user) {
+      state.comments.unshift({ user: entry.user || 'Anonymous', text: entry.comment, rating: `NPS ${entry.nps} · CSAT ${entry.csat} · CES ${entry.ces}` });
+      if (state.comments.length > 20) state.comments.pop();
+    }
+
+    refreshDashboard();
+    updateWordCloud();
+    
+    if (!silent) {
+      spawnEmojiBurst(entry);
+      spawnCommentBubble(entry);
+      playMoodChime(moodForEntry(entry));
+    }
+    
+    // Trigger AI every 3 comments
+    if (state.comments.length > 0 && state.comments.length % 3 === 0) {
+      fetchAIInsights();
+    }
+  }
+
+  function clearDashboard() {
+    state.nps = { promoters: 0, passives: 0, detractors: 0 };
+    state.csat = [0,0,0,0,0]; state.ces = [0,0,0,0,0]; state.comments = [];
+    refreshDashboard();
+    updateWordCloud();
+    document.getElementById('aiInsightsList').innerHTML = '';
+    document.getElementById('aiStatus').textContent = 'Waiting for at least 3 comments to analyze…';
+    lastAICommentCount = 0;
   }
 
   // ═══════════ WORD CLOUD ═══════════
-  const STOP_WORDS = new Set([
-    'the','a','an','and','or','but','of','to','in','on','at','is','it','i','we','you','they',
-    'was','were','are','be','been','have','has','had','do','does','did','for','with','as',
-    'this','that','these','those','my','our','your','their','very','so','too','much','many',
-    'good','bad','nice','ok','okay','fine','not','no','yes','if','then','than','also',
-    'can','could','will','would','should','may','might','must','about','from','by','up','down',
-    'out','off','over','under','again','only','just','really','quite','more','most','less'
-  ]);
-
-  function extractWords() {
+  const STOP_WORDS = new Set(['the','a','an','and','or','but','of','to','in','on','at','is','it','i','we','you','they','was','were','are','be','been','have','has','had','do','does','did','for','with','as','this','that','these','those','my','our','your','their','very','so','too','much','many','good','bad','nice','ok','okay','fine','not','no','yes','if','then','than','also','can','could','will','would','should','may','might','must','about','from','by','up','down','out','off','over','under','again','only','just','really','quite','more','most','less']);
+  function updateWordCloud() {
     const counts = {};
     state.comments.forEach(c => {
-      const words = (c.text || '').toLowerCase()
-        .replace(/[^a-z\s]/g, ' ')
-        .split(/\s+/)
-        .filter(w => w.length >= 3 && !STOP_WORDS.has(w));
+      const words = (c.text || '').toLowerCase().replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(w => w.length >= 3 && !STOP_WORDS.has(w));
       words.forEach(w => { counts[w] = (counts[w] || 0) + 1; });
     });
-    return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 18);
-  }
-
-  function updateWordCloud() {
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 18);
     const container = document.getElementById('wordcloud');
-    const words = extractWords();
-    if (!words.length) {
-      container.innerHTML = '<h4>TOP THEMES</h4><span class="empty">Awaiting comments…</span>';
-      return;
-    }
-    const max = words[0][1];
-    const min = words[words.length - 1][1];
+    if (!sorted.length) { container.innerHTML = '<h4>TOP THEMES</h4><span class="empty">Awaiting comments…</span>'; return; }
+    
+    const max = sorted[0][1], min = sorted[sorted.length-1][1];
     const palette = ['#007A3D', '#005F2E', '#C9A600', '#4C7A12', '#A88300'];
-    container.innerHTML = '<h4>TOP THEMES</h4>' + words.map(([word, count], i) => {
+    container.innerHTML = '<h4>TOP THEMES</h4>' + sorted.map(([word, count], i) => {
       const t = max === min ? 1 : (count - min) / (max - min);
       const size = 0.78 + t * 1.05;
-      const weight = count >= max * 0.7 ? 800 : count >= max * 0.4 ? 700 : 600;
       const color = palette[i % palette.length];
-      return `<span class="wc-word" style="font-size:${size}rem;font-weight:${weight};color:${color};" title="${count} mention${count > 1 ? 's' : ''}">${escapeHtml(word)}</span>`;
+      return `<span class="wc-word" style="font-size:${size}rem;font-weight:800;color:${color};">${word}</span>`;
     }).join('');
   }
 
-  // ═══════════ AI INSIGHTS ═══════════
-  let aiInFlight = false;
-  let lastAICommentCount = 0;
-
+  // ═══════════ AI INSIGHTS (UPDATED) ═══════════
+  let aiInFlight = false, lastAICommentCount = 0;
   async function fetchAIInsights() {
     if (aiInFlight) return;
     const comments = state.comments.map(c => c.text).filter(t => t && t !== '(no comment)');
@@ -1418,7 +869,8 @@
     aiInFlight = true;
     const status = document.getElementById('aiStatus');
     const list = document.getElementById('aiInsightsList');
-    status.textContent = 'Analyzing…';
+    status.textContent = 'Analyzing comments…';
+    status.style.color = 'var(--text-muted)';
 
     try {
       const res = await fetch('/groq', {
@@ -1427,106 +879,96 @@
         body: JSON.stringify({
           model: 'llama-3.1-8b-instant',
           messages: [
-            {
-              role: 'system',
-              content: 'You are a customer experience analyst. Given a list of customer comments, produce exactly 3 short, specific insights (max 12 words each). Output ONLY a JSON object with key "insights" whose value is an array of 3 strings. Focus on recurring themes, sentiment, and actionable takeaways.'
-            },
-            {
-              role: 'user',
-              content: 'Comments:\n' + comments.slice(0, 25).map((c, i) => `${i + 1}. ${c}`).join('\n')
-            }
+            { role: 'system', content: 'You are a CX analyst. Produce exactly 3 short insights (max 12 words each). Output ONLY a JSON object with key "insights" containing an array of 3 strings. Focus on actionable takeaways.' },
+            { role: 'user', content: 'Comments:\n' + comments.slice(0, 20).map((c, i) => `${i + 1}. ${c}`).join('\n') }
           ],
-          temperature: 0.4,
-          max_tokens: 220,
+          temperature: 0.3,
           response_format: { type: 'json_object' }
         })
       });
 
+      if (!res.ok) {
+        const errData = await res.json().catch(()=>({}));
+        throw new Error(errData.error || `HTTP ${res.status}`);
+      }
+
       const data = await res.json();
-      const raw = data?.choices?.[0]?.message?.content || '';
+      const raw = data?.choices?.[0]?.message?.content || '{}';
       let insights = [];
       try {
         const parsed = JSON.parse(raw);
         insights = Array.isArray(parsed) ? parsed : (parsed.insights || parsed.points || []);
-      } catch {
-        insights = raw.split('\n').map(s => s.replace(/^[\d\.\-\•\s]+/, '').trim()).filter(Boolean).slice(0, 3);
-      }
+      } catch { insights = raw.split('\n').filter(s => s.trim()).slice(0, 3); }
 
       if (insights.length) {
-        list.innerHTML = insights.slice(0, 3).map(t => `<li>${escapeHtml(t)}</li>`).join('');
-        status.textContent = `Based on ${comments.length} comment${comments.length > 1 ? 's' : ''}`;
+        list.innerHTML = insights.map(t => `<li>${t.replace(/^[-\d.\s•]+/, '')}</li>`).join('');
+        status.textContent = `Based on ${comments.length} comments`;
+        status.style.color = 'var(--kvb-green)';
         lastAICommentCount = comments.length;
       } else {
-        status.textContent = 'No insights yet.';
+        status.textContent = 'No insights generated.';
       }
     } catch (err) {
-      console.warn('AI insight fetch failed:', err);
-      status.textContent = 'AI analysis unavailable.';
+      console.warn('AI error:', err);
+      status.textContent = 'AI unavailable: ' + err.message;
+      status.style.color = '#C15C1C';
     } finally {
       aiInFlight = false;
     }
   }
 
-  function clearDashboard() {
-    state.nps = { promoters: 0, passives: 0, detractors: 0 };
-    state.csat = [0, 0, 0, 0, 0];
-    state.ces  = [0, 0, 0, 0, 0];
-    state.comments = [];
-    refreshCharts();
-    renderComments();
-    updateCounter();
-    updateWordCloud();
-    document.getElementById('aiInsightsList').innerHTML = '';
-    document.getElementById('aiStatus').textContent = 'Gathering comments…';
-    lastAICommentCount = 0;
-  }
-
-  function rebuildFromScratch(entries) {
-    clearDashboard();
-    entries.forEach(e => addResponse(e, { silent: true }));
-  }
-
   // ═══════════ WEBSOCKET ═══════════
   const WS_URL = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
   let ws;
-
   function connectWS() {
     ws = new WebSocket(WS_URL);
-    ws.onopen = () => console.log('✅ Connected to relay');
+    ws.onopen = () => console.log('✅ Connected');
     ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
-      if (msg.type === 'init') rebuildFromScratch(msg.responses);
-      else if (msg.type === 'new') {
-        addResponse(msg.entry);
-        playMoodChime(moodForEntry(msg.entry));
-      }
+      if (msg.type === 'init') { clearDashboard(); msg.responses.forEach(e => addResponse(e, true)); }
+      else if (msg.type === 'new') addResponse(msg.entry);
       else if (msg.type === 'reset') clearDashboard();
     };
-    ws.onclose = () => {
-      console.warn('⚠️ Disconnected. Retrying in 2s…');
-      setTimeout(connectWS, 2000);
-    };
-    ws.onerror = (err) => console.error('WS error', err);
+    ws.onclose = () => setTimeout(connectWS, 2000);
   }
 
   document.getElementById('resetDashboardBtn').addEventListener('click', () => {
     if (confirm('Clear all responses for everyone?')) {
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: 'reset' }));
-      }
+      if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'reset' }));
     }
   });
 
-  // ═══════════ BOOT ═══════════
   window.addEventListener('load', () => {
-    initCharts();
-    renderComments();
-    updateCounter();
-    updateWordCloud();
-    connectWS();
-
+    initCharts(); refreshDashboard(); updateWordCloud(); connectWS();
     setInterval(() => { fetchAIInsights(); }, 30000);
   });
 </script>
+
+<!-- Floating layers for animations -->
+<div id="emojiBurstLayer" style="position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;"></div>
+<div id="commentBubbleLayer" style="position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:hidden;"></div>
+
+<style>
+  .float-emoji { position:absolute; font-size:3rem; opacity:0; transform:translate(-50%, -50%) scale(0.3); animation:emojiFloat 3.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; filter:drop-shadow(0 4px 10px rgba(0,0,0,0.14)); }
+  @keyframes emojiFloat {
+    0% { opacity:0; transform:translate(-50%, -50%) scale(0.3) rotate(0deg); }
+    10% { opacity:1; transform:translate(-50%, -50%) scale(1.1) rotate(var(--rot, 0deg)); }
+    40% { opacity:1; transform:translate(calc(-50% + var(--dx1, 0px)), calc(-50% + var(--dy1, -60px))) scale(1) rotate(var(--rot, 0deg)); }
+    70% { opacity:0.85; transform:translate(calc(-50% + var(--dx2, 0px)), calc(-50% + var(--dy2, -140px))) scale(1.02) rotate(var(--rot, 0deg)); }
+    100% { opacity:0; transform:translate(calc(-50% + var(--dx3, 0px)), calc(-50% + var(--dy3, -220px))) scale(0.55) rotate(var(--rot, 0deg)); }
+  }
+  .float-bubble { position:absolute; max-width:280px; padding:12px 16px; background:#fff; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.18); border-left:5px solid var(--kvb-green); opacity:0; transform:translate(-50%, -50%) scale(0.4); animation:bubbleFloat 3.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; font-family:'Inter',sans-serif; }
+  .float-bubble.mood-passive { border-left-color: #C9A600; }
+  .float-bubble.mood-detractor { border-left-color: #C15C5C; }
+  .bubble-user { font-size:0.9rem; font-weight:800; color:var(--kvb-green-deep); display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+  .bubble-avatar { width:20px; height:20px; border-radius:50%; background:var(--kvb-yellow); color:#fff; font-size:0.65rem; display:flex; align-items:center; justify-content:center; }
+  .bubble-text { font-size:0.85rem; color:var(--text-primary); font-weight:500; line-height:1.4; }
+  @keyframes bubbleFloat {
+    0% { opacity:0; transform:translate(-50%, -50%) scale(0.4); }
+    15% { opacity:1; transform:translate(-50%, -50%) scale(1.05); }
+    80% { opacity:1; transform:translate(calc(-50% + var(--dx2, 0px)), calc(-50% + var(--dy2, -100px))) scale(1); }
+    100% { opacity:0; transform:translate(calc(-50% + var(--dx3, 0px)), calc(-50% + var(--dy3, -180px))) scale(0.8); }
+  }
+</style>
 </body>
 </html>
