@@ -106,7 +106,7 @@
   .slide-img { width: 100%; height: 165px; object-fit: cover; border-radius: 16px; margin: 0.6rem 0 1rem; filter: saturate(0.92); border: 1px solid var(--matte-border); }
   .img-small { height: 115px; }
 
-  /* --- NEW: GAMIFIED REVEAL BUTTON --- */
+  /* --- GAMIFIED REVEAL BUTTON --- */
   .reveal-btn {
     background: var(--kvb-yellow);
     color: var(--kvb-green-deep);
@@ -150,7 +150,7 @@
   }
   .reset-btn:hover { background: #C15C1E; color: #fff; }
 
-  /* NEW: Live Score Summary Strip */
+  /* Live Score Summary Strip */
   .score-strip {
     display: flex;
     gap: 1rem;
@@ -291,7 +291,7 @@
       </div>
     </div>
 
-    <!-- SLIDE 3 - Modified -->
+    <!-- SLIDE 3 -->
     <div class="slide">
       <h1>CSAT <span class="sub">Customer Satisfaction Score</span></h1>
       <img class="slide-img img-small" src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1200&h=200&fit=crop" alt="">
@@ -482,7 +482,6 @@
       </div>
       <p style="color:var(--text-secondary); font-size:0.9rem;">Real-time feedback from Karur Vysya Bank participants.</p>
 
-      <!-- NEW: Metric Summary Strip -->
       <div class="score-strip">
         <div class="score-pill">
           <span class="score-label">NPS Score</span>
@@ -531,7 +530,7 @@
       </div>
     </div>
 
-    <!-- SLIDE 11 - Modified -->
+    <!-- SLIDE 11 -->
     <div class="slide">
       <h1>Why Promoters Matter?</h1>
       <img class="slide-img img-small" src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1200&h=200&fit=crop" alt="">
@@ -634,7 +633,6 @@
   window.addEventListener('keydown', (e) => {
     const tag = document.activeElement.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-
     if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); showSlide(currentSlide + 1); }
     else if (e.key === 'ArrowLeft') { e.preventDefault(); showSlide(currentSlide - 1); }
     else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFullscreen(); }
@@ -657,59 +655,38 @@
     try {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
-      
       const now = audioCtx.currentTime;
-      const masterGain = audioCtx.createGain();
-      masterGain.gain.value = 0.38;
-      masterGain.connect(audioCtx.destination);
-
+      const masterGain = audioCtx.createGain(); masterGain.gain.value = 0.38; masterGain.connect(audioCtx.destination);
       let notes, stagger, baseDuration, oscType;
       if (mood === 'promoter') { notes = [1046.5, 1318.5, 1568.0]; stagger = 0.10; baseDuration = 1.15; oscType = 'triangle'; }
       else if (mood === 'passive') { notes = [659.3, 987.8, 784.0]; stagger = 0.13; baseDuration = 1.0; oscType = 'sine'; }
       else { notes = [880.0, 698.5, 587.3]; stagger = 0.16; baseDuration = 1.1; oscType = 'sine'; }
-
       notes.forEach((freq, i) => {
-        const startTime = now + i * stagger;
-        const duration = baseDuration + i * 0.12;
+        const startTime = now + i * stagger; const duration = baseDuration + i * 0.12;
         const osc = audioCtx.createOscillator(); osc.type = oscType; osc.frequency.value = freq;
         const harmonic = audioCtx.createOscillator(); harmonic.type = 'sine'; harmonic.frequency.value = freq * 2.01;
-        
         const mainGain = audioCtx.createGain(); mainGain.gain.setValueAtTime(0, startTime); mainGain.gain.linearRampToValueAtTime(0.9, startTime + 0.015); mainGain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
         const harmGain = audioCtx.createGain(); harmGain.gain.setValueAtTime(0, startTime); harmGain.gain.linearRampToValueAtTime(0.28, startTime + 0.02); harmGain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration * 0.7);
-        
-        osc.connect(mainGain); mainGain.connect(masterGain);
-        harmonic.connect(harmGain); harmGain.connect(masterGain);
-        
-        osc.start(startTime); osc.stop(startTime + duration + 0.05);
-        harmonic.start(startTime); harmonic.stop(startTime + duration + 0.05);
+        osc.connect(mainGain); mainGain.connect(masterGain); harmonic.connect(harmGain); harmGain.connect(masterGain);
+        osc.start(startTime); osc.stop(startTime + duration + 0.05); harmonic.start(startTime); harmonic.stop(startTime + duration + 0.05);
       });
     } catch (e) {}
   }
-  
-  // Unlock audio on first user gesture
   let audioUnlocked = false;
   document.addEventListener('click', () => { if(!audioUnlocked && audioCtx) { audioCtx.resume(); audioUnlocked = true; } });
 
-  function moodForEntry(entry) {
-    if (entry.nps >= 9) return 'promoter';
-    if (entry.nps >= 7) return 'passive';
-    return 'detractor';
-  }
+  function moodForEntry(entry) { return entry.nps >= 9 ? 'promoter' : (entry.nps >= 7 ? 'passive' : 'detractor'); }
 
   // ═══════════ EMOJI BURST ═══════════
   function spawnEmojiBurst(entry) {
     const layer = document.getElementById('emojiBurstLayer');
     if (!layer) return;
-    const npsScore = Math.max(0, Math.min(10, entry.nps || 0)) / 10;
-    const score = (npsScore * 0.4) + ((entry.csat/5) * 0.3) + ((entry.ces/5) * 0.3);
+    const score = ((entry.nps/10)*0.4) + ((entry.csat/5)*0.3) + ((entry.ces/5)*0.3);
     let pool = score >= 0.75 ? ['🎉','👏','🌟','💚','🔥','✨','🙌','💯','🥳','😍'] : (score >= 0.4 ? ['👀','💭','🤔','📊'] : ['😟','😕','😞','💔','😢','😠','👎','😔']);
     const vw = window.innerWidth, vh = window.innerHeight;
-    
     for (let i = 0; i < 15; i++) {
-      const el = document.createElement('span'); el.className = 'float-emoji';
-      el.textContent = pool[Math.floor(Math.random() * pool.length)];
-      const startX = (vw/6)*(i%6) + Math.random()*(vw/6), startY = vh*0.6 + Math.random()*vh*0.3;
-      el.style.left = startX+'px'; el.style.top = startY+'px';
+      const el = document.createElement('span'); el.className = 'float-emoji'; el.textContent = pool[Math.floor(Math.random() * pool.length)];
+      el.style.left = (vw/6)*(i%6) + Math.random()*(vw/6)+'px'; el.style.top = vh*0.6 + Math.random()*vh*0.3+'px';
       el.style.setProperty('--dx1', (Math.random()-0.5)*60+'px'); el.style.setProperty('--dy1', -60+'px');
       el.style.setProperty('--dx2', (Math.random()-0.5)*120+'px'); el.style.setProperty('--dy2', -140+'px');
       el.style.setProperty('--dx3', (Math.random()-0.5)*180+'px'); el.style.setProperty('--dy3', -220+'px');
@@ -729,8 +706,7 @@
     const vw = window.innerWidth, vh = window.innerHeight;
     el.style.left = (vw*0.2 + Math.random()*vw*0.6)+'px'; el.style.top = (vh*0.3 + Math.random()*vh*0.3)+'px';
     el.style.setProperty('--dy1', -25+'px'); el.style.setProperty('--dx2', (Math.random()-0.5)*80+'px'); el.style.setProperty('--dy2', -100+'px'); el.style.setProperty('--dx3', (Math.random()-0.5)*120+'px'); el.style.setProperty('--dy3', -180+'px'); el.style.setProperty('--rot', '0deg');
-    el.style.animationDelay = '200ms';
-    layer.appendChild(el); setTimeout(() => el.remove(), 4000);
+    el.style.animationDelay = '200ms'; layer.appendChild(el); setTimeout(() => el.remove(), 4000);
   }
 
   // ═══════════ DASHBOARD STATE & CHARTS ═══════════
@@ -758,79 +734,54 @@
 
   function refreshDashboard() {
     const total = state.nps.promoters + state.nps.passives + state.nps.detractors;
-    
-    // Update Charts
     npsChart.data.datasets[0].data = total === 0 ? [0,0,0] : [state.nps.promoters||0.001, state.nps.passives||0.001, state.nps.detractors||0.001];
     npsChart.update();
     csatChart.data.datasets[0].data = state.csat; csatChart.update();
     cesChart.data.datasets[0].data = state.ces; cesChart.update();
 
-    // Update Live Scores
     if (total === 0) {
       document.getElementById('val-nps').textContent = '—';
       document.getElementById('val-csat').textContent = '—';
       document.getElementById('val-ces').textContent = '—';
     } else {
-      // NPS: % Promoters - % Detractors
       const npsVal = Math.round(((state.nps.promoters / total) - (state.nps.detractors / total)) * 100);
       document.getElementById('val-nps').textContent = (npsVal > 0 ? '+' : '') + npsVal;
-
-      // CSAT: Percentage of 4s and 5s
       const csatGood = state.csat[3] + state.csat[4];
-      const csatPct = Math.round((csatGood / total) * 100);
-      document.getElementById('val-csat').textContent = csatPct + '%';
-
-      // CES: Average (1-5)
+      document.getElementById('val-csat').textContent = Math.round((csatGood / total) * 100) + '%';
       let cesSum = 0;
       state.ces.forEach((count, i) => { cesSum += (i + 1) * count; });
       document.getElementById('val-ces').textContent = (cesSum / total).toFixed(1);
     }
 
-    // Update Comments Feed
     const list = document.getElementById('commentsList');
     if (!state.comments.length) list.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;">Waiting for responses…</p>';
-    else list.innerHTML = state.comments.slice(0, 5).map(c => `
-      <div class="comment-item">
-        <span class="comment-user">${c.user}</span>
-        <span class="comment-text">${c.text || '(no comment)'}</span>
-        <span class="comment-rating">${c.rating}</span>
-      </div>
-    `).join('');
+    else list.innerHTML = state.comments.slice(0, 5).map(c => `<div class="comment-item"><span class="comment-user">${c.user}</span><span class="comment-text">${c.text}</span><span class="comment-rating">${c.rating}</span></div>`).join('');
   }
 
   function addResponse(entry, silent = false) {
-    if (entry.nps >= 9) state.nps.promoters++;
-    else if (entry.nps >= 7) state.nps.passives++;
-    else state.nps.detractors++;
-
+    if (entry.nps >= 9) state.nps.promoters++; else if (entry.nps >= 7) state.nps.passives++; else state.nps.detractors++;
     state.csat[Math.max(0, Math.min(4, entry.csat - 1))]++;
     state.ces[Math.max(0, Math.min(4, entry.ces - 1))]++;
 
-    if (entry.comment || entry.user) {
-      state.comments.unshift({ user: entry.user || 'Anonymous', text: entry.comment, rating: `NPS ${entry.nps} · CSAT ${entry.csat} · CES ${entry.ces}` });
-      if (state.comments.length > 20) state.comments.pop();
-    }
+    // FIXED: Save comments correctly for word cloud
+    state.comments.unshift({ 
+      user: entry.user || 'Anonymous', 
+      text: entry.comment || '(no comment)', 
+      rating: `NPS ${entry.nps} · CSAT ${entry.csat} · CES ${entry.ces}` 
+    });
+    if (state.comments.length > 20) state.comments.pop();
 
     refreshDashboard();
     updateWordCloud();
     
-    if (!silent) {
-      spawnEmojiBurst(entry);
-      spawnCommentBubble(entry);
-      playMoodChime(moodForEntry(entry));
-    }
-    
-    // Trigger AI every 3 comments
-    if (state.comments.length > 0 && state.comments.length % 3 === 0) {
-      fetchAIInsights();
-    }
+    if (!silent) { spawnEmojiBurst(entry); spawnCommentBubble(entry); playMoodChime(moodForEntry(entry)); }
+    if (state.comments.length > 0 && state.comments.length % 3 === 0) fetchAIInsights();
   }
 
   function clearDashboard() {
     state.nps = { promoters: 0, passives: 0, detractors: 0 };
     state.csat = [0,0,0,0,0]; state.ces = [0,0,0,0,0]; state.comments = [];
-    refreshDashboard();
-    updateWordCloud();
+    refreshDashboard(); updateWordCloud();
     document.getElementById('aiInsightsList').innerHTML = '';
     document.getElementById('aiStatus').textContent = 'Waiting for at least 3 comments to analyze…';
     lastAICommentCount = 0;
@@ -858,7 +809,7 @@
     }).join('');
   }
 
-  // ═══════════ AI INSIGHTS (UPDATED) ═══════════
+  // ═══════════ AI INSIGHTS (FIXED) ═══════════
   let aiInFlight = false, lastAICommentCount = 0;
   async function fetchAIInsights() {
     if (aiInFlight) return;
@@ -877,7 +828,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',
+          model: 'openai/gpt-oss-20b', // NEW UPDATED MODEL
           messages: [
             { role: 'system', content: 'You are a CX analyst. Produce exactly 3 short insights (max 12 words each). Output ONLY a JSON object with key "insights" containing an array of 3 strings. Focus on actionable takeaways.' },
             { role: 'user', content: 'Comments:\n' + comments.slice(0, 20).map((c, i) => `${i + 1}. ${c}`).join('\n') }
