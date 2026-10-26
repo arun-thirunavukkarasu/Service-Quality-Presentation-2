@@ -192,130 +192,63 @@
   }
 
   /* ═══════════════════════════════════════════════
-     NPS — SINGLE-LINE SLIDER
+     NPS — NUMBER GRID (Option 1)
      ═══════════════════════════════════════════════ */
-  .nps-slider-wrap {
+  .nps-grid-wrap {
     padding: 6px 4px 0;
   }
 
-  /* Live readout above the slider */
-  .nps-readout {
-    text-align: center;
-    margin-bottom: 14px;
-    min-height: 3.2rem;
+  .nps-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
   }
-  .nps-readout .value {
-    display: block;
-    font-size: 2.4rem;
-    font-weight: 800;
-    letter-spacing: -0.04em;
-    line-height: 1;
-    color: var(--nps-mood, #C9A600);
-    transition: color 0.3s;
-    font-variant-numeric: tabular-nums;
-  }
-  .nps-readout .label {
-    display: block;
-    font-size: 0.75rem;
+
+  .nps-btn {
+    aspect-ratio: 1;
+    border-radius: 14px;
+    border: 2px solid transparent;
+    background: #F5F5EE;
+    color: #1A1A1A;
+    font-family: inherit;
+    font-size: 1.05rem;
     font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--nps-mood, #C9A600);
-    margin-top: 6px;
-    transition: color 0.3s;
-  }
-
-  /* Slider track */
-  .nps-slider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 12px;
-    border-radius: 20px;
-    outline: none;
     cursor: pointer;
-    background:
-      linear-gradient(90deg,
-        #B71C1C 0%,
-        #C65400 20%,
-        #C9A600 45%,
-        #4C7A12 70%,
-        #007A3D 100%);
-    transition: box-shadow 0.2s;
-    padding: 0;
-    margin: 8px 0;
-  }
-  .nps-slider:active {
-    box-shadow: 0 0 0 8px rgba(0, 122, 61, 0.10);
-  }
-
-  /* WebKit thumb */
-  .nps-slider::-webkit-slider-thumb {
+    transition:
+      transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+      background 0.2s,
+      color 0.2s,
+      box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
     -webkit-appearance: none;
     appearance: none;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: #ffffff;
-    border: 4px solid var(--nps-mood, #C9A600);
-    box-shadow:
-      0 4px 12px rgba(0, 0, 0, 0.18),
-      0 0 0 3px rgba(255, 255, 255, 0.9);
-    cursor: grab;
-    transition: border-color 0.3s, transform 0.12s;
+    outline: none;
+    padding: 0;
   }
-  .nps-slider::-webkit-slider-thumb:active {
+
+  .nps-btn:active {
+    transform: scale(0.92);
+  }
+
+  .nps-btn.selected {
     transform: scale(1.12);
-    cursor: grabbing;
-  }
-
-  /* Firefox thumb */
-  .nps-slider::-moz-range-thumb {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: #ffffff;
-    border: 4px solid var(--nps-mood, #C9A600);
+    border-color: #fff;
     box-shadow:
-      0 4px 12px rgba(0, 0, 0, 0.18),
-      0 0 0 3px rgba(255, 255, 255, 0.9);
-    cursor: grab;
-    transition: border-color 0.3s, transform 0.12s;
-  }
-  .nps-slider::-moz-range-thumb:active {
-    transform: scale(1.12);
-    cursor: grabbing;
+      0 0 0 3px var(--nps-mood, #C9A600),
+      0 6px 16px rgba(0, 0, 0, 0.18);
+    z-index: 2;
+    color: #fff;
+    background: var(--nps-mood, #C9A600);
   }
 
-  /* Scale numbers below the track */
-  .nps-scale {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 8px;
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    padding: 0 2px;
-  }
-  .nps-scale span {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 12px;
-  }
-  .nps-scale span.active {
-    color: var(--nps-mood, #C9A600);
-    font-weight: 800;
-    transform: scale(1.15);
-    transition: transform 0.2s, color 0.3s;
-  }
-
-  /* Band hint below the scale */
   .nps-bands {
     display: flex;
     justify-content: space-between;
-    margin-top: 14px;
+    margin-top: 12px;
     font-size: 0.64rem;
     color: var(--text-muted);
     font-weight: 600;
@@ -323,11 +256,7 @@
     padding: 0 2px;
   }
   .nps-bands span { display: flex; align-items: center; gap: 4px; }
-  .nps-bands .band-dot {
-    display: inline-block;
-    width: 6px; height: 6px;
-    border-radius: 50%;
-  }
+  .nps-bands .band-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; }
   .nps-bands .band-detractor .band-dot { background: #C15C5C; }
   .nps-bands .band-passive .band-dot { background: #E0C418; }
   .nps-bands .band-promoter .band-dot { background: #2E7D32; }
@@ -637,41 +566,13 @@
     <input type="text" id="userName" placeholder="e.g. Priya" maxlength="40" autocomplete="off">
   </div>
 
-  <!-- ═══════════ Q1 — NPS SLIDER ═══════════ -->
+  <!-- Q1 — NPS NUMBER GRID -->
   <div class="q-card">
     <h2>How likely are you to recommend Karur Vysya Bank?</h2>
-    <div class="q-sub">Drag the slider · 0 = Not at all · 10 = Absolutely</div>
+    <div class="q-sub">Tap a number · 0 = Not at all · 10 = Absolutely</div>
 
-    <div class="nps-slider-wrap">
-      <div class="nps-readout" id="npsReadout">
-        <span class="value" id="npsValue">—</span>
-        <span class="label" id="npsLabel">Drag to rate</span>
-      </div>
-
-      <input
-        type="range"
-        class="nps-slider"
-        id="npsSlider"
-        min="0"
-        max="10"
-        step="1"
-        value="5"
-        aria-label="NPS rating slider">
-
-      <div class="nps-scale" id="npsScale">
-        <span data-n="0">0</span>
-        <span data-n="1">1</span>
-        <span data-n="2">2</span>
-        <span data-n="3">3</span>
-        <span data-n="4">4</span>
-        <span data-n="5">5</span>
-        <span data-n="6">6</span>
-        <span data-n="7">7</span>
-        <span data-n="8">8</span>
-        <span data-n="9">9</span>
-        <span data-n="10">10</span>
-      </div>
-
+    <div class="nps-grid-wrap">
+      <div class="nps-grid" id="npsGrid"></div>
       <div class="nps-bands">
         <span class="band-detractor"><span class="band-dot"></span>Detractor 0–6</span>
         <span class="band-passive"><span class="band-dot"></span>Passive 7–8</span>
@@ -680,7 +581,7 @@
     </div>
   </div>
 
-  <!-- ═══════════ Q2 — CSAT ANIMATED EMOJIS ═══════════ -->
+  <!-- Q2 — CSAT ANIMATED EMOJIS -->
   <div class="q-card">
     <h2>How satisfied were you with Karur Vysya Bank today?</h2>
     <div class="q-sub">Tap the face that matches your feeling</div>
@@ -734,7 +635,7 @@
     </div>
   </div>
 
-  <!-- ═══════════ Q3 — CES FLOATING BUBBLES ═══════════ -->
+  <!-- Q3 — CES FLOATING BUBBLES -->
   <div class="q-card">
     <h2>How easy was it to get your work done?</h2>
     <div class="q-sub">Pop the bubble that matches your effort</div>
@@ -794,99 +695,52 @@
   // ═══════════════════════════════════════════════
   const state = { nps: null, csat: null, ces: null };
 
-  // ═══════════════════════════════════════════════  // NPS — SINGLE-LINE SLIDER
+  // ═══════════════════════════════════════════════
+  // OPTION 1: NPS NUMBER GRID
   // ═══════════════════════════════════════════════
   const MOOD_COLORS = [
-    '#B71C1C', // 0
-    '#C0392B', // 1
-    '#C65400', // 2
-    '#D4813F', // 3
-    '#C9A600', // 4
-    '#A88300', // 5
-    '#7A9C1A', // 6
-    '#4C7A12', // 7
-    '#2E7D32', // 8
-    '#00853E', // 9
-    '#005F2E'  // 10
-  ];
-  const MOOD_LABELS = [
-    'Not at all',
-    'Very unlikely',
-    'Unlikely',
-    'Somewhat unlikely',
-    'Neutral',
-    'Somewhat likely',
-    'Likely',
-    'Quite likely',
-    'Very likely',
-    'Extremely likely',
-    'Absolutely'
+    '#B71C1C', '#C0392B', '#C65400', '#D4813F',
+    '#C9A600', '#A88300', '#7A9C1A', '#4C7A12',
+    '#2E7D32', '#00853E', '#005F2E'
   ];
 
-  const npsSlider   = document.getElementById('npsSlider');
-  const npsValue    = document.getElementById('npsValue');
-  const npsLabel    = document.getElementById('npsLabel');
-  const npsReadout  = document.getElementById('npsReadout');
-  const npsScale    = document.getElementById('npsScale');
+  const npsGrid = document.getElementById('npsGrid');
 
-  let hasInteracted = false;
-
-  function updateSliderUI(v) {
-    const mood = MOOD_COLORS[v];
-
-    // Top readout
-    npsValue.textContent = v;
-    npsValue.style.color = mood;
-    npsLabel.textContent = MOOD_LABELS[v];
-    npsLabel.style.color = mood;
-
-    // Mood affects the thumb border (via CSS variable)
-    document.documentElement.style.setProperty('--nps-mood', mood);
-
-    // Scale numbers below — highlight the current one
-    npsScale.querySelectorAll('span').forEach(s => {
-      s.classList.toggle('active', parseInt(s.dataset.n, 10) === v);
-    });
+  function buildNPSGrid() {
+    npsGrid.innerHTML = '';
+    for (let i = 0; i <= 10; i++) {
+      const b = document.createElement('button');
+      b.className = 'nps-btn';
+      b.type = 'button';
+      b.dataset.value = i;
+      b.textContent = i;
+      b.addEventListener('click', () => selectNPS(i));
+      npsGrid.appendChild(b);
+    }
   }
 
-  // Initialize thumb color at the default value
-  document.documentElement.style.setProperty('--nps-mood', MOOD_COLORS[5]);
-
-  // Live update while dragging
-  npsSlider.addEventListener('input', (e) => {
-    const v = parseInt(e.target.value, 10);
-    updateSliderUI(v);
-
-    // Small haptic on integer change
-    if (navigator.vibrate && v !== state.nps) {
-      navigator.vibrate(6);
-    }
-  });
-
-  // Commit on release (also fires for keyboard / tap)
-  npsSlider.addEventListener('change', (e) => {
-    const v = parseInt(e.target.value, 10);
+  function selectNPS(v) {
     state.nps = v;
-    hasInteracted = true;
-    updateSliderUI(v);
-    if (navigator.vibrate) navigator.vibrate(18);
-    checkReady();
-  });
+    const mood = MOOD_COLORS[v];
 
-  // Also handle "pointer up" on the slider to ensure commit even without change event
-  npsSlider.addEventListener('pointerup', () => {
-    const v = parseInt(npsSlider.value, 10);
-    if (state.nps !== v) {
-      state.nps = v;
-      hasInteracted = true;
-      updateSliderUI(v);
-      checkReady();
+    // Reset all buttons
+    document.querySelectorAll('.nps-btn').forEach(btn => {
+      btn.classList.remove('selected');
+      btn.style.removeProperty('--nps-mood');
+    });
+
+    // Highlight the one selected
+    const selectedBtn = npsGrid.querySelector(`[data-value="${v}"]`);
+    if (selectedBtn) {
+      selectedBtn.classList.add('selected');
+      selectedBtn.style.setProperty('--nps-mood', mood);
     }
-  });
 
-  // Visual default: show 5 as "in-progress" so users see the readout format
-  updateSliderUI(5);
-  state.nps = 5; // prefill so the form is easier to complete
+    if (navigator.vibrate) navigator.vibrate(15);
+    checkReady();
+  }
+
+  buildNPSGrid();
 
   // ═══════════════════════════════════════════════
   // CSAT bouncing emojis
@@ -975,7 +829,7 @@
   }
 
   // ═══════════════════════════════════════════════
-  // WEBSOCKET
+  // WEBSOCKET & SUBMIT
   // ═══════════════════════════════════════════════
   const WS_URL = (location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + location.host;
   let ws = null;
@@ -989,9 +843,6 @@
     console.error('❌ Could not create WebSocket:', err);
   }
 
-  // ═══════════════════════════════════════════════
-  // SUBMIT
-  // ═══════════════════════════════════════════════
   document.getElementById('submitBtn').addEventListener('click', () => {
     const payload = {
       type: 'submit',
