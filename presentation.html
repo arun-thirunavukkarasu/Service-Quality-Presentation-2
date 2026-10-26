@@ -123,7 +123,7 @@
   }
   .reveal-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(245, 208, 0, 0.4); }
   .reveal-btn:active { transform: translateY(0); }
-  
+
   .reveal-answer {
     display: none;
     margin-top: 1rem;
@@ -142,15 +142,18 @@
   }
 
   /* --- DASHBOARD STYLES --- */
-  .dashboard-header { display: flex; justify-content: space-between; align-items: center; padding-right: 150px; margin-bottom: 0.4rem; }
-  .reset-btn {
+  .dashboard-header { display: flex; justify-content: space-between; align-items: center; padding-right: 150px; margin-bottom: 0.4rem; gap: 0.6rem; flex-wrap: wrap; }
+  .dash-actions { display: flex; gap: 0.5rem; }
+  .reset-btn, .export-btn {
     background: #fff; border: 1.5px solid #C15C1E; color: #C15C1E;
-    padding: 0.5rem 1.3rem; border-radius: 40px; font-weight: 700;
-    font-size: 0.9rem; cursor: pointer; transition: all 0.2s; font-family: inherit;
+    padding: 0.5rem 1.1rem; border-radius: 40px; font-weight: 700;
+    font-size: 0.85rem; cursor: pointer; transition: all 0.2s; font-family: inherit;
+    white-space: nowrap;
   }
   .reset-btn:hover { background: #C15C1E; color: #fff; }
+  .export-btn { border-color: var(--kvb-green); color: var(--kvb-green); }
+  .export-btn:hover { background: var(--kvb-green); color: #fff; }
 
-  /* Live Score Summary Strip */
   .score-strip {
     display: flex;
     gap: 1rem;
@@ -208,15 +211,33 @@
   .ai-insights ul li { padding: 0.28rem 0 0.28rem 1.4rem; position: relative; font-size: 0.9rem; line-height: 1.45; color: var(--text-primary); animation: fadeInUp 0.4s ease; }
   .ai-insights ul li::before { content: '▸'; position: absolute; left: 0.4rem; color: var(--kvb-green); font-weight: 700; }
 
+  .ai-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .ai-chip {
+    font-size: 0.72rem; font-weight: 700; padding: 3px 10px;
+    border-radius: 20px; letter-spacing: 0.02em;
+    border: 1px solid;
+    animation: fadeInUp 0.4s ease;
+  }
+  .ai-chip.sentiment-positive { background: #E8F5E9; color: #2E7D32; border-color: #A5D6A7; }
+  .ai-chip.sentiment-mixed    { background: #FFF8E1; color: #8D6E00; border-color: #FFE082; }
+  .ai-chip.sentiment-negative { background: #FFEBEE; color: #C62828; border-color: #EF9A9A; }
+  .ai-chip.topic { background: #F1F8F3; color: var(--kvb-green-deep); border-color: #C8E6C9; }
+
   .wordcloud {
     background: #FFFFFF; border: 1px solid var(--matte-border);
-    border-radius: 16px; padding: 0.95rem 1rem; min-height: 130px;
+    border-radius: 16px; padding: 1.5rem 1rem 0.95rem; min-height: 130px;
     display: flex; flex-wrap: wrap; align-content: center; justify-content: center;
     gap: 4px 8px; overflow: hidden; position: relative;
   }
   .wordcloud h4 { position: absolute; top: 6px; left: 14px; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; margin: 0; }
   .wordcloud .wc-word { display: inline-block; font-weight: 700; line-height: 1; transition: all 0.4s ease; cursor: default; padding: 2px 4px; }
   .wordcloud .empty { color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
+  .wc-legend {
+    position: absolute; top: 6px; right: 12px;
+    display: flex; gap: 8px; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.04em;
+  }
+  .wc-legend span { display: flex; align-items: center; gap: 3px; color: var(--text-muted); }
+  .wc-legend .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
 
   .qr-block {
     position: absolute; top: 1.1rem; right: 1.1rem;
@@ -241,6 +262,9 @@
   .slide-counter { font-weight: 700; color: var(--kvb-yellow); font-size: 0.92rem; }
   .shortcut-hint { font-size: 0.72rem; color: rgba(255,255,255,0.6); margin-top: 0.15rem; }
   .shortcut-hint kbd { background: rgba(255,255,255,0.15); border-radius: 4px; padding: 1px 6px; font-family: inherit; font-size: 0.72rem; margin: 0 2px; border: 1px solid rgba(255,255,255,0.1); }
+
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
 </style>
 </head>
 <body>
@@ -478,7 +502,10 @@
 
       <div class="dashboard-header">
         <h1 style="margin:1rem 0 0.1rem;font-size:1.75rem;">📊 Live Experience Dashboard</h1>
-        <button class="reset-btn" id="resetDashboardBtn">🔄 Reset</button>
+        <div class="dash-actions">
+          <button class="export-btn" id="exportBtn">⬇ Export CSV</button>
+          <button class="reset-btn" id="resetDashboardBtn">🔄 Reset</button>
+        </div>
       </div>
       <p style="color:var(--text-secondary); font-size:0.9rem;">Real-time feedback from Karur Vysya Bank participants.</p>
 
@@ -519,12 +546,18 @@
 
       <div class="insights-row">
         <div class="ai-insights">
-          <h4><span class="sparkle">✨</span> AI Insights <span style="font-size:0.7rem;font-weight:500;color:var(--text-muted);margin-left:auto;">powered by Groq</span></h4>
+          <h4>✨ AI Insights <span style="font-size:0.7rem;font-weight:500;color:var(--text-muted);margin-left:auto;">powered by Groq</span></h4>
           <div class="ai-status" id="aiStatus">Waiting for at least 3 comments to analyze…</div>
           <ul id="aiInsightsList"></ul>
+          <div class="ai-meta" id="aiMeta"></div>
         </div>
         <div class="wordcloud" id="wordcloud">
           <h4>TOP THEMES</h4>
+          <div class="wc-legend">
+            <span><span class="dot" style="background:#2E7D32;"></span>POS</span>
+            <span><span class="dot" style="background:#C9A600;"></span>NEU</span>
+            <span><span class="dot" style="background:#C15C5C;"></span>NEG</span>
+          </div>
           <span class="empty">Awaiting comments…</span>
         </div>
       </div>
@@ -755,7 +788,11 @@
 
     const list = document.getElementById('commentsList');
     if (!state.comments.length) list.innerHTML = '<p style="color:var(--text-muted);font-size:.88rem;">Waiting for responses…</p>';
-    else list.innerHTML = state.comments.slice(0, 5).map(c => `<div class="comment-item"><span class="comment-user">${c.user}</span><span class="comment-text">${c.text}</span><span class="comment-rating">${c.rating}</span></div>`).join('');
+    else list.innerHTML = state.comments.slice(0, 5).map(c => `<div class="comment-item"><span class="comment-user">${escapeHtml(c.user)}</span><span class="comment-text">${escapeHtml(c.text)}</span><span class="comment-rating">${c.rating}</span></div>`).join('');
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
   }
 
   function addResponse(entry, silent = false) {
@@ -763,19 +800,19 @@
     state.csat[Math.max(0, Math.min(4, entry.csat - 1))]++;
     state.ces[Math.max(0, Math.min(4, entry.ces - 1))]++;
 
-    // FIXED: Save comments correctly for word cloud
-    state.comments.unshift({ 
-      user: entry.user || 'Anonymous', 
-      text: entry.comment || '(no comment)', 
-      rating: `NPS ${entry.nps} · CSAT ${entry.csat} · CES ${entry.ces}` 
+    state.comments.unshift({
+      user: entry.user || 'Anonymous',
+      text: entry.comment || '(no comment)',
+      rating: `NPS ${entry.nps} · CSAT ${entry.csat} · CES ${entry.ces}`,
+      nps: entry.nps, csat: entry.csat, ces: entry.ces  // stored for sentiment word cloud
     });
     if (state.comments.length > 20) state.comments.pop();
 
     refreshDashboard();
     updateWordCloud();
-    
+
     if (!silent) { spawnEmojiBurst(entry); spawnCommentBubble(entry); playMoodChime(moodForEntry(entry)); }
-    if (state.comments.length > 0 && state.comments.length % 3 === 0) fetchAIInsights();
+    if (state.comments.length > 0 && state.comments.length % 2 === 0) fetchAIInsights();
   }
 
   function clearDashboard() {
@@ -783,33 +820,89 @@
     state.csat = [0,0,0,0,0]; state.ces = [0,0,0,0,0]; state.comments = [];
     refreshDashboard(); updateWordCloud();
     document.getElementById('aiInsightsList').innerHTML = '';
+    document.getElementById('aiMeta').innerHTML = '';
     document.getElementById('aiStatus').textContent = 'Waiting for at least 3 comments to analyze…';
+    document.getElementById('aiStatus').style.color = 'var(--text-muted)';
     lastAICommentCount = 0;
   }
 
-  // ═══════════ WORD CLOUD ═══════════
+  // ═══════════ SENTIMENT-AWARE WORD CLOUD ═══════════
   const STOP_WORDS = new Set(['the','a','an','and','or','but','of','to','in','on','at','is','it','i','we','you','they','was','were','are','be','been','have','has','had','do','does','did','for','with','as','this','that','these','those','my','our','your','their','very','so','too','much','many','good','bad','nice','ok','okay','fine','not','no','yes','if','then','than','also','can','could','will','would','should','may','might','must','about','from','by','up','down','out','off','over','under','again','only','just','really','quite','more','most','less']);
+
+  // Sentiment lexicons (~40 words each). Word sentiment OVERRIDES the rating-derived color,
+  // so "wait" stays red even in a 5-star comment — the classic Medallia/Qualtrics pattern.
+  const POSITIVE_WORDS = new Set(['great','excellent','helpful','friendly','quick','fast','easy','smooth','seamless','happy','satisfied','delight','delighted','love','loved','perfect','wonderful','amazing','awesome','best','outstanding','superb','efficient','prompt','courteous','polite','patient','clear','transparent','professional','reliable','trustworthy','trust','recommend','recommended','thanks','thank','appreciate','appreciated','brilliant','fantastic','impressed','impressive','clean','convenient','comfortable','welcome']);
+  const NEGATIVE_WORDS = new Set(['slow','wait','waiting','waited','long','delay','delayed','late','rude','poor','bad','worst','terrible','awful','horrible','difficult','confusing','confused','error','errors','mistake','mistakes','problem','problems','issue','issues','frustrated','frustrating','annoying','annoyed','angry','upset','disappointed','disappointing','unhelpful','careless','ignored','unprofessional','unclear','complicated','hassle','painful','boring','disorganized','crowded','broken']);
+
+  // Rating-derived mood palette (used only when the word has no explicit sentiment)
+  const MOOD_POSITIVE = '#2E7D32';  // deep green
+  const MOOD_POSITIVE_ALT = '#007A3D'; // KVB green (for alternating visual richness)
+  const MOOD_NEUTRAL = '#C9A600';   // gold
+  const MOOD_NEGATIVE = '#D4813F';  // amber
+  const MOOD_NEGATIVE_STRONG = '#C15C5C'; // deep red
+
+  function ratingMood(entry) {
+    // Blend NPS (0-10), CSAT (1-5), CES (1-5) into a 0-1 score
+    const n = (entry.nps ?? 5) / 10;
+    const c = ((entry.csat ?? 3) - 1) / 4;
+    const e = ((entry.ces ?? 3) - 1) / 4;
+    return (n * 0.4) + (c * 0.3) + (e * 0.3);
+  }
+
+  function colorForWord(word, agg) {
+    // 1) Per-word sentiment (Option 2) — takes priority
+    const pos = POSITIVE_WORDS.has(word);
+    const neg = NEGATIVE_WORDS.has(word);
+    if (pos && !neg) return MOOD_POSITIVE;
+    if (neg && !pos) return (agg.negWeight >= 3 ? MOOD_NEGATIVE_STRONG : MOOD_NEGATIVE);
+    // 2) Fallback: rating-derived (Option 1)
+    const mood = agg.avgMood; // 0..1
+    if (mood >= 0.75) return MOOD_POSITIVE;
+    if (mood >= 0.45) return (agg.count % 2 === 0 ? MOOD_POSITIVE_ALT : MOOD_NEUTRAL);
+    if (mood >= 0.25) return MOOD_NEGATIVE;
+    return MOOD_NEGATIVE_STRONG;
+  }
+
   function updateWordCloud() {
-    const counts = {};
+    // Build per-word aggregate: count + avg rating mood + negative mentions
+    const agg = new Map();
     state.comments.forEach(c => {
       const words = (c.text || '').toLowerCase().replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(w => w.length >= 3 && !STOP_WORDS.has(w));
-      words.forEach(w => { counts[w] = (counts[w] || 0) + 1; });
+      const mood = ratingMood(c);
+      const uniqueWordsInComment = new Set(words);
+      uniqueWordsInComment.forEach(w => {
+        let a = agg.get(w);
+        if (!a) { a = { count: 0, moodSum: 0, negWeight: 0 }; agg.set(w, a); }
+        a.count++;
+        a.moodSum += mood;
+        if (NEGATIVE_WORDS.has(w)) a.negWeight++;
+      });
     });
-    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 18);
+
     const container = document.getElementById('wordcloud');
-    if (!sorted.length) { container.innerHTML = '<h4>TOP THEMES</h4><span class="empty">Awaiting comments…</span>'; return; }
-    
-    const max = sorted[0][1], min = sorted[sorted.length-1][1];
-    const palette = ['#007A3D', '#005F2E', '#C9A600', '#4C7A12', '#A88300'];
-    container.innerHTML = '<h4>TOP THEMES</h4>' + sorted.map(([word, count], i) => {
-      const t = max === min ? 1 : (count - min) / (max - min);
+    const legendHtml = '<h4>TOP THEMES</h4><div class="wc-legend">'
+      + '<span><span class="dot" style="background:' + MOOD_POSITIVE + ';"></span>POS</span>'
+      + '<span><span class="dot" style="background:' + MOOD_NEUTRAL + ';"></span>NEU</span>'
+      + '<span><span class="dot" style="background:' + MOOD_NEGATIVE_STRONG + ';"></span>NEG</span>'
+      + '</div>';
+
+    if (!agg.size) { container.innerHTML = legendHtml + '<span class="empty">Awaiting comments…</span>'; return; }
+
+    const sorted = [...agg.entries()]
+      .map(([word, a]) => ({ word, count: a.count, avgMood: a.moodSum / a.count, negWeight: a.negWeight }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 18);
+
+    const max = sorted[0].count, min = sorted[sorted.length - 1].count;
+    container.innerHTML = legendHtml + sorted.map(item => {
+      const t = max === min ? 1 : (item.count - min) / (max - min);
       const size = 0.78 + t * 1.05;
-      const color = palette[i % palette.length];
-      return `<span class="wc-word" style="font-size:${size}rem;font-weight:800;color:${color};">${word}</span>`;
+      const color = colorForWord(item.word, item);
+      return `<span class="wc-word" style="font-size:${size}rem;font-weight:800;color:${color};">${item.word}</span>`;
     }).join('');
   }
 
-  // ═══════════ AI INSIGHTS (FIXED) ═══════════
+  // ═══════════ AI INSIGHTS (with sentiment + topics) ═══════════
   let aiInFlight = false, lastAICommentCount = 0;
   async function fetchAIInsights() {
     if (aiInFlight) return;
@@ -820,6 +913,7 @@
     aiInFlight = true;
     const status = document.getElementById('aiStatus');
     const list = document.getElementById('aiInsightsList');
+    const meta = document.getElementById('aiMeta');
     status.textContent = 'Analyzing comments…';
     status.style.color = 'var(--text-muted)';
 
@@ -828,13 +922,9 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'openai/gpt-oss-20b', // NEW UPDATED MODEL
-          messages: [
-            { role: 'system', content: 'You are a CX analyst. Produce exactly 3 short insights (max 12 words each). Output ONLY a JSON object with key "insights" containing an array of 3 strings. Focus on actionable takeaways.' },
-            { role: 'user', content: 'Comments:\n' + comments.slice(0, 20).map((c, i) => `${i + 1}. ${c}`).join('\n') }
-          ],
-          temperature: 0.3,
-          response_format: { type: 'json_object' }
+          model: 'openai/gpt-oss-20b',
+          messages: [{ role: 'user', content: 'Comments:\n' + comments.slice(0, 20).map((c, i) => `${i + 1}. ${c}`).join('\n') }]
+          // Note: server enforces the actual system prompt — this is just raw content
         })
       });
 
@@ -845,14 +935,20 @@
 
       const data = await res.json();
       const raw = data?.choices?.[0]?.message?.content || '{}';
-      let insights = [];
-      try {
-        const parsed = JSON.parse(raw);
-        insights = Array.isArray(parsed) ? parsed : (parsed.insights || parsed.points || []);
-      } catch { insights = raw.split('\n').filter(s => s.trim()).slice(0, 3); }
+      let parsed = {};
+      try { parsed = JSON.parse(raw); } catch { parsed = {}; }
+
+      const insights = parsed.insights || parsed.points || [];
+      const sentiment = (parsed.sentiment || '').toLowerCase();
+      const topics = Array.isArray(parsed.topics) ? parsed.topics : [];
 
       if (insights.length) {
-        list.innerHTML = insights.map(t => `<li>${t.replace(/^[-\d.\s•]+/, '')}</li>`).join('');
+        list.innerHTML = insights.slice(0, 3).map(t => `<li>${escapeHtml(String(t).replace(/^[-\d.\s•]+/, ''))}</li>`).join('');
+        meta.innerHTML = '';
+        if (['positive', 'mixed', 'negative'].includes(sentiment)) {
+          meta.innerHTML += `<span class="ai-chip sentiment-${sentiment}">Sentiment: ${sentiment.toUpperCase()}</span>`;
+        }
+        topics.slice(0, 3).forEach(t => { meta.innerHTML += `<span class="ai-chip topic">#${escapeHtml(String(t))}</span>`; });
         status.textContent = `Based on ${comments.length} comments`;
         status.style.color = 'var(--kvb-green)';
         lastAICommentCount = comments.length;
@@ -868,6 +964,12 @@
     }
   }
 
+  // ═══════════ CSV EXPORT ═══════════
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    // Uses server /export endpoint (better: full data, includes all historic responses)
+    window.open('/export', '_blank');
+  });
+
   // ═══════════ WEBSOCKET ═══════════
   const WS_URL = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
   let ws;
@@ -876,9 +978,10 @@
     ws.onopen = () => console.log('✅ Connected');
     ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
-      if (msg.type === 'init') { clearDashboard(); msg.responses.forEach(e => addResponse(e, true)); }
+      if (msg.type === 'init') { clearDashboard(); msg.responses.forEach(entry => addResponse(entry, true)); }
       else if (msg.type === 'new') addResponse(msg.entry);
       else if (msg.type === 'reset') clearDashboard();
+      else if (msg.type === 'error') console.warn('Server:', msg.reason);
     };
     ws.onclose = () => setTimeout(connectWS, 2000);
   }
